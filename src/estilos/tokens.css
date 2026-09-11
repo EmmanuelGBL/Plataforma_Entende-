@@ -1,0 +1,126 @@
+/* =========================================================================
+   Entende+ — tokens do design system
+   Paleta herdada da marca (Logo/README.md). Os valores de contraste anotados
+   ao lado de cada cor foram calculados pela fórmula da WCAG 2.2 (SC 1.4.3) e
+   estão registrados em documentacao/acessibilidade-wcag-emag.md.
+   ========================================================================= */
+
+:root {
+  /* --- Cores da marca ---------------------------------------------------- */
+  --cor-petroleo: #10323a;  /* 13,85:1 sobre branco — texto principal        */
+  --cor-teal: #0e7c86;      /*  4,94:1 sobre branco — fundo de botão, ícone  */
+  --cor-teal-escuro: #0b5f67; /* 7,38:1 sobre branco — links e texto de apoio */
+  --cor-menta: #3bb6a6;     /*  2,49:1 — NUNCA em texto. Só traço e fundo.   */
+  --cor-ambar: #e0912b;     /*  2,54:1 sobre branco — só sobre petróleo      */
+  --cor-ambar-escuro: #8a5410; /* 5,72:1 sobre branco — texto de alerta      */
+
+  /* --- Neutros ----------------------------------------------------------- */
+  --cor-fundo: #f7f9f9;
+  --cor-superficie: #ffffff;
+  --cor-superficie-alt: #eef4f4;
+  --cor-borda: #c7d5d7;
+  --cor-borda-forte: #7d9498;
+  --cor-texto: var(--cor-petroleo);
+  --cor-texto-apoio: #405c62;  /* 7,54:1 sobre branco                        */
+
+  /* Barra superior. Tokens próprios, e não --cor-petroleo direto: no alto
+     contraste o petróleo vira branco (porque ali ele é cor de TEXTO), e a
+     barra ficaria branca com texto branco. Foi um defeito real encontrado
+     na primeira verificação do modo de alto contraste.                      */
+  --cor-barra-fundo: #10323a;
+  --cor-barra-texto: #ffffff;
+
+  /* --- Estados ----------------------------------------------------------- */
+  --cor-sucesso: #1a6b3c;   /* 5,86:1 sobre branco */
+  --cor-sucesso-fundo: #e6f4ec;
+  --cor-erro: #a3161d;      /* 7,07:1 sobre branco */
+  --cor-erro-fundo: #fdecec;
+  --cor-atencao: #8a5410;
+  --cor-atencao-fundo: #fdf3e3;
+  --cor-info-fundo: #e7f1f3;
+
+  /* --- Tipografia -------------------------------------------------------- */
+  /* Sem serifa por RNF05. Segoe UI é a fonte do Windows usada na marca;
+     as demais são reservas para Linux/macOS. Nenhuma fonte externa é
+     carregada — o protótipo abre sem internet.                              */
+  --fonte-texto: 'Segoe UI', system-ui, -apple-system, 'Noto Sans', Arial, sans-serif;
+  --fonte-mono: 'Cascadia Mono', Consolas, 'Courier New', monospace;
+
+  --altura-linha: 1.6;
+  --espaco-letras: normal;
+  --espaco-palavras: normal;
+  --espaco-paragrafos: 1.6em;
+
+  /* --- Espaçamento (escala de 4) ---------------------------------------- */
+  --e1: 0.25rem;
+  --e2: 0.5rem;
+  --e3: 0.75rem;
+  --e4: 1rem;
+  --e5: 1.5rem;
+  --e6: 2rem;
+  --e7: 3rem;
+
+  /* --- Forma ------------------------------------------------------------- */
+  --raio: 8px;
+  --raio-g: 14px;
+  --sombra: 0 1px 2px rgba(16, 50, 58, 0.08), 0 4px 12px rgba(16, 50, 58, 0.06);
+  --sombra-alta: 0 8px 28px rgba(16, 50, 58, 0.16);
+
+  /* --- Foco (WCAG 2.2 SC 2.4.11 / 2.4.13) -------------------------------- */
+  --cor-foco: #0b5f67;
+  --contorno-foco: 3px solid var(--cor-foco);
+  --deslocamento-foco: 2px;
+
+  /* --- Alvo de toque (WCAG 2.2 SC 2.5.8, mínimo 24px; adotado 44px) ------- */
+  --alvo-minimo: 44px;
+
+  --duracao: 180ms;
+  --largura-conteudo: 68rem;
+  /* Medida de linha: máx. 80 caracteres (WCAG 2.2 SC 1.4.8) — RNF02 */
+  --medida-leitura: 68ch;
+}
+
+/* --- Preferência: corpo do texto ----------------------------------------
+   Recalibra a raiz inteira, então todo rem acompanha. Atende SC 1.4.4
+   (redimensionar texto até 200% sem perda de conteúdo).                     */
+:root[data-fonte='grande'] { font-size: 112.5%; }
+:root[data-fonte='maior']  { font-size: 125%; }
+
+/* --- Preferência: espaçamento do texto ----------------------------------
+   Os valores de "amplo" são os do SC 1.4.12 (Text Spacing).                 */
+:root[data-espacamento='amplo'] {
+  --altura-linha: 1.9;
+  --espaco-letras: 0.12em;
+  --espaco-palavras: 0.16em;
+  --espaco-paragrafos: 2em;
+}
+
+/* --- Preferência: alto contraste (e-MAG, recomendação 1.6) ---------------
+   Esquema preto/amarelo, o mesmo adotado nos portais do governo federal.    */
+:root[data-contraste='alto'] {
+  --cor-fundo: #000000;
+  --cor-superficie: #000000;
+  --cor-superficie-alt: #14181a;
+  --cor-borda: #ffffff;
+  --cor-borda-forte: #ffffff;
+  --cor-texto: #ffffff;
+  --cor-texto-apoio: #ffffff;
+  --cor-petroleo: #ffffff;
+  --cor-barra-fundo: #000000;
+  --cor-barra-texto: #ffe600;
+  --cor-teal: #000000;
+  --cor-teal-escuro: #ffe600;
+  --cor-menta: #ffe600;
+  --cor-ambar: #ffe600;
+  --cor-ambar-escuro: #ffe600;
+  --cor-sucesso: #6cf58f;
+  --cor-sucesso-fundo: #000000;
+  --cor-erro: #ff8f8f;
+  --cor-erro-fundo: #000000;
+  --cor-atencao: #ffe600;
+  --cor-atencao-fundo: #000000;
+  --cor-info-fundo: #000000;
+  --cor-foco: #ffe600;
+  --sombra: none;
+  --sombra-alta: none;
+}

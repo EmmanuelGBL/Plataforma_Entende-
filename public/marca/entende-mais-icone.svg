@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 432 432" width="432" height="432" role="img" aria-label="Entende+">
+  <title>Entende+</title>
+  <rect x="8" y="8" width="416" height="416" rx="54" fill="none" stroke="#0A4348" stroke-width="16"/>
+  <g stroke-linecap="round" transform="scale(0.7400)">
+    <line x1="124.6" y1="214.1" x2="194.5" y2="201.3" stroke="#0A4348" stroke-width="23.6"/>
+    <line x1="201.4" y1="242.7" x2="264.4" y2="255.1" stroke="#0B6769" stroke-width="22.7"/>
+    <line x1="111.2" y1="280.0" x2="210.2" y2="280.0" stroke="#0C8281" stroke-width="22.0"/>
+    <line x1="153.7" y1="329.6" x2="252.6" y2="317.5" stroke="#14A090" stroke-width="23.6"/>
+    <line x1="126.5" y1="382.8" x2="242.1" y2="365.3" stroke="#20C099" stroke-width="23.0"/>
+    <line x1="368.5" y1="225.0" x2="472.5" y2="225.0" stroke="#0A5256" stroke-width="22.0"/>
+    <line x1="368.5" y1="272.0" x2="472.5" y2="272.0" stroke="#0C7B7B" stroke-width="22.0"/>
+    <line x1="368.5" y1="320.0" x2="472.5" y2="320.0" stroke="#139E8F" stroke-width="22.0"/>
+    <line x1="368.5" y1="367.0" x2="472.5" y2="367.0" stroke="#1EBC98" stroke-width="22.0"/>
+    <g fill="#E0912B">
+    <rect x="280.7" y="287.5" width="66.0" height="20.0" rx="8.0"/>
+    <rect x="303.7" y="264.5" width="20.0" height="66.0" rx="8.0"/>
+    </g>
+  </g>
+</svg>

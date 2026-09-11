@@ -1,0 +1,12 @@
+# Dependências e artefatos de build — o servidor refaz o build
+node_modules/
+dist/
+
+# Arquivo único offline: é gerado por `npm run offline` e pesa ~330 KB.
+# Fica fora do repositório porque é derivado do código, não fonte.
+Entende+ (protótipo).html
+
+# Sistema
+Thumbs.db
+.DS_Store
+*.tmp

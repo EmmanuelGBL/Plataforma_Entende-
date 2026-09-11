@@ -1,0 +1,63 @@
+# Publica o protótipo do Entende+ no GitHub Pages a cada envio para a branch
+# principal.
+#
+# Este fluxo pressupõe que a RAIZ do repositório é a pasta do protótipo — foi a
+# escolha feita em 11/09, para que o material didático da professora e os
+# endereços de e-mail que estão na pasta do TCC não fossem para um repositório
+# público. Se um dia o repositório passar a ser a pasta inteira do TCC, é
+# preciso acrescentar `working-directory: Entrega-14-09/prototipo` aos passos de
+# instalar e construir, e ajustar os caminhos de `cache-dependency-path` e
+# `path`.
+#
+# O mesmo build serve ao Pages e ao arquivo offline (`base: './'` mais
+# HashRouter), então não existem duas versões para manter.
+
+name: Publicar protótipo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Construir
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

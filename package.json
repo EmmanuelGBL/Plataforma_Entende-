@@ -1,0 +1,22 @@
+{
+  "name": "entende-mais-prototipo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Prototipo navegavel do front-end do Entende+ (TCC FAMETRO - Emmanuel e Hugo)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "offline": "vite build && node empacotar-offline.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.18.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.2.0",
+    "vite": "^7.1.0"
+  }
+}
