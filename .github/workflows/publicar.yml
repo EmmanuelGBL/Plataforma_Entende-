@@ -46,7 +46,13 @@ jobs:
       - name: Construir
         run: npm run build
 
+      # enablement: true faz a própria ação habilitar o Pages no repositório se
+      # ele ainda não estiver ligado, em vez de falhar. Sem isto, a primeira
+      # execução quebra aqui enquanto ninguém tiver ido em Settings > Pages
+      # escolher "GitHub Actions" como origem — foi o que aconteceu em 11/09.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
