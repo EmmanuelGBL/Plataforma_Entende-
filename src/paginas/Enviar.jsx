@@ -120,7 +120,7 @@ export function Enviar() {
   }
 
   return (
-    <>
+    <div className="pagina-fluxo">
       <Migalhas itens={[{ rotulo: 'Meus materiais', para: '/painel' }, { rotulo: 'Enviar material' }]} />
 
       <div className="cabecalho-pagina">
@@ -340,6 +340,6 @@ export function Enviar() {
           </p>
         </Cartao>
       )}
-    </>
+    </div>
   );
 }

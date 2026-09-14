@@ -163,6 +163,14 @@ kbd {
    vazia à direita. Aqui o container encolhe até a coluna de leitura. */
 .pagina-leitura { max-width: 58rem; }
 
+/* Fluxo linear (Enviar): três passos e um formulário, não uma comparação. No
+   container de trabalho o cabeçalho e os passos ficavam colados à esquerda e
+   o cartão, em fit-content, também; sobrava meia tela vazia à direita. A tela
+   inteira vira uma coluna centralizada, e o cartão passa a preencher a coluna
+   para alinhar as bordas com o cabeçalho e os passos. */
+.pagina-fluxo { max-width: 54rem; margin-inline: auto; }
+.pagina-fluxo .cartao--acao { max-width: none; }
+
 .cabecalho-pagina { margin-bottom: var(--e5); }
 .cabecalho-pagina p { color: var(--cor-texto-apoio); margin-top: var(--e2); }
 
