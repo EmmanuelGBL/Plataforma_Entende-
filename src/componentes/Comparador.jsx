@@ -13,7 +13,7 @@ import { REGRAS, TEXTO_ORIGINAL } from '../dados/conteudo.js';
  * não só nos números. Está registrado no documento para não parecer descuido
  * numa auditoria.
  */
-export function ComparadorTextos({ blocos }) {
+export function ComparadorTextos({ blocos, acaoAdaptado }) {
   return (
     <div className="comparador">
       <article className="painel-texto" aria-labelledby="titulo-original">
@@ -37,9 +37,19 @@ export function ComparadorTextos({ blocos }) {
       </article>
 
       <article className="painel-texto" aria-labelledby="titulo-adaptado">
+        {/* A ação de editar mora no cabeçalho do painel que ela edita, e não
+            no título da seção de comparação: ali valia tanto para o original
+            (que é imutável, RF12) quanto para o adaptado, e era ambígua.
+
+            Quando a ação está presente, ela ocupa o lugar da etiqueta em vez
+            de se somar a ela. Os dois juntos não cabem na coluna e jogavam o
+            cabeçalho para duas linhas, o que fazia o texto adaptado começar
+            mais abaixo que o original e estragava a comparação lado a lado.
+            A informação da etiqueta não se perde: perfil e etapa estão no
+            cabeçalho da página, logo acima. */}
         <header className="painel-texto__cabecalho">
           <h3 id="titulo-adaptado">Material adaptado</h3>
-          <Etiqueta tom="info">perfil TEA · 5º ano</Etiqueta>
+          {acaoAdaptado ?? <Etiqueta tom="info">perfil TEA · 5º ano</Etiqueta>}
         </header>
         <div
           className="painel-texto__corpo texto-adaptado"

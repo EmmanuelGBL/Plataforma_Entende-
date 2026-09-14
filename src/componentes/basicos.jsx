@@ -154,9 +154,12 @@ export function Etiqueta({ tom = 'neutra', children }) {
   return <span className={`etiqueta etiqueta--${tom}`}>{children}</span>;
 }
 
-export function Cartao({ compacto, children, ...resto }) {
+export function Cartao({ compacto, className = '', children, ...resto }) {
   return (
-    <section className={`cartao${compacto ? ' cartao--compacto' : ''}`} {...resto}>
+    <section
+      className={`cartao${compacto ? ' cartao--compacto' : ''}${className ? ` ${className}` : ''}`}
+      {...resto}
+    >
       {children}
     </section>
   );

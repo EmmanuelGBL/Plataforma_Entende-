@@ -82,6 +82,13 @@ export function Adaptacao() {
     );
   }
 
+  function abrirEdicao() {
+    // Reabrir sempre parte do que está salvo. Sem isto, um rascunho
+    // descartado ressuscitaria na próxima abertura do diálogo.
+    setRascunho(textoOriginalSalvo);
+    setEditando(true);
+  }
+
   function salvarEdicao() {
     definirBlocos(id, desserializar(rascunho, blocos));
     setEditando(false);
@@ -89,9 +96,14 @@ export function Adaptacao() {
   }
 
   function descartarEdicao() {
+    const tinhaMudanca = houveMudanca;
     setRascunho(textoOriginalSalvo);
     setEditando(false);
-    anunciar('Alterações descartadas. O texto voltou como estava.');
+    anunciar(
+      tinhaMudanca
+        ? 'Alterações descartadas. O texto voltou como estava.'
+        : 'Edição fechada. Nada foi alterado.',
+    );
   }
 
   async function confirmarExportacao() {
@@ -130,13 +142,32 @@ export function Adaptacao() {
         ]}
       />
 
-      <div className="cabecalho-pagina">
-        <h1>{dados.nome}</h1>
+      <div className="cabecalho-pagina cabecalho-acoes">
+        <div>
+          <h1>{dados.nome}</h1>
+          <div className="linha" style={{ marginTop: 'var(--e2)' }}>
+            <Etiqueta tom="info">Perfil TEA</Etiqueta>
+            <Etiqueta tom="neutra">{dados.etapa}</Etiqueta>
+            <Etiqueta tom="neutra">{dados.versaoRegras}</Etiqueta>
+            {dados.estado === 'aprovado' && <Etiqueta tom="boa">Aprovado por você</Etiqueta>}
+          </div>
+        </div>
+
+        {/* RN02 — o botão do PDF só aparece depois da aprovação. Material já
+            aprovado antes continua com o PDF disponível, sem aprovar de novo.
+            A garantia de que nada sai sem aprovação continua dita onde ela
+            importa: no diálogo de confirmação, no instante da decisão. */}
         <div className="linha">
-          <Etiqueta tom="info">Perfil TEA</Etiqueta>
-          <Etiqueta tom="neutra">{dados.etapa}</Etiqueta>
-          <Etiqueta tom="neutra">{dados.versaoRegras}</Etiqueta>
-          {dados.estado === 'aprovado' && <Etiqueta tom="boa">Aprovado por você</Etiqueta>}
+          {dados.estado === 'aprovado' ? (
+            <Botao como="link" para={`/materiais/${id}/impressao`}>
+              Abrir o material em PDF
+            </Botao>
+          ) : (
+            <Botao onClick={() => setConfirmando(true)}>Aprovar e exportar em PDF</Botao>
+          )}
+          <Botao variante="secundario" onClick={() => navegar(`/materiais/${id}/atividade`)}>
+            Ir para a atividade
+          </Botao>
         </div>
       </div>
 
@@ -144,14 +175,13 @@ export function Adaptacao() {
 
       {exportado && (
         <Aviso tipo="boa" titulo="Material aprovado" papel="status">
+          {/* O botão do PDF não se repete aqui: depois da aprovação ele passa
+              a ocupar, de forma permanente, o lugar do "Aprovar e exportar"
+              no topo da tela, a dois centímetros deste aviso. */}
           <p>
             Aprovado em {exportado.geradoEm}. O material sai com fonte sem serifa, alinhamento à
-            esquerda, entrelinha 1,5 e linha de no máximo 80 caracteres.
-          </p>
-          <p>
-            <Botao como="link" para={`/materiais/${id}/impressao`}>
-              Abrir o material em PDF
-            </Botao>
+            esquerda, entrelinha 1,5 e linha de no máximo 80 caracteres. O botão no topo da tela
+            agora abre o PDF.
           </p>
         </Aviso>
       )}
@@ -177,7 +207,7 @@ export function Adaptacao() {
       )}
 
       {reprocessando && (
-        <Cartao>
+        <Cartao className="cartao--acao">
           <h2>Reprocessando</h2>
           <BarraProgresso valor={progresso} etapa={etapaAtual} />
         </Cartao>
@@ -186,78 +216,55 @@ export function Adaptacao() {
       <div className="duas-colunas">
         <div className="pilha-g">
           <section aria-labelledby="titulo-comparacao">
-            <div
-              className="linha"
-              style={{ justifyContent: 'space-between', marginBottom: 'var(--e3)' }}
-            >
-              <h2 id="titulo-comparacao">Comparar original e adaptado</h2>
-              {!editando && (
-                <Botao variante="secundario" onClick={() => setEditando(true)}>
+            <h2 id="titulo-comparacao" style={{ marginBottom: 'var(--e3)' }}>
+              Comparar original e adaptado
+            </h2>
+
+            {/* A edição virou diálogo em vez de trocar o conteúdo da seção.
+                Trocando, a comparação sumia justamente enquanto o professor
+                corrigia o texto, e era ela a referência da correção. No
+                diálogo, o comparador continua atrás e volta inteiro ao
+                fechar. */}
+            <ComparadorTextos
+              blocos={blocos}
+              acaoAdaptado={
+                <Botao variante="secundario" onClick={abrirEdicao}>
                   Editar o texto adaptado
                 </Botao>
-              )}
-            </div>
-
-            {editando ? (
-              <Cartao>
-                <h3>Editando o texto adaptado</h3>
-                <p className="campo__dica">
-                  Linhas iniciadas por <code>##</code> são subtítulos. Deixe uma linha em branco
-                  entre os parágrafos. Você pode desfazer tudo enquanto não salvar.
-                </p>
-                <label className="campo" style={{ maxWidth: 'none' }}>
-                  <span className="apenas-leitor">Texto adaptado</span>
-                  <textarea
-                    className="area-texto"
-                    value={rascunho}
-                    onChange={(e) => setRascunho(e.target.value)}
-                  />
-                </label>
-                <div className="linha linha-fim">
-                  <Botao variante="discreto" onClick={descartarEdicao}>
-                    Descartar alterações
-                  </Botao>
-                  <Botao onClick={salvarEdicao} disabled={!houveMudanca}>
-                    Salvar alterações
-                  </Botao>
-                </div>
-              </Cartao>
-            ) : (
-              <ComparadorTextos blocos={blocos} />
-            )}
+              }
+            />
           </section>
 
           <TabelaMetricas metricas={METRICAS} />
-
-          <Cartao>
-            <h2>Aprovar e exportar</h2>
-            <p>
-              Nenhum material é exportado sem a sua aprovação. Você é responsável pelo conteúdo
-              pedagógico; o sistema só propõe a forma.
-            </p>
-            <div className="linha" style={{ marginTop: 'var(--e4)' }}>
-              {/* RN02 — o botão do PDF só aparece depois da aprovação. Material
-                  já aprovado antes continua com o PDF disponível, sem precisar
-                  aprovar de novo. */}
-              {dados.estado === 'aprovado' ? (
-                <Botao como="link" para={`/materiais/${id}/impressao`}>
-                  Abrir o material em PDF
-                </Botao>
-              ) : (
-                <Botao onClick={() => setConfirmando(true)}>Aprovar e exportar em PDF</Botao>
-              )}
-              <Botao
-                variante="secundario"
-                onClick={() => navegar(`/materiais/${id}/atividade`)}
-              >
-                Ir para a atividade
-              </Botao>
-            </div>
-          </Cartao>
         </div>
 
         <PainelRegras />
       </div>
+
+      <Dialogo
+        aberto={editando}
+        titulo="Editar o texto adaptado"
+        largo
+        rotuloCancelar="Descartar alterações"
+        rotuloConfirmar="Salvar alterações"
+        confirmarDesabilitado={!houveMudanca}
+        aoCancelar={descartarEdicao}
+        aoConfirmar={salvarEdicao}
+      >
+        <p className="campo__dica">
+          Linhas iniciadas por <code>##</code> são subtítulos. Deixe uma linha em branco entre os
+          parágrafos. Enquanto você não salvar, dá para descartar tudo e voltar ao texto como
+          estava.
+        </p>
+        <label className="campo">
+          <span className="apenas-leitor">Texto adaptado</span>
+          <textarea
+            className="area-texto"
+            value={rascunho}
+            onChange={(e) => setRascunho(e.target.value)}
+          />
+        </label>
+      </Dialogo>
 
       <Dialogo
         aberto={confirmando}

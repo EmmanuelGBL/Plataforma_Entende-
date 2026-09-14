@@ -85,6 +85,24 @@ a:hover { text-decoration-thickness: 2px; }
 
 code { font-family: var(--fonte-mono); font-size: 0.92em; }
 
+/* Tecla do teclado. Sem isto o <kbd> herda só a fonte monoespaçada do
+   navegador e "Shift + Tab" no meio da frase vira um borrão de texto cinza,
+   sem parecer tecla nenhuma. A borda é o que faz a leitura funcionar. */
+kbd {
+  font-family: var(--fonte-texto);
+  font-size: 0.8125em;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-block;
+  padding: 0.25em 0.5em;
+  border: 1px solid var(--cor-borda-forte);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--cor-superficie-alt);
+  color: var(--cor-texto);
+  white-space: nowrap;
+}
+
 /* --- Foco visível --------------------------------------------------------
    Um único estilo de foco no app inteiro (SC 2.4.7 e 2.4.13). Nunca use
    outline:none sem substituir — foi decisão registrada no documento.       */
@@ -137,11 +155,30 @@ code { font-family: var(--fonte-mono); font-size: 0.92em; }
   width: 100%;
   max-width: var(--largura-conteudo);
   margin-inline: auto;
-  padding: var(--e6) var(--e4) var(--e7);
+  padding: var(--e6) var(--respiro-lateral) var(--e7);
 }
+
+/* Telas de texto corrido (Acessibilidade, 404) não usam a largura de trabalho:
+   num container de 90rem o parágrafo pararia em 68ch e sobraria meia tela
+   vazia à direita. Aqui o container encolhe até a coluna de leitura. */
+.pagina-leitura { max-width: 58rem; }
 
 .cabecalho-pagina { margin-bottom: var(--e5); }
 .cabecalho-pagina p { color: var(--cor-texto-apoio); margin-top: var(--e2); }
+
+/* Cabeçalho com as ações principais da tela à direita do título. As duas ações
+   da adaptação (aprovar e ir para a atividade) ficavam no pé da página, depois
+   do quadro de métricas: quem já tinha revisado precisava rolar de volta para
+   agir. Aqui elas ficam visíveis na abertura da tela e continuam no fim da
+   ordem de tabulação do cabeçalho, depois do título e das etiquetas. */
+.cabecalho-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e4);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.cabecalho-acoes > :first-child { min-width: 0; }
 
 /* --- Barra superior ------------------------------------------------------ */
 .barra {
@@ -154,7 +191,7 @@ code { font-family: var(--fonte-mono); font-size: 0.92em; }
 .barra-interna {
   max-width: var(--largura-conteudo);
   margin-inline: auto;
-  padding: var(--e3) var(--e4);
+  padding: var(--e3) var(--respiro-lateral);
   display: flex;
   align-items: center;
   gap: var(--e4);
@@ -193,7 +230,7 @@ code { font-family: var(--fonte-mono); font-size: 0.92em; }
 .rodape {
   background: var(--cor-superficie-alt);
   border-top: 1px solid var(--cor-borda);
-  padding: var(--e5) var(--e4);
+  padding: var(--e5) var(--respiro-lateral);
   font-size: 0.9375rem;
   color: var(--cor-texto-apoio);
 }
@@ -206,6 +243,14 @@ code { font-family: var(--fonte-mono); font-size: 0.92em; }
   justify-content: space-between;
 }
 .rodape ul { display: flex; gap: var(--e4); flex-wrap: wrap; list-style: none; padding: 0; }
+
+/* O crédito do rodapé é a única exceção ao teto de 68 caracteres, e a exceção
+   é legítima: o limite do SC 1.4.8 existe para bloco de texto, onde o olho
+   precisa voltar da direita de uma linha para a esquerda da seguinte. Aqui é
+   uma linha só de crédito institucional, e quebrá-la em duas no meio de
+   "Sistemas / de Informação" é justamente o que atrapalha a leitura. Em tela
+   estreita ela volta a quebrar sozinha, porque o container é que encolhe. */
+.rodape-interno p { max-width: none; }
 
 /* --- Utilitários de layout ----------------------------------------------- */
 .pilha > * + * { margin-top: var(--e4); }

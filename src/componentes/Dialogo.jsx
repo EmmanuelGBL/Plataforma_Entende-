@@ -15,7 +15,18 @@ import { Botao } from './basicos.jsx';
    - aria-modal + role="dialog" + título ligado por aria-labelledby.
    ========================================================================= */
 
-export function Dialogo({ aberto, titulo, children, aoConfirmar, aoCancelar, rotuloConfirmar, perigo }) {
+export function Dialogo({
+  aberto,
+  titulo,
+  children,
+  aoConfirmar,
+  aoCancelar,
+  rotuloConfirmar,
+  rotuloCancelar = 'Cancelar',
+  confirmarDesabilitado,
+  perigo,
+  largo,
+}) {
   const caixa = useRef(null);
   const focoAnterior = useRef(null);
 
@@ -68,7 +79,7 @@ export function Dialogo({ aberto, titulo, children, aoConfirmar, aoCancelar, rot
       }}
     >
       <div
-        className="dialogo"
+        className={`dialogo${largo ? ' dialogo--largo' : ''}`}
         ref={caixa}
         role="dialog"
         aria-modal="true"
@@ -78,9 +89,13 @@ export function Dialogo({ aberto, titulo, children, aoConfirmar, aoCancelar, rot
         {children}
         <div className="linha linha-fim">
           <Botao variante="secundario" onClick={aoCancelar}>
-            Cancelar
+            {rotuloCancelar}
           </Botao>
-          <Botao variante={perigo ? 'perigo' : 'principal'} onClick={aoConfirmar}>
+          <Botao
+            variante={perigo ? 'perigo' : 'principal'}
+            onClick={aoConfirmar}
+            disabled={confirmarDesabilitado}
+          >
             {rotuloConfirmar}
           </Botao>
         </div>

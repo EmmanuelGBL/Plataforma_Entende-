@@ -25,6 +25,21 @@ import { enviarMaterial, processarAdaptacao, validarArquivo } from '../servicos/
 
 const PASSOS = ['Escolher o material', 'Configurar a adaptação', 'Processar'];
 
+/* Perfis fora do escopo desta versão. Aparecem na tela desligados, nunca
+   selecionáveis, e sempre rotulados como extensão futura. */
+const PERFIS_FUTUROS = [
+  {
+    sigla: 'TDAH',
+    nome: 'Transtorno do Déficit de Atenção com Hiperatividade',
+    apoio: 'Exigiria um conjunto de regras próprio. Não faz parte desta versão.',
+  },
+  {
+    sigla: 'Dislexia',
+    nome: 'Transtorno específico da leitura',
+    apoio: 'Exigiria um conjunto de regras próprio. Não faz parte desta versão.',
+  },
+];
+
 export function Enviar() {
   usarTituloDaPagina('Enviar material');
   const navegar = useNavigate();
@@ -136,11 +151,29 @@ export function Enviar() {
       )}
 
       {passo === 0 && (
-        <Cartao>
+        <Cartao className="cartao--acao">
           <h2>1. Escolher o material</h2>
           <p className="campo__dica">
             Aceitamos PDF e Word (.docx), com até 20 páginas e 15 MB por envio.
           </p>
+
+          {/* O envio de arquivo próprio é a interação principal do produto, e
+              some da tela se a demonstração mostrar só a lista de exemplos.
+              Fica visível e desligado, com a razão escrita ao lado: é a mesma
+              postura do aviso de conteúdo de demonstração e da declaração de
+              limites na tela de entrada. */}
+          <div className="area-envio">
+            <Botao variante="secundario" disabled>
+              Upload do material
+            </Botao>
+            <div className="linha" style={{ justifyContent: 'center' }}>
+              <Etiqueta tom="neutra">Indisponível nesta demonstração</Etiqueta>
+            </div>
+            <p className="campo__dica" style={{ marginTop: 'var(--e3)', marginBottom: 0 }}>
+              O protótipo roda inteiro no navegador, sem servidor, e por isso não lê arquivo do seu
+              computador. Escolha um dos materiais de exemplo abaixo.
+            </p>
+          </div>
 
           <fieldset>
             <legend>Arquivos disponíveis nesta demonstração</legend>
@@ -190,7 +223,7 @@ export function Enviar() {
       )}
 
       {passo === 1 && (
-        <Cartao>
+        <Cartao className="cartao--acao">
           <h2>2. Configurar a adaptação</h2>
 
           <Aviso tipo="boa" titulo="Material lido com sucesso">
@@ -200,7 +233,7 @@ export function Enviar() {
             </p>
           </Aviso>
 
-          <div className="campo">
+          <div className="campo" style={{ maxWidth: '44rem' }}>
             <span className="campo__rotulo" id="rotulo-perfil">
               Perfil de adaptação
             </span>
@@ -213,6 +246,34 @@ export function Enviar() {
                 </span>
               </span>
             </div>
+
+            {/* Os dois perfis abaixo são o recorte do trabalho aparecendo na
+                interface. Não são requisito, não são item de backlog e não
+                podem ser escolhidos: o escopo foi fechado em TEA, e TDAH e
+                dislexia constam apenas como extensão futura. Mostrá-los
+                desligados, com o motivo escrito, explica ao professor por que
+                a lista tem um item só — e mostra o caminho do produto sem
+                prometer data. */}
+            {PERFIS_FUTUROS.map((perfil) => (
+              <div key={perfil.sigla} className="opcao opcao--indisponivel" aria-disabled="true">
+                <span aria-hidden="true">○</span>
+                <span>
+                  <span className="opcao__titulo">
+                    {perfil.sigla} — {perfil.nome}
+                  </span>
+                  <span className="opcao__apoio">{perfil.apoio}</span>
+                </span>
+                <span style={{ marginLeft: 'auto', flex: 'none' }}>
+                  <Etiqueta tom="neutra">Extensão futura</Etiqueta>
+                </span>
+              </div>
+            ))}
+
+            <span className="campo__dica" style={{ marginTop: 'var(--e2)' }}>
+              O conjunto de regras, os materiais de teste e a validação com professores foram
+              construídos para o perfil TEA. Adaptar para outro perfil exige um conjunto de regras
+              próprio, e não é o recorte deste trabalho.
+            </span>
           </div>
 
           <label className="campo">
@@ -260,7 +321,7 @@ export function Enviar() {
       )}
 
       {passo === 2 && (
-        <Cartao>
+        <Cartao className="cartao--acao">
           <h2>3. Adaptando o material</h2>
           <p>
             Você pode acompanhar o andamento abaixo. Materiais de até 20 páginas levam menos de

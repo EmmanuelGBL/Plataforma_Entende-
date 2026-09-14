@@ -69,7 +69,24 @@
 .cartao--compacto { padding: var(--e4); }
 .cartao > h2, .cartao > h3 { margin-bottom: var(--e3); }
 
-.cartao-lista { display: grid; gap: var(--e4); }
+/* Cartão de ação: um título, uma ou duas frases e um botão. Mesmo motivo do
+   `.aviso` — esticado na largura de trabalho inteira, ele fica com o texto
+   parado em 68 caracteres (RNF02) e mais de mil pixels vazios à direita, o
+   que lê como texto quebrado no meio. A caixa acompanha o conteúdo; a linha
+   de leitura continua onde estava. */
+.cartao--acao { max-width: fit-content; }
+
+/* Cada material é um cartão independente, e o cartão tem os dados à esquerda e
+   as ações à direita. Numa linha só, em tela larga, sobravam uns 500 px de nada
+   entre um e outro, e o olho perdia a ligação entre o material e o botão que
+   age sobre ele. Duas colunas aproximam os dois e mostram mais material sem
+   rolar. Volta para uma coluna sozinho quando não couber. */
+.cartao-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(40rem, 100%), 1fr));
+  gap: var(--e4);
+  align-items: start;
+}
 
 .cartao-material {
   display: grid;
@@ -162,7 +179,48 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .opcao__titulo { font-weight: 600; display: block; overflow-wrap: anywhere; }
 .opcao__apoio { font-size: 0.9375rem; color: var(--cor-texto-apoio); display: block; }
 
+/* Opção presente na tela, mas fora do escopo desta versão (perfis TDAH e
+   dislexia). Não é um controle desligado por erro nem por estado temporário:
+   é o recorte do trabalho aparecendo na interface, e por isso vem sempre com
+   a etiqueta "Extensão futura" ao lado. O estado não é comunicado só pelo
+   cinza (SC 1.4.1) — há a etiqueta em texto, a borda tracejada e o
+   aria-disabled para quem usa leitor de tela. */
+.opcao--indisponivel {
+  background: var(--cor-superficie-alt);
+  border-style: dashed;
+  border-color: var(--cor-borda);
+  color: var(--cor-texto-apoio);
+  cursor: not-allowed;
+  align-items: center;
+}
+.opcao--indisponivel .opcao__titulo { font-weight: 500; }
+.opcao--indisponivel:hover { background: var(--cor-superficie-alt); }
+
+/* --- Área de envio de arquivo ------------------------------------------- */
+/* Mostra a interação real do produto (escolher um arquivo do computador) sem
+   fingir que ela funciona na demonstração. A alternativa seria esconder o
+   botão, e aí a tela de envio não mostraria o passo que dá nome a ela. */
+.area-envio {
+  border: 2px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie-alt);
+  padding: var(--e5);
+  text-align: center;
+  margin-bottom: var(--e4);
+}
+.area-envio .botao { margin-bottom: var(--e3); }
+.area-envio p { max-width: 46ch; margin-inline: auto; }
+
 /* --- Avisos -------------------------------------------------------------- */
+/* `fit-content` resolve o defeito que aparecia em monitor largo: a caixa
+   esticava até a largura de trabalho inteira enquanto o texto dentro dela
+   parava em 68 caracteres (RNF02), deixando cerca de mil pixels vazios à
+   direita e dando a impressão de texto quebrado no meio.
+   A correção é encolher a CAIXA, não soltar a linha: soltar a linha poria
+   textos de 170 caracteres justamente na tela onde o sistema promete no
+   máximo 80. Quando o conteúdo é mais largo que o espaço disponível,
+   `fit-content` devolve a largura disponível sozinho, então nada estoura em
+   tela de 360 px (SC 1.4.10). */
 .aviso {
   display: flex;
   gap: var(--e3);
@@ -170,6 +228,7 @@ legend { font-weight: 600; padding-inline: var(--e2); }
   border-radius: var(--raio);
   border-left: 6px solid;
   margin-bottom: var(--e4);
+  max-width: fit-content;
 }
 .aviso h3 { font-size: 1rem; margin-bottom: var(--e1); }
 .aviso p { font-size: 0.9375rem; }
@@ -235,8 +294,13 @@ legend { font-weight: 600; padding-inline: var(--e2); }
   border-radius: var(--raio-g);
   overflow: hidden;
 }
+/* min-height mantém os dois cabeçalhos com a mesma altura: um traz uma
+   etiqueta baixa e o outro um botão de 44 px, e sem isto o texto adaptado
+   começaria alguns pixels abaixo do original, justamente na tela cujo sentido
+   é comparar os dois na mesma linha. */
 .painel-texto__cabecalho {
   padding: var(--e3) var(--e4);
+  min-height: calc(var(--alvo-minimo) + 2 * var(--e3));
   background: var(--cor-superficie-alt);
   border-bottom: 1px solid var(--cor-borda);
   display: flex; align-items: center; justify-content: space-between; gap: var(--e3);
@@ -247,8 +311,15 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 
 /* O painel do original imita o material como ele é hoje: justificado e
    apertado. É a única exceção deliberada às regras tipográficas do app —
-   está anotada no documento para não parecer descuido. */
-.texto-original p { text-align: justify; line-height: 1.35; max-width: none; }
+   está anotada no documento para não parecer descuido.
+
+   O teto de 80ch NÃO é parte da imitação, é contenção: com o container
+   acompanhando o monitor, a coluna passa de 700 px em tela larga e a linha
+   chegaria perto de 100 caracteres. Justamente nesta tela o documento defende
+   o limite de 80 do SC 1.4.8 — deixar a demonstração violar o número que ela
+   existe para defender é o tipo de detalhe que a banca encontra. A exceção
+   declarada na seção 3.4 é justificação e entrelinha, não comprimento. */
+.texto-original p { text-align: justify; line-height: 1.35; max-width: 80ch; }
 .texto-original p + p { margin-top: 0.75em; }
 
 .texto-adaptado { max-width: var(--medida-leitura); }
@@ -305,8 +376,17 @@ table.dados th, table.dados td {
   vertical-align: top;
 }
 table.dados thead th { background: var(--cor-superficie-alt); border-bottom: 2px solid var(--cor-borda-forte); }
-table.dados tbody tr:last-child td { border-bottom: none; }
+/* O `th` precisa entrar aqui junto com o `td`: sem ele, a última linha ficava
+   com o traço só embaixo da primeira coluna, e a tabela terminava com um risco
+   curto e torto que parecia defeito de renderização. */
+table.dados tbody tr:last-child td,
+table.dados tbody tr:last-child th { border-bottom: none; }
 table.dados td.numero { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Tabela de poucas colunas curtas. Esticada na largura de trabalho inteira,
+   a de atalhos de teclado ficava com dois rótulos de três palavras separados
+   por 1200 px de nada — o olho perdia a ligação entre a tecla e o destino. */
+table.dados--estreita { max-width: 46rem; }
 
 /* --- Diálogo modal ------------------------------------------------------- */
 .dialogo-fundo {
@@ -328,7 +408,35 @@ table.dados td.numero { font-variant-numeric: tabular-nums; white-space: nowrap;
 .dialogo h2 { margin-bottom: var(--e3); }
 .dialogo .linha { margin-top: var(--e5); }
 
+/* Diálogo de edição de texto. 34rem serve para confirmar uma ação de uma
+   frase; para editar o material inteiro seria uma fresta.
+
+   A largura não é um número escolhido no olho: é a medida de leitura (68
+   caracteres, RNF02) mais o respiro interno. Assim a área de edição ocupa o
+   diálogo inteiro, sem sobra à direita, e mesmo assim a linha que o professor
+   digita respeita o mesmo limite que o sistema aplica ao material. Um
+   diálogo mais largo que isso só serviria para alongar a linha. */
+.dialogo--largo { max-width: calc(68ch + 2 * var(--e5) + 4px); }
+.dialogo--largo .area-texto { min-height: 24rem; }
+.dialogo--largo .campo { max-width: none; margin-bottom: 0; }
+.dialogo--largo .campo__dica { margin-bottom: var(--e3); }
+
 /* --- Questões ------------------------------------------------------------ */
+/* Questão é unidade curta e independente: enunciado e quatro alternativas.
+   Numa tela larga, uma por linha deixaria o cartão com mais de 1000 px vazios
+   à direita e obrigaria a rolar cinco vezes para conferir cinco questões. A
+   grade encaixa duas lado a lado e volta para uma quando não couber. A ordem
+   de leitura e a de tabulação continuam sendo a do DOM, que é a mesma da tela:
+   esquerda para a direita, de cima para baixo. */
+.questao-lista {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(38rem, 100%), 1fr));
+  gap: var(--e4);
+  align-items: start;
+}
+
 .questao { border: 1px solid var(--cor-borda); border-radius: var(--raio-g); background: var(--cor-superficie); padding: var(--e4); }
 .questao + .questao { margin-top: var(--e4); }
 .questao__topo { display: flex; gap: var(--e3); align-items: baseline; flex-wrap: wrap; margin-bottom: var(--e3); }
@@ -419,8 +527,27 @@ table.dados td.numero { font-variant-numeric: tabular-nums; white-space: nowrap;
 .migalhas li + li::before { content: '›'; margin-right: var(--e2); color: var(--cor-texto-apoio); }
 
 /* --- Estado vazio -------------------------------------------------------- */
-.vazio { text-align: center; padding: var(--e7) var(--e4); }
+/* Estado vazio e página de erro: o cartão não acompanha a largura de trabalho.
+   Texto centralizado esticado até 90rem obriga o olho a varrer a tela inteira
+   para achar o começo da linha seguinte. */
+.vazio { text-align: center; padding: var(--e7) var(--e4); max-width: 52rem; margin-inline: auto; }
 .vazio p { margin-inline: auto; }
+
+/* --- Perguntas frequentes ------------------------------------------------
+   A resposta para em 68ch por RNF02, então num cartão de 90rem sobraria meia
+   tela vazia à direita. A grade encaixa duas perguntas lado a lado e volta
+   sozinha para uma coluna quando não couberem — inclusive com o texto em 125%
+   ou o zoom em 200%, porque o limite está em rem, não em pixel de tela. */
+.perguntas {
+  display: grid;
+  /* O `min(...)` não é enfeite: `minmax(26rem, 1fr)` sozinho obriga a pista a
+     ter 416 px e estoura a tela de 360 px na horizontal (SC 1.4.10). Com ele,
+     a pista encolhe até a largura disponível. */
+  grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr));
+  gap: var(--e5) var(--e6);
+  align-items: start;
+  margin-top: var(--e4);
+}
 
 /* --- Lista de definições em blocos -------------------------------------- */
 .blocos { display: grid; gap: var(--e3); grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }

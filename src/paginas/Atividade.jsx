@@ -160,7 +160,7 @@ export function Atividade() {
           <p>Você excluiu todas as questões. Não é possível publicar uma atividade vazia.</p>
         </div>
       ) : (
-        <ol style={{ listStyle: 'none', padding: 0 }}>
+        <ol className="questao-lista">
           {questoes.map((questao, indice) => (
             <li key={questao.id}>
               {emEdicao?.id === questao.id ? (
@@ -217,7 +217,7 @@ export function Atividade() {
         </ol>
       )}
 
-      <Cartao>
+      <Cartao className="cartao--acao">
         <h2>{publicada ? 'Republicar a atividade' : 'Publicar a atividade'}</h2>
         <p>
           Ao publicar, o sistema gera um link e um código de acesso. Você decide quando e como

@@ -70,9 +70,9 @@ export function Ajuda() {
       <div className="pilha-g">
         <Cartao>
           <h2>Perguntas frequentes</h2>
-          <dl>
+          <dl className="perguntas">
             {PERGUNTAS.map((item) => (
-              <div key={item.pergunta} style={{ marginTop: 'var(--e4)' }}>
+              <div key={item.pergunta}>
                 <dt style={{ fontWeight: 600, fontSize: '1.0625rem' }}>{item.pergunta}</dt>
                 <dd style={{ margin: 'var(--e1) 0 0', maxWidth: 'var(--medida-leitura)' }}>
                   {item.resposta}
@@ -87,7 +87,7 @@ export function Ajuda() {
             Conjunto de regras {CONJUNTO_REGRAS.identificador} v{CONJUNTO_REGRAS.versao}
           </h2>
           <p>{CONJUNTO_REGRAS.descricao}</p>
-          <p className="campo__dica">
+          <p className="campo__dica" style={{ marginBottom: 'var(--e5)' }}>
             Publicado em {CONJUNTO_REGRAS.publicadoEm}. Toda adaptação registra qual versão foi
             usada, e esse registro não pode ser alterado.
           </p>
@@ -126,38 +126,65 @@ export function Ajuda() {
           </TabelaEnvolvente>
         </Cartao>
 
-        <Cartao>
+        <Cartao className="cartao--acao">
           <h2>Atalhos de teclado</h2>
-          <p>
-            Todo o sistema pode ser usado sem mouse. Use <kbd>Tab</kbd> para avançar,{' '}
-            <kbd>Shift</kbd> + <kbd>Tab</kbd> para voltar, <kbd>Enter</kbd> ou{' '}
-            <kbd>Barra de espaço</kbd> para acionar e <kbd>Esc</kbd> para fechar uma janela de
-            confirmação.
-          </p>
-          <TabelaEnvolvente rotulo="Atalhos de teclado">
-            <table className="dados">
-              <thead>
-                <tr>
-                  <th scope="col">Atalho</th>
-                  <th scope="col">Vai para</th>
-                </tr>
-              </thead>
+          <p style={{ marginBottom: 'var(--e5)' }}>Todo o sistema pode ser usado sem mouse.</p>
+
+          <TabelaEnvolvente rotulo="Teclas de navegação">
+            <table className="dados dados--estreita">
+              <caption>Para navegar em qualquer tela</caption>
               <tbody>
                 <tr>
-                  <th scope="row">Tecla de acesso 1</th>
-                  <td>Conteúdo principal da página</td>
+                  <th scope="row">
+                    <kbd>Tab</kbd>
+                  </th>
+                  <td>Avança para o próximo item</td>
                 </tr>
                 <tr>
-                  <th scope="row">Tecla de acesso 2</th>
-                  <td>Menu de navegação</td>
+                  <th scope="row">
+                    <kbd>Shift</kbd> + <kbd>Tab</kbd>
+                  </th>
+                  <td>Volta para o item anterior</td>
+                </tr>
+                <tr>
+                  <th scope="row">
+                    <kbd>Enter</kbd> ou <kbd>Espaço</kbd>
+                  </th>
+                  <td>Aciona o botão ou o link em foco</td>
+                </tr>
+                <tr>
+                  <th scope="row">
+                    <kbd>Esc</kbd>
+                  </th>
+                  <td>Fecha a janela de confirmação sem confirmar</td>
                 </tr>
               </tbody>
             </table>
           </TabelaEnvolvente>
-          <p className="campo__dica">
-            A combinação que ativa a tecla de acesso muda conforme o navegador. No Chrome e no
-            Edge, em Windows, é <kbd>Alt</kbd> + a tecla. No Firefox, <kbd>Alt</kbd> +{' '}
-            <kbd>Shift</kbd> + a tecla.
+
+          <TabelaEnvolvente rotulo="Teclas de acesso">
+            <table className="dados dados--estreita" style={{ marginTop: 'var(--e5)' }}>
+              <caption>Para saltar direto a uma parte da página</caption>
+              <tbody>
+                <tr>
+                  <th scope="row">
+                    <kbd>Alt</kbd> + <kbd>1</kbd>
+                  </th>
+                  <td>Vai para o conteúdo principal</td>
+                </tr>
+                <tr>
+                  <th scope="row">
+                    <kbd>Alt</kbd> + <kbd>2</kbd>
+                  </th>
+                  <td>Vai para o menu de navegação</td>
+                </tr>
+              </tbody>
+            </table>
+          </TabelaEnvolvente>
+
+          <p className="campo__dica" style={{ marginTop: 'var(--e4)' }}>
+            A combinação muda conforme o navegador. No Chrome e no Edge, em Windows, é a mostrada
+            acima. No Firefox, acrescente <kbd>Shift</kbd>.
           </p>
         </Cartao>
       </div>

@@ -61,8 +61,8 @@ function Rodape() {
     <footer className="rodape" id="rodape" tabIndex={-1}>
       <div className="rodape-interno">
         <p>
-          Entende+ — protótipo acadêmico. Trabalho de Conclusão de Curso em Sistemas de
-          Informação, CEUNI FAMETRO. Os dados exibidos são de demonstração.
+          Entende+, protótipo acadêmico. Trabalho de Conclusão de Curso em Sistemas de Informação,
+          CEUNI FAMETRO. Os dados exibidos são de demonstração.
         </p>
         <ul>
           <li>

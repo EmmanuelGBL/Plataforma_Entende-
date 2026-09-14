@@ -75,9 +75,30 @@
   --alvo-minimo: 44px;
 
   --duracao: 180ms;
-  --largura-conteudo: 68rem;
-  /* Medida de linha: máx. 80 caracteres (WCAG 2.2 SC 1.4.8) — RNF02 */
+
+  /* --- Largura ------------------------------------------------------------
+     Duas medidas diferentes, e confundir as duas é o erro comum:
+
+     --largura-conteudo é o CONTAINER da página. As telas de trabalho do
+     professor são de comparar, conferir e decidir, não de ler corrido, então
+     o container acompanha o monitor: o teto de 120rem só passa a valer em
+     tela maior que 1920 px, e abaixo disso a página ocupa a largura toda. A
+     primeira versão travava em 68rem e espremia a comparação original ×
+     adaptado em duas colunas de ~300 px, o que forçava justificação com
+     buracos entre as palavras e deixava mais de 400 px mortos de cada lado.
+
+     --medida-leitura é a MEDIDA DE LINHA do texto corrido, e essa NÃO
+     acompanha: continua em 68ch por RNF02 e pelo SC 1.4.8 da WCAG (teto de 80
+     caracteres). Alargar o container não alarga a linha, porque `p` e
+     `.texto-adaptado` se limitam sozinhos. É o que sustenta a decisão na
+     banca: o que cresce é a área de trabalho, não a linha de leitura.        */
+  --largura-conteudo: 120rem;
   --medida-leitura: 68ch;
+
+  /* Respiro lateral do container. Cresce com a viewport, com piso e teto: em
+     360 px não desperdiça largura, e em tela larga afasta o conteúdo da borda
+     em vez de deixar o texto encostado no vidro. */
+  --respiro-lateral: clamp(1rem, 3.5vw, 4rem);
 }
 
 /* --- Preferência: corpo do texto ----------------------------------------

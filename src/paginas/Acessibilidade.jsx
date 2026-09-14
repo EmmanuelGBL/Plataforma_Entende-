@@ -19,7 +19,7 @@ export function Acessibilidade() {
   usarTituloDaPagina('Acessibilidade');
 
   return (
-    <>
+    <div className="pagina-leitura">
       <div className="cabecalho-pagina">
         <h1>Acessibilidade no Entende+</h1>
         <p>
@@ -134,6 +134,6 @@ export function Acessibilidade() {
           <p className="campo__dica">Declaração revisada em 8 de setembro de 2026.</p>
         </Cartao>
       </div>
-    </>
+    </div>
   );
 }
