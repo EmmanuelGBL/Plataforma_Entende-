@@ -64,7 +64,7 @@ html = html.replace(
   '<div id="raiz"></div>',
   '<div id="raiz"></div>\n    <!-- Entende+ — protótipo do TCC de Emmanuel e Hugo (CEUNI FAMETRO).\n' +
     '         Arquivo único e offline, gerado por empacotar-offline.js.\n' +
-    '         Não editar aqui: a fonte é a pasta prototipo/src. -->',
+    '         Não editar aqui: a fonte é a pasta src/. -->',
 );
 
 fs.writeFileSync(saida, html, 'utf8');

@@ -5,7 +5,7 @@
 # escolha feita em 11/09, para que o material didático da professora e os
 # endereços de e-mail que estão na pasta do TCC não fossem para um repositório
 # público. Se um dia o repositório passar a ser a pasta inteira do TCC, é
-# preciso acrescentar `working-directory: Entrega-14-09/prototipo` aos passos de
+# preciso acrescentar `working-directory: SISTEMA` aos passos de
 # instalar e construir, e ajustar os caminhos de `cache-dependency-path` e
 # `path`.
 #
