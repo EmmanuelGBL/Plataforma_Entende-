@@ -26,6 +26,11 @@ export function Dialogo({
   confirmarDesabilitado,
   perigo,
   largo,
+  /* Substitui o par cancelar/confirmar. Existe para o diálogo servir também a
+     quem não tem o que confirmar — o painel de ajustes do jogo aplica cada
+     escolha na hora, e oferecer "Cancelar" ali prometeria um desfazer que não
+     existe (H5 ao contrário: pior que não ter saída é ter uma saída falsa). */
+  acoes,
 }) {
   const caixa = useRef(null);
   const focoAnterior = useRef(null);
@@ -88,16 +93,20 @@ export function Dialogo({
         <h2 id="titulo-dialogo">{titulo}</h2>
         {children}
         <div className="linha linha-fim">
-          <Botao variante="secundario" onClick={aoCancelar}>
-            {rotuloCancelar}
-          </Botao>
-          <Botao
-            variante={perigo ? 'perigo' : 'principal'}
-            onClick={aoConfirmar}
-            disabled={confirmarDesabilitado}
-          >
-            {rotuloConfirmar}
-          </Botao>
+          {acoes ?? (
+            <>
+              <Botao variante="secundario" onClick={aoCancelar}>
+                {rotuloCancelar}
+              </Botao>
+              <Botao
+                variante={perigo ? 'perigo' : 'principal'}
+                onClick={aoConfirmar}
+                disabled={confirmarDesabilitado}
+              >
+                {rotuloConfirmar}
+              </Botao>
+            </>
+          )}
         </div>
       </div>
     </div>

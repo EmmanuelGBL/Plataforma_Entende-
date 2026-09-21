@@ -154,6 +154,21 @@ export function Atividade() {
         <Etiqueta tom="info">Geradas do próprio material (RN04)</Etiqueta>
       </div>
 
+      {/* RF23 — a folha impressa é o terceiro caminho da mesma atividade, ao
+          lado do jogo e da lista de perguntas. Fica disponível antes de
+          publicar: quem vai entregar no papel não precisa gerar link nenhum.
+
+          Sai da tela quando não há questão, em vez de ficar desabilitado:
+          `disabled` não existe em <a>, e um link "desligado" só na aparência
+          continua alcançável por teclado e leva a uma folha vazia. */}
+      {questoes.length > 0 && (
+        <div className="linha" style={{ marginBottom: 'var(--e5)' }}>
+          <Botao como="link" para={`/materiais/${id}/questionario`} variante="secundario">
+            Imprimir as questões ou salvar em PDF
+          </Botao>
+        </div>
+      )}
+
       {questoes.length === 0 ? (
         <div className="cartao vazio">
           <h2>Nenhuma questão restante</h2>

@@ -24,6 +24,8 @@ src/
                     e os quatro modos do painel de exibição
     base.css        Reset, tipografia, marcos de página, foco, links de salto
     componentes.css Botões, campos, cartões, diálogo, comparador, atividade
+    jogo.css        Cena, alvos e ajustes da atividade gamificada (RF21)
+    impressao.css   Folha do material adaptado (RF11) e das questões (RF23)
   contextos/
     Preferencias    Tamanho do texto, espaçamento, contraste e movimento
     Anuncios        Região aria-live única do aplicativo
@@ -31,7 +33,7 @@ src/
   servicos/api.js   Camada de dados simulada — trocar por HTTP depois
   dados/conteudo.js Texto original e adaptado, dez regras, métricas, questões
   componentes/      Design system
-  paginas/          As dez telas
+  paginas/          As telas (13 rotas)
 ```
 
 ## Cinco coisas que não são estilo, e que quebram se mexerem
@@ -87,8 +89,62 @@ teste e a seguinte.
 | `#/materiais/m-102/adaptacao` | Revisar a adaptação — **a tela núcleo** |
 | `#/materiais/m-102/impressao` | Material adaptado em PDF (botão Salvar como PDF) |
 | `#/materiais/m-102/atividade` | Revisar e publicar a atividade |
-| `#/atividade/PXK4T9` | Atividade na visão do estudante |
+| `#/materiais/m-102/questionario` | Folha imprimível das questões, com gabarito opcional (RF23) |
+| `#/atividade/PXK4T9` | Escolher a forma: jogar ou responder (RF22) |
+| `#/atividade/PXK4T9/jogo` | Atividade gamificada (RF21) |
+| `#/atividade/PXK4T9/perguntas` | Lista de perguntas, sem jogo (RF16, RF17) |
 | `#/ajuda` | Ajuda e catálogo das dez regras |
 | `#/acessibilidade` | Declaração de acessibilidade |
 
 Qualquer outro endereço cai na página de erro.
+
+## As três formas da mesma atividade
+
+As questões são as mesmas nas três — geradas do próprio material (RF13, RN04) e revisadas pelo
+professor antes de publicar. O que muda é o caminho:
+
+| Forma | Arquivo | Para quem |
+| --- | --- | --- |
+| Jogo | `paginas/AtividadeJogo.jsx` | Quem quer jogar |
+| Lista de perguntas | `paginas/AtividadeEstudante.jsx` | Quem quer só responder |
+| Folha impressa | `paginas/QuestionarioImpresso.jsx` | Turma sem máquina para todo mundo; papel |
+
+**A lista não é um modo degradado do jogo.** O jogo tem cena, movimento e metáfora, e nada disso é
+neutro para todo estudante do perfil — é a mesma razão pela qual o tema é preferência e não
+estrutura. Quem for "simplificar" juntando as duas telas está desfazendo uma decisão, não limpando
+código.
+
+### O jogo, em uma tela
+
+Estrutura de turno fixa, sempre nesta ordem: **mirar → responder → resultado → próxima**. O
+cabeçalho de `AtividadeJogo.jsx` traz as decisões que sustentam a tela e o de `CenaJogo.jsx` as do
+desenho. As catorze regras estão em **RN11**, no `Entrega-24-08/requisitos.md` §4.1, cada uma com a
+diretriz de origem; a pesquisa que as produziu está em
+`Entrega-14-09/mecanica-atividade-gamificada.md`, seções 4 e 7.
+
+O que é mais fácil de quebrar sem perceber:
+
+- **Não existe contagem de erro em lugar nenhum** (G05). Acrescentar "3 erros" ao placar parece
+  informação e é registro de fracasso exibido à criança pela atividade inteira. A trilha de
+  bolinhas também não distingue "pulou" de "ainda não chegou", pelo mesmo motivo.
+- **Nada na tela pode comunicar urgência** (G03). Sem cronômetro, sem barra que enche, sem
+  movimento da bola antes da resposta confirmada. O balanço do goleiro durante a leitura é lento e
+  sem começo nem fim marcados — é o oposto de um relógio.
+- **Acerto sempre vira gol** (G02). "Dar realismo" deixando o goleiro pegar às vezes quebra a
+  previsibilidade que sustenta o desenho inteiro.
+- **A dica existe antes do erro, e é de graça** (G11). Transformá-la em recurso limitado, ou
+  contá-la no resumo, desfaz a aprendizagem sem erro que ela implementa.
+- **Tema neutro é o padrão e o som começa desligado** (G07, G08). O reconhecimento visual do acerto,
+  esse **vem ligado** — só contador numérico é a forma de recompensa menos preferida pelo perfil.
+- **A paleta não é escolha de gosto** (G12). Frio dominante, um único acento quente nas luvas, e
+  amarelo fora da paleta padrão. As variáveis estão no topo de `jogo.css`.
+- **Estilo plano, nunca fotorrealista** (G13) — inclusive a bola, que é vetor desenhado e não foto.
+  O cabeçalho de `CenaJogo.jsx` explica os quatro motivos.
+- A preferência de movimento reduzido do painel de Exibição já zera as transições na raiz do
+  documento, e a cena usa `transition` justamente para obedecer sem saber que a preferência existe
+  (G09). `esperaDoAviso` lê a mesma preferência para não fazer ninguém esperar em tela parada.
+
+**Tempos que andam juntos.** A bola leva 540 ms para chegar (`.jogo__movel`), o balanço da rede
+espera 520 ms para começar, e o cartão de resultado entra em 1150 ms no gol e 950 ms no erro
+(`esperaDoAviso`). Mexer em um sem mexer nos outros faz o cartão voltar a aparecer por cima da bola
+em movimento — que era o defeito da primeira versão.

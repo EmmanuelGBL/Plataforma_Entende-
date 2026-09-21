@@ -482,6 +482,52 @@ table.dados--estreita { max-width: 46rem; }
 .atividade__retorno { margin-top: var(--e5); }
 .atividade__contador { color: var(--cor-texto-apoio); font-weight: 600; margin-bottom: var(--e3); }
 
+/* Troca de forma no pé das duas telas do estudante. Mora aqui, e não em
+   jogo.css, porque as duas telas a usam e só uma delas carrega aquela folha. */
+.atividade__troca { margin-top: var(--e6); }
+
+/* --- Escolha do modo da atividade (RF22) ---------------------------------
+   Duas opções, do mesmo tamanho e com o mesmo peso visual. Nenhuma das duas é
+   "a principal": jogar e responder a lista são caminhos completos da mesma
+   atividade, e destacar um induziria a escolha que a tela existe para deixar
+   com a criança.                                                            */
+.escolha__intro { font-size: 1.125rem; margin: var(--e4) 0 var(--e5); }
+
+.escolha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  gap: var(--e4);
+  list-style: none;
+  padding: 0;
+}
+.escolha__opcao {
+  height: 100%;
+  display: flex;
+  gap: var(--e4);
+  align-items: flex-start;
+  padding: var(--e5);
+  border: 3px solid var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+.escolha__opcao:hover { border-color: var(--cor-teal); background: var(--cor-info-fundo); }
+.escolha__figura {
+  flex: none;
+  width: 3rem; height: 3rem;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--cor-superficie-alt);
+  border: 2px solid var(--cor-borda-forte);
+  font-size: 1.5rem;
+}
+.escolha__texto { display: grid; gap: var(--e2); }
+.escolha__titulo { font-size: 1.25rem; text-decoration: underline; }
+
+:root[data-contraste='alto'] .escolha__opcao,
+:root[data-contraste='alto'] .escolha__figura { background: #000000; border-color: #ffffff; }
+
 /* --- Painel de preferências de exibição --------------------------------- */
 .preferencias { position: relative; }
 .preferencias__gatilho {

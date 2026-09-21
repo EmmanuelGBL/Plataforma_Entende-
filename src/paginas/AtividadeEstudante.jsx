@@ -2,13 +2,23 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Aviso, Botao, Cartao } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
-import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
+import {
+  AtividadeIndisponivel,
+  assuntoDaAtividade,
+  usarAtividadeDoCodigo,
+} from '../componentes/AtividadeAcesso.jsx';
 
 /* =========================================================================
    UC16 — Executar a atividade (RF16)  ·  UC17 — Retorno de acerto ou erro (RF17)
    RN05 — sem cadastro e sem nenhum dado que identifique o estudante.
    RNF04 — funciona de 360 px a 1920 px, em Chrome e Firefox, sem instalar nada.
+
+   Esta é a forma SEM jogo da atividade, e continua sendo um caminho completo,
+   não um modo reduzido: é ela que corresponde à folha impressa que o professor
+   entrega (RF23), e é ela que atende quem não quer jogo nenhum. O jogo mora em
+   `AtividadeJogo.jsx` e usa exatamente as mesmas questões (RF13, RN04); a
+   escolha entre os dois é da criança, em `AtividadeEscolha.jsx` (RF22).
 
    As decisões desta tela vêm do perfil, não do gosto:
 
@@ -25,11 +35,8 @@ import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
 export function AtividadeEstudante() {
   const { codigo } = useParams();
-  const { materialPorCodigo, adaptacao } = usarApp();
+  const { material, valida, questoes } = usarAtividadeDoCodigo(codigo);
   const { anunciar } = usarAnuncios();
-
-  const material = materialPorCodigo(codigo);
-  const valida = material && material.atividade?.estado === 'publicada';
 
   usarTituloDaPagina(valida ? 'Atividade' : 'Atividade indisponível');
 
@@ -38,23 +45,8 @@ export function AtividadeEstudante() {
   const [acertos, setAcertos] = useState(0);
   const [terminou, setTerminou] = useState(false);
 
-  if (!valida) {
-    return (
-      <div className="atividade">
-        <Aviso tipo="atencao" titulo="Esta atividade não está disponível">
-          <p>
-            O link pode ter sido revogado pelo professor, ou o código pode estar digitado errado.
-          </p>
-          <p>Peça um link novo ao seu professor.</p>
-        </Aviso>
-        <p>
-          <Link to="/">Ir para a página inicial do Entende+</Link>
-        </p>
-      </div>
-    );
-  }
+  if (!valida) return <AtividadeIndisponivel />;
 
-  const { questoes } = adaptacao(material.id);
   const questao = questoes[indice];
   const ultima = indice === questoes.length - 1;
 
@@ -100,6 +92,9 @@ export function AtividadeEstudante() {
           <p>Você pode responder de novo quantas vezes quiser.</p>
           <div className="linha" style={{ marginTop: 'var(--e5)' }}>
             <Botao onClick={recomecar}>Responder de novo</Botao>
+            <Botao como="link" para={`/atividade/${codigo}`} variante="secundario">
+              Voltar para a escolha
+            </Botao>
           </div>
         </Cartao>
         <p className="campo__dica" style={{ marginTop: 'var(--e4)' }}>
@@ -118,10 +113,7 @@ export function AtividadeEstudante() {
           erro seria justamente quem usa leitor de tela, porque este título é
           `apenas-leitor`. As telas do professor já tratam esse descompasso com
           o AvisoConteudoDemo; esta era a única que não tratava. */}
-      <h1 className="apenas-leitor">
-        Atividade sobre{' '}
-        {material.conteudoProprio ? (material.disciplina ?? 'o material da aula') : 'Ciências'}
-      </h1>
+      <h1 className="apenas-leitor">Atividade sobre {assuntoDaAtividade(material)}</h1>
 
       <p className="atividade__contador">
         Pergunta {indice + 1} de {questoes.length}
@@ -188,6 +180,10 @@ export function AtividadeEstudante() {
           </Botao>
         </div>
       )}
+
+      <p className="campo__dica atividade__troca">
+        Prefere com jogo? <Link to={`/atividade/${codigo}/jogo`}>Jogar estas perguntas</Link>.
+      </p>
     </div>
   );
 }

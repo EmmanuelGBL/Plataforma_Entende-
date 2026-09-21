@@ -87,6 +87,64 @@
 .folha__identificacao dt { font-weight: 600; }
 .folha__identificacao dd { margin: 0; }
 
+/* --- Folha de questões (RF23) -------------------------------------------
+   Mesmos parâmetros de RNF02 e RNF05 da folha do material: o que muda é o
+   conteúdo, não a conformidade. A questão inteira nunca se parte entre duas
+   páginas — enunciado numa folha e alternativas na seguinte obriga a criança
+   a virar o papel para trás e para a frente enquanto responde.              */
+
+/* O seletor repete `.folha` de propósito: a regra `.folha p { margin: 0 }` lá
+   em cima tem especificidade (0,1,1), e uma classe sozinha (0,1,0) perde dela
+   mesmo vindo depois no arquivo. Vale para toda margem declarada por classe
+   nesta folha. */
+.folha .folha__instrucao { font-weight: 600; margin-bottom: 1.5em; }
+
+.folha__questoes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: questao;
+}
+
+.folha__questao {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-top: 1.75em;
+  padding-top: 1em;
+  border-top: 0.75pt solid #999999;
+}
+.folha__questao:first-child { margin-top: 0; }
+
+.folha .folha__enunciado {
+  font-weight: 600;
+  margin-bottom: 0.9em;
+}
+.folha__enunciado::before {
+  counter-increment: questao;
+  content: counter(questao) '. ';
+}
+
+.folha__alternativas { list-style: none; padding: 0; margin: 0; }
+.folha__alternativas li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  margin: 0 0 0.6em;
+  line-height: 1.5;
+}
+
+/* Quadrado de marcar. Desenhado com borda, e não com o caractere ☐: o
+   caractere depende de a fonte da máquina tê-lo, e some em impressora que cai
+   para uma fonte de reserva. */
+.folha__caixa {
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
+  margin-top: 0.28em;
+  border: 1pt solid #000000;
+}
+.folha__letra { flex: none; font-weight: 600; }
+
 .folha__ficha {
   break-before: page;
   page-break-before: always;
@@ -103,7 +161,10 @@
 }
 .folha__ficha thead th { background: #eeeeee; }
 
-.folha__rodape {
+/* `.folha` repetido pelo mesmo motivo explicado na folha de questões: sem
+   isso, `.folha p { margin: 0 }` zerava este afastamento e o rodapé colava no
+   último parágrafo do material. */
+.folha .folha__rodape {
   margin-top: 3em;
   padding-top: 0.75em;
   border-top: 0.75pt solid #666666;

@@ -11,19 +11,47 @@ Orientação: Profa. Msc. Luana Leal.
 
 ## O que este repositório é, e o que não é
 
-**É** o front-end: dez telas, o design system, a folha de impressão que gera o PDF do material
-adaptado, e as decisões de acessibilidade que sustentam o trabalho.
+**É** o front-end: as telas do professor e do estudante, o design system, as folhas de impressão
+que geram os PDFs, a atividade gamificada e as decisões de acessibilidade que sustentam o trabalho.
 
 **Não é** o sistema funcionando. Não existem aqui motor de adaptação, chamada a modelo de
 linguagem, banco de dados nem autenticação real. Os textos, as métricas de legibilidade e as
 questões da atividade são **dados fixos**, escritos pela dupla, e estão em
 `src/dados/conteudo.js`.
 
-A exceção é a **exportação em PDF**, que funciona de verdade: a folha é formatada por
-`@media print` e o arquivo sai pela função de impressão do navegador, com texto selecionável.
+As exceções são a **exportação em PDF**, que funciona de verdade — a folha é formatada por
+`@media print` e o arquivo sai pela função de impressão do navegador, com texto selecionável —, e a
+**atividade gamificada**, que é jogável do começo ao fim.
 
 O texto didático da demonstração foi redigido por nós no estilo de um material de Ciências do
 5º ano — não é material de terceiros.
+
+## A atividade, em três formas
+
+A mesma atividade, com as mesmas questões, por três caminhos. Quem escolhe entre os dois primeiros
+é a criança, ao abrir o link; o terceiro é do professor.
+
+| Forma | O que é |
+| --- | --- |
+| **Jogo** | Treino de pênalti (ou de pontaria, no tema neutro). A criança escolhe onde mirar, responde e vê o resultado. |
+| **Lista de perguntas** | Uma questão por vez, sem cena e sem desenho. |
+| **Folha impressa** | PDF das questões, com gabarito opcional em página separada. |
+
+O desenho do jogo segue catorze regras derivadas de diretrizes publicadas para o perfil TEA. As que
+mais o definem:
+
+- **Estrutura de turno sempre igual**, e nenhum cronômetro ou elemento que comunique urgência.
+- **Erro gera dica e nova tentativa, nunca perda.** A contagem registra acerto e não registra erro.
+- **A dica está disponível antes de responder**, de graça e sem ser contabilizada — é aprendizagem
+  sem erro, não prêmio de consolação.
+- **Tema é preferência, com opção neutra como padrão**; futebol é escolha, não imposição.
+- **Estilo plano e caricato, não fotorrealista**, e paleta de tom frio com um único acento quente
+  fora do centro visual — as duas coisas por recomendação medida, não por gosto.
+
+Cada regra tem a diretriz de origem declarada na documentação do TCC.
+
+O que se afirma com isso é sobre o **desenho**, não sobre o **efeito**: não há base na literatura
+para dizer que a mecânica melhora a aprendizagem de criança autista, e o trabalho não diz.
 
 ## Rodar
 
@@ -45,12 +73,16 @@ A pasta `dist/` **não** abre por duplo clique: o navegador bloqueia `<script ty
 Alvo: **WCAG 2.2 nível AA** e **e-MAG 3.1**. Três critérios AAA foram adotados por serem o
 objeto do trabalho.
 
-Auditoria executada em 11/09/2026 com axe-core 4.10.2 nas dez rotas, mais medição de reflow em
-viewport de 320 px e percurso por teclado. **Quatro violações encontradas, todas corrigidas; as
-dez rotas fecham com zero violação.** O relatório, com o antes e o depois de cada achado e os
-dados brutos, está na pasta de documentação do TCC.
+Auditoria executada em 11/09/2026 com axe-core 4.10.2 nas dez rotas então existentes, mais medição
+de reflow em viewport de 320 px e percurso por teclado. **Quatro violações encontradas, todas
+corrigidas; as dez rotas fecham com zero violação.** O relatório, com o antes e o depois de cada
+achado e os dados brutos, está na pasta de documentação do TCC.
 
-Pendentes e declarados: validação pelo ASES, que exige endereço público, e leitura com NVDA.
+Pendentes e declarados: validação pelo ASES, que exige endereço público; leitura com NVDA; e
+**repetir a auditoria automática sobre as três rotas acrescentadas em 20/09** (escolha da forma,
+jogo e folha de questões), que ainda não passaram pelo axe-core. Na cena do jogo, o SVG é
+`aria-hidden` e tudo que acontece nele é dito em texto e anunciado na região de status — mas isso é
+decisão de projeto, não resultado de medição, e a diferença fica registrada.
 
 O sistema tem painel de preferências de exibição em todas as telas — tamanho do texto,
 espaçamento, alto contraste e redução de movimento —, e as escolhas ficam gravadas entre sessões.

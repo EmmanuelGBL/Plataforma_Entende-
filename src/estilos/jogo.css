@@ -1,0 +1,514 @@
+/* =========================================================================
+   Entende+ — atividade gamificada (RF21, RN11)
+
+   Três coisas valem para o arquivo inteiro:
+
+   · **Nenhum estado é comunicado só por cor** (SC 1.4.1). Acerto e erro têm
+     sempre texto e símbolo junto da cor. Na cena, a posição da bola e a do
+     goleiro contam a história, e o texto ao lado conta a mesma história por
+     escrito.
+
+   · **A paleta é decisão de pesquisa, não de gosto** (RN11/G12). Tom frio, alta
+     luminosidade e alta saturação são o que atrai a atenção da criança autista,
+     na proporção aproximada de 7 frias para 3 quentes, com o acento saturado
+     fora do centro visual. Daí: campo verde, uniforme no teal da marca, e o
+     único quente da cena nas luvas do goleiro. **Amarelo não entra** — é a cor
+     mais rejeitada por essa população, atribuída a sobrecarga sensorial. Ele
+     aparece só no modo de alto contraste, que é o esquema do e-MAG e é escolha
+     explícita de quem liga.
+
+   · **Todo movimento é `transition` ou `animation` curta.** A raiz do documento
+     zera as duas quando a preferência de movimento está em "reduzido" ou quando
+     o sistema operacional pede movimento reduzido (ver base.css). Assim o jogo
+     obedece a G09 e ao SC 2.3.3 sem ter uma linha de código sobre o assunto:
+     com movimento reduzido, a bola simplesmente aparece no destino e o goleiro
+     para de balançar.
+   ========================================================================= */
+
+.jogo {
+  /* --- Frios: 7 partes ------------------------------------------------- */
+  --jogo-ceu: #e4f2f5;
+  --jogo-gramado: #2f8f5c;
+  --jogo-gramado-linha: rgba(255, 255, 255, 0.85);
+  --jogo-rede-painel: #2a6570;
+  --jogo-rede-lado: #1f4f59;
+  --jogo-rede-topo: #1a444d;
+  --jogo-malha: rgba(255, 255, 255, 0.42);
+  --jogo-trave: #ffffff;
+  --jogo-camisa: #0e7c86;
+  --jogo-camisa-escura: #0b5f67;
+  --jogo-calcado: #10323a;
+  --jogo-alvo: #8fe6da; /* alto brilho e alta saturação: é o que a criança procura */
+
+  /* --- Quentes: 3 partes, e só onde são funcionais --------------------- */
+  --jogo-luva: #e0912b; /* nas mãos, fora do centro visual */
+  --jogo-pele: #e8b58c;
+  --jogo-cabelo: #3a2a20;
+}
+
+.jogo__topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e3);
+  flex-wrap: wrap;
+}
+
+.jogo__placar {
+  margin: 0 0 var(--e3);
+  font-size: 1.125rem;
+  color: var(--cor-teal-escuro);
+}
+.jogo__placar strong { font-size: 1.5rem; }
+
+/* --- Trilha de progresso -------------------------------------------------
+   O mesmo progresso que o texto "Cobrança 2 de 5" já dá, em forma não textual
+   (RN11/G14). Saber quanto falta antes de começar é a própria TEA-09 do
+   conjunto de regras — antecipação da estrutura reduz a ansiedade diante do
+   imprevisto — e uma instrução que não depende de leitura alcança também quem
+   está cansado de ler, que é metade do público desta tela.
+
+   A trilha mostra acerto e pendência. NÃO mostra erro: cobrança que ficou para
+   depois aparece igual à que ainda não chegou (G05).                        */
+.jogo__trilha {
+  display: flex;
+  gap: var(--e2);
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--e4);
+}
+.jogo__trilha li {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid var(--cor-borda-forte);
+  background: var(--cor-superficie);
+}
+.jogo__trilha li[data-estado='feita'] {
+  background: var(--cor-teal);
+  border-color: var(--cor-teal-escuro);
+}
+/* A atual ganha anel externo, e não só outra cor: estado nunca por cor só. */
+.jogo__trilha li[data-estado='atual'] {
+  border-color: var(--cor-teal-escuro);
+  box-shadow: 0 0 0 3px var(--cor-info-fundo);
+}
+
+/* --- Ajustes do jogo ----------------------------------------------------- */
+.jogo__ajustes { margin-bottom: var(--e4); }
+
+.jogo__ajustes-gatilho {
+  min-height: var(--alvo-minimo);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  padding: var(--e2) var(--e3);
+  border: 2px solid var(--cor-borda-forte);
+  border-radius: var(--raio);
+  background: var(--cor-superficie);
+  cursor: pointer;
+  font-weight: 600;
+}
+.jogo__ajustes-gatilho:hover { background: var(--cor-superficie-alt); }
+
+/* Os grupos moram dentro do diálogo, então não carregam borda nem fundo
+   próprios: a moldura é a do diálogo. */
+.jogo__ajustes-grupos { margin-top: var(--e4); }
+.jogo__ajustes-grupos fieldset { border: none; padding: 0; margin: 0 0 var(--e4); }
+.jogo__ajustes-grupos legend { padding: 0; margin-bottom: var(--e2); font-size: 0.9375rem; }
+
+/* --- A cena --------------------------------------------------------------
+   Proporção fixa para a cena não pular de altura entre uma fase e outra do
+   turno: a tela mudar de tamanho sozinha quando a pergunta aparece seria o
+   oposto da previsibilidade que o resto do desenho persegue (G01).          */
+.jogo__cena {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  margin-bottom: var(--e5);
+  border: 2px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  background: var(--jogo-ceu);
+  overflow: hidden;
+}
+.jogo__cena svg { width: 100%; height: 100%; display: block; }
+
+/* --- Aviso no meio da cena ----------------------------------------------
+   O que aconteceu aparece onde aconteceu, com a saída junto. Antes o
+   resultado do erro ficava num aviso abaixo da lista de alternativas: a
+   criança via a bola sair e tinha de procurar o texto no rodapé para saber o
+   que fazer.
+
+   O véu escuro por trás existe para o texto ter contraste sobre qualquer
+   parte da cena — rede escura, grama verde ou céu claro. Sem ele, a mesma
+   caixa branca reprovaria em SC 1.4.3 dependendo de onde a bola parou.       */
+.jogo__aviso-cena {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--e3);
+  background: rgba(16, 50, 58, 0.55);
+}
+
+.jogo__aviso-caixa {
+  max-width: 26rem;
+  text-align: center;
+  padding: var(--e4) var(--e5);
+  border: 3px solid var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-alta);
+}
+
+/* O erro é vermelho, e isso não contradiz o desenho do jogo.
+   O que as diretrizes para TEA mandam evitar é **punição** — perder ponto,
+   acumular contador de erro, ser comparado com os outros. Nada disso acontece
+   aqui. Dizer com clareza que a resposta não foi aquela é informação, e negar
+   essa informação para "não desanimar" seria condescendência, não
+   acessibilidade.
+
+   Vale ainda a consistência (H4): a lista de perguntas e a própria tela do
+   professor já marcam erro com `--cor-erro`. O jogo tinha inventado um cartão
+   neutro, e a criança que passa de uma tela para a outra encontrava dois
+   vocabulários visuais para a mesma coisa.
+
+   `--cor-erro` é #a3161d, 7,07:1 sobre branco — acima do exigido tanto para
+   texto quanto para elemento gráfico.                                       */
+.jogo__aviso-caixa--erro {
+  border-color: var(--cor-erro);
+  border-top-width: 8px;
+}
+.jogo__aviso-caixa--erro .jogo__aviso-titulo { color: var(--cor-erro); }
+.jogo__aviso-caixa--erro .jogo__aviso-icone { background: var(--cor-erro); }
+
+/* O acerto tem o mesmo cartão, em verde. Mesma estrutura, mesma posição,
+   mesmo lugar do botão: a criança encontra a saída no mesmo ponto da tela
+   tenha acertado ou não, que é o que G01 pede.
+
+   `--cor-sucesso` é #1a6b3c, 5,86:1 sobre branco.                            */
+.jogo__aviso-caixa--acerto {
+  border-color: var(--cor-sucesso);
+  border-top-width: 8px;
+}
+.jogo__aviso-caixa--acerto .jogo__aviso-titulo { color: var(--cor-sucesso); }
+.jogo__aviso-caixa--acerto .jogo__aviso-icone { background: var(--cor-sucesso); }
+
+/* Entrada do cartão: 260 ms, uma vez, sem piscar. O tempo que ele espera para
+   entrar está em `esperaDoAviso`, no AtividadeJogo.jsx — no gol ele entra
+   depois da bola chegar na rede, para não tapar a comemoração. */
+.jogo__aviso-caixa { animation: jogo-aviso-entra 260ms ease-out 1 both; }
+@keyframes jogo-aviso-entra {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.jogo__aviso-icone { animation: jogo-icone-entra 420ms cubic-bezier(0.2, 1.4, 0.4, 1) 1 both; }
+@keyframes jogo-icone-entra {
+  from { transform: scale(0.2); }
+  to   { transform: scale(1); }
+}
+
+.jogo__aviso-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: var(--e3);
+  border-radius: 50%;
+  background: var(--cor-erro);
+  color: #ffffff;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.jogo__aviso-titulo {
+  margin: 0 0 var(--e2);
+  max-width: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--cor-texto);
+}
+.jogo__aviso-texto {
+  margin: 0;
+  max-width: none;
+  color: var(--cor-texto-apoio);
+}
+.jogo__aviso-acoes {
+  margin-top: var(--e4);
+  display: flex;
+  gap: var(--e2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Em tela estreita e com o corpo do texto aumentado, a caixa não cabe nos
+   16/9 da cena. Deixar a cena crescer seria mudar a altura da tela no meio do
+   turno — o oposto de G01 —, então quem cresce é a caixa, que passa a rolar
+   dentro do quadro. */
+@media (max-width: 30rem) {
+  .jogo__aviso-cena { overflow-y: auto; align-content: center; }
+  .jogo__aviso-caixa { padding: var(--e3); }
+  .jogo__aviso-titulo { font-size: 1.25rem; }
+}
+
+/* --- Cenário ------------------------------------------------------------- */
+.jogo__ceu { fill: var(--jogo-ceu); }
+.jogo__gramado { fill: var(--jogo-gramado); }
+
+.jogo__rede-fundo { fill: var(--jogo-rede-painel); }
+.jogo__rede-lateral { fill: var(--jogo-rede-lado); }
+.jogo__rede-topo { fill: var(--jogo-rede-topo); }
+
+/* A malha é fina e de baixo contraste de propósito: ela precisa dizer "isto é
+   uma rede" e não pode competir com a bola nem com a marca de mira (G10). */
+.jogo__malha {
+  stroke: var(--jogo-malha);
+  stroke-width: 0.8;
+}
+
+.jogo__linha-campo {
+  fill: none;
+  stroke: var(--jogo-gramado-linha);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.jogo__trave {
+  fill: none;
+  stroke: var(--jogo-trave);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.jogo__marca-penalti { fill: var(--jogo-gramado-linha); }
+
+/* Alvos do tema neutro */
+.jogo__lugar {
+  fill: none;
+  stroke: var(--jogo-alvo);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 6;
+  opacity: 0.75;
+}
+.jogo__lugar-centro { fill: var(--jogo-alvo); opacity: 0.35; }
+
+/* --- Marca de mira -------------------------------------------------------
+   O elemento mais brilhante e mais saturado da cena, e no lugar exato onde a
+   criança precisa olhar. É a aplicação direta de G12.                       */
+.jogo__mira circle {
+  fill: none;
+  stroke: var(--jogo-alvo);
+  stroke-width: 3.5;
+}
+.jogo__mira path {
+  stroke: var(--jogo-alvo);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/* --- Goleiro ------------------------------------------------------------- */
+.jogo__guardiao { transition: transform 400ms ease-out; }
+
+/* A espera tem vida e não tem pressa: balanço lento, sem começo nem fim
+   marcados, que nada tem de cronômetro. Ver a regra 4 em CenaJogo.jsx. */
+.jogo__guardiao-espera {
+  animation: jogo-espera 3400ms ease-in-out infinite alternate;
+}
+@keyframes jogo-espera {
+  from { transform: translateX(-1.6px); }
+  to   { transform: translateX(1.6px); }
+}
+
+.jogo-g__camisa { fill: var(--jogo-camisa); }
+.jogo-g__camisa-faixa { fill: var(--jogo-camisa-escura); }
+.jogo-g__camisa-gola { fill: var(--jogo-camisa-escura); }
+.jogo-g__sombra { fill: rgba(16, 50, 58, 0.22); }
+.jogo-g__calcao { fill: var(--jogo-camisa-escura); }
+.jogo-g__meiao { fill: var(--jogo-camisa); }
+.jogo-g__calcado { fill: var(--jogo-calcado); }
+.jogo-g__pele { fill: var(--jogo-pele); }
+.jogo-g__cabelo { fill: var(--jogo-cabelo); }
+.jogo-g__olho { fill: var(--jogo-calcado); }
+.jogo-g__luva { fill: var(--jogo-luva); }
+.jogo-g__manga {
+  fill: none;
+  stroke: var(--jogo-camisa);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.jogo-g__pele-traco {
+  fill: none;
+  stroke: var(--jogo-pele);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+/* --- Bola ---------------------------------------------------------------- */
+.jogo__movel { transition: transform 540ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+
+/* O couro NÃO leva `fill` aqui: ele vem do gradiente declarado no próprio SVG,
+   e regra CSS, mesmo de classe simples, vence atributo de apresentação — uma
+   linha `fill` nesta classe apagaria o brilho da esfera. O alto contraste
+   sobrescreve de propósito, mais abaixo.
+
+   As espessuras estão multiplicadas por ~2,2 porque a bola é desenhada com
+   raio 20 e reduzida por `scale(0.45)`: o traço encolhe junto. */
+.jogo-b__gomo { fill: var(--jogo-calcado); }
+.jogo-b__costura {
+  stroke: var(--jogo-calcado);
+  stroke-width: 2;
+  opacity: 0.5;
+}
+.jogo-b__contorno {
+  fill: none;
+  stroke: var(--jogo-calcado);
+  stroke-width: 3;
+}
+
+/* --- Balanço da rede no gol ---------------------------------------------
+   Reconhecimento visual do acerto: curto, silencioso, sem piscar e sem
+   estourar na tela. Vem LIGADO por padrão, e o porquê está em G08 — criança
+   autista responde melhor a recompensa em forma de animação que a contador
+   numérico, e até esta versão o jogo só oferecia o contador. O que segue
+   desligado por padrão é o som e o efeito intenso.
+
+   Nada aqui pisca mais de três vezes por segundo (SC 2.3.1).               */
+.jogo__balanco circle {
+  fill: none;
+  stroke: var(--jogo-alvo);
+  stroke-width: 2.5;
+  /* O atraso é o tempo de voo da bola: a rede não pode balançar antes de a
+     bola chegar nela. Estava começando junto com o chute. */
+  animation: jogo-balanco 620ms ease-out 520ms 1 both;
+}
+.jogo__balanco circle:last-child { animation-delay: 630ms; }
+@keyframes jogo-balanco {
+  from { opacity: 0.9; transform: scale(0.35); }
+  to   { opacity: 0; transform: scale(1.35); }
+}
+
+/* --- Escolher o canto ---------------------------------------------------- */
+.jogo__passo {
+  font-size: 1.25rem;
+  margin-bottom: var(--e4);
+}
+
+.jogo__cantos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+  gap: var(--e3);
+  list-style: none;
+  padding: 0;
+}
+.jogo__canto {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: var(--e3) var(--e4);
+  border: 3px solid var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.jogo__canto:hover { border-color: var(--cor-teal); background: var(--cor-info-fundo); }
+
+.jogo__mirou {
+  margin-bottom: var(--e4);
+  color: var(--cor-texto-apoio);
+}
+
+/* Alternativa desabilitada enquanto o resultado está na tela. O fundo apagado
+   diz que clicar agora não faz nada.
+
+   Fundo apagado, e não `opacity`: opacidade sobre o texto derruba a relação de
+   contraste do rótulo, e não é aceitável numa tela deste projeto. O contraste
+   do texto fica intacto; o que muda é a superfície atrás dele.              */
+.jogo .atividade__opcao:disabled:not(.atividade__opcao--certa):not(.atividade__opcao--errada) {
+  background: var(--cor-superficie-alt);
+  border-color: var(--cor-borda);
+}
+
+/* --- Dica ---------------------------------------------------------------- */
+.jogo__dica {
+  margin-top: var(--e4);
+  padding: var(--e4);
+  border: 2px dashed var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+  background: var(--cor-superficie);
+}
+.jogo__dica h3 { margin-bottom: var(--e2); }
+
+/* Pedir a dica ANTES de responder é o caminho principal, não um último
+   recurso — ver G11. Por isso o botão fica junto da pergunta, e não escondido
+   no rodapé. */
+.jogo__pedir-dica { margin-bottom: var(--e4); }
+
+.jogo__resumo { font-size: 1.25rem; }
+
+/* --- Alto contraste ------------------------------------------------------
+   O esquema preto/amarelo do e-MAG substitui a paleta inteira. Aqui o amarelo
+   é correto: quem liga o alto contraste está pedindo o esquema do governo
+   federal, e a recomendação de evitar amarelo vale para a paleta padrão, que é
+   a que a criança encontra sem pedir nada.                                  */
+:root[data-contraste='alto'] .jogo {
+  --jogo-ceu: #000000;
+  --jogo-gramado: #000000;
+  --jogo-gramado-linha: #ffffff;
+  --jogo-rede-painel: #000000;
+  --jogo-rede-lado: #000000;
+  --jogo-rede-topo: #000000;
+  --jogo-malha: rgba(255, 255, 255, 0.5);
+  --jogo-trave: #ffffff;
+  --jogo-camisa: #000000;
+  --jogo-camisa-escura: #000000;
+  --jogo-calcado: #000000;
+  --jogo-alvo: #ffe600;
+  --jogo-luva: #ffe600;
+  --jogo-pele: #000000;
+  --jogo-cabelo: #ffffff;
+}
+:root[data-contraste='alto'] .jogo__cena { border-color: #ffffff; }
+/* No esquema preto/amarelo não existe vermelho utilizável: `--cor-erro` vira
+   um rosa claro que não se distingue do branco no traço. O erro passa a ser
+   dito pela borda grossa e pelo símbolo, que é o que o e-MAG espera. */
+:root[data-contraste='alto'] .jogo__aviso-caixa--erro { border-color: #ff8f8f; }
+:root[data-contraste='alto'] .jogo__aviso-caixa--erro .jogo__aviso-titulo { color: #ff8f8f; }
+:root[data-contraste='alto'] .jogo__aviso-caixa--acerto { border-color: #6cf58f; }
+:root[data-contraste='alto'] .jogo__aviso-caixa--acerto .jogo__aviso-titulo { color: #6cf58f; }
+:root[data-contraste='alto'] .jogo__aviso-icone { background: #000000; }
+:root[data-contraste='alto'] .jogo__aviso-caixa--erro .jogo__aviso-icone {
+  background: #000000;
+  color: #ff8f8f;
+  box-shadow: inset 0 0 0 2px #ff8f8f;
+}
+:root[data-contraste='alto'] .jogo__aviso-caixa--acerto .jogo__aviso-icone {
+  background: #000000;
+  color: #6cf58f;
+  box-shadow: inset 0 0 0 2px #6cf58f;
+}
+/* No alto contraste o goleiro vira contorno: preenchimento preto sobre fundo
+   preto precisa de traço branco, senão o boneco desaparece. */
+:root[data-contraste='alto'] .jogo-g__camisa,
+:root[data-contraste='alto'] .jogo-g__camisa-faixa,
+:root[data-contraste='alto'] .jogo-g__camisa-gola,
+:root[data-contraste='alto'] .jogo-g__calcao,
+:root[data-contraste='alto'] .jogo-g__meiao,
+:root[data-contraste='alto'] .jogo-g__calcado,
+:root[data-contraste='alto'] .jogo-g__pele,
+:root[data-contraste='alto'] .jogo-g__cabelo,
+:root[data-contraste='alto'] .jogo-g__luva { stroke: #ffffff; stroke-width: 1.5; }
+:root[data-contraste='alto'] .jogo-g__olho { fill: #ffffff; }
+:root[data-contraste='alto'] .jogo-b__couro { fill: #000000; }
+:root[data-contraste='alto'] .jogo-b__gomo { fill: #ffffff; }
+:root[data-contraste='alto'] .jogo-b__costura { stroke: #ffffff; opacity: 1; }
+:root[data-contraste='alto'] .jogo-b__contorno { stroke: #ffffff; }
+:root[data-contraste='alto'] .jogo__trilha li { background: #000000; border-color: #ffffff; }
+:root[data-contraste='alto'] .jogo__trilha li[data-estado='feita'] { background: #ffe600; }
+:root[data-contraste='alto'] .jogo__canto,
+:root[data-contraste='alto'] .jogo__ajustes-gatilho,
+:root[data-contraste='alto'] .jogo__dica { background: #000000; border-color: #ffffff; }
