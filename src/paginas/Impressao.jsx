@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Aviso, Botao } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
-import { usarApp } from '../contextos/Aplicacao.jsx';
-import { CONJUNTO_REGRAS, REGRAS } from '../dados/conteudo.js';
+import { usarAdaptacao, usarApp } from '../contextos/Aplicacao.jsx';
 import '../estilos/impressao.css';
 
 /* =========================================================================
@@ -30,7 +29,8 @@ import '../estilos/impressao.css';
 
 export function Impressao() {
   const { id } = useParams();
-  const { material, adaptacao } = usarApp();
+  const { material } = usarApp();
+  const { dados: adaptacao, carregando } = usarAdaptacao(id);
   const dados = material(id);
   const [comFicha, setComFicha] = useState(false);
 
@@ -49,9 +49,19 @@ export function Impressao() {
     );
   }
 
-  const { blocos } = adaptacao(id);
-  const regrasUsadas = REGRAS.filter((regra) =>
-    blocos.some((bloco) => bloco.regra === regra.codigo),
+  if (!adaptacao) {
+    return (
+      <main className="conteudo">
+        <p role="status" className="campo__dica">
+          {carregando ? 'Carregando o material…' : 'Este material ainda não foi adaptado.'}
+        </p>
+      </main>
+    );
+  }
+
+  const { blocos, conjunto } = adaptacao;
+  const regrasUsadas = adaptacao.regras.filter((regra) =>
+    blocos.some((bloco) => (bloco.regras ?? [bloco.regra]).includes(regra.codigo)),
   );
 
   return (
@@ -117,11 +127,11 @@ export function Impressao() {
           </dl>
         </div>
 
-        {blocos.map((bloco) => (
-          <section key={bloco.titulo}>
-            <h2>{bloco.titulo}</h2>
-            {bloco.paragrafos.map((paragrafo) => (
-              <p key={paragrafo.slice(0, 40)} style={{ whiteSpace: 'pre-line' }}>
+        {blocos.map((bloco, indice) => (
+          <section key={indice}>
+            {bloco.titulo && <h2>{bloco.titulo}</h2>}
+            {bloco.paragrafos.map((paragrafo, posicao) => (
+              <p key={posicao} style={{ whiteSpace: 'pre-line' }}>
                 {paragrafo}
               </p>
             ))}
@@ -133,7 +143,7 @@ export function Impressao() {
           altera a forma do texto; nenhum conceito foi acrescentado ou retirado. A revisão e a
           aprovação pedagógica são do professor responsável.
           <br />
-          Conjunto de regras {dados.versaoRegras}, publicado em {CONJUNTO_REGRAS.publicadoEm}.
+          Conjunto de regras {dados.versaoRegras}, publicado em {conjunto.publicadoEm}.
         </p>
 
         {comFicha && (

@@ -1,5 +1,4 @@
 import { Etiqueta, TabelaEnvolvente } from './basicos.jsx';
-import { REGRAS, TEXTO_ORIGINAL } from '../dados/conteudo.js';
 
 /* =========================================================================
    Comparação original × adaptado (RF08) e quadro de métricas (RF07).
@@ -13,7 +12,7 @@ import { REGRAS, TEXTO_ORIGINAL } from '../dados/conteudo.js';
  * não só nos números. Está registrado no documento para não parecer descuido
  * numa auditoria.
  */
-export function ComparadorTextos({ blocos, acaoAdaptado }) {
+export function ComparadorTextos({ original, blocos, regras, acaoAdaptado }) {
   return (
     <div className="comparador">
       <article className="painel-texto" aria-labelledby="titulo-original">
@@ -30,9 +29,20 @@ export function ComparadorTextos({ blocos, acaoAdaptado }) {
           role="region"
           aria-labelledby="titulo-original"
         >
-          {TEXTO_ORIGINAL.map((paragrafo) => (
-            <p key={paragrafo.slice(0, 40)}>{paragrafo}</p>
-          ))}
+          {/* Títulos do original vão em negrito, e não como cabeçalho: o
+              painel mostra o material como chegou, e cabeçalho aqui entraria
+              na estrutura de títulos da página (SC 1.3.1). */}
+          {original.map((trecho, indice) =>
+            trecho.tipo === 'titulo' ? (
+              <p key={indice}>
+                <strong>{trecho.texto}</strong>
+              </p>
+            ) : (
+              <p key={indice} style={{ whiteSpace: 'pre-line' }}>
+                {trecho.tipo === 'item' ? `• ${trecho.texto}` : trecho.texto}
+              </p>
+            ),
+          )}
         </div>
       </article>
 
@@ -57,23 +67,32 @@ export function ComparadorTextos({ blocos, acaoAdaptado }) {
           role="region"
           aria-labelledby="titulo-adaptado"
         >
-          {blocos.map((bloco) => {
-            const regra = REGRAS.find((r) => r.codigo === bloco.regra);
+          {blocos.map((bloco, indice) => {
+            const aplicadas = (bloco.regras ?? [bloco.regra])
+              .map((codigo) => regras.find((r) => r.codigo === codigo))
+              .filter(Boolean);
             return (
-              <section key={bloco.titulo}>
-                <h4>{bloco.titulo}</h4>
+              <section key={indice}>
+                {bloco.titulo && <h4>{bloco.titulo}</h4>}
                 {/* A etiqueta vem logo abaixo do subtítulo, e não no fim do
                     bloco: no fim, ela ficava colada no subtítulo seguinte e
                     parecia rotular o bloco errado. */}
-                {regra && (
+                {aplicadas.length > 0 && (
                   <p className="campo__dica">
-                    <span className="marca-regra" title={regra.descricao}>
-                      {regra.codigo} — {regra.nome}
-                    </span>
+                    {aplicadas.map((regra) => (
+                      <span
+                        key={regra.codigo}
+                        className="marca-regra"
+                        title={regra.descricao}
+                        style={{ marginRight: 'var(--e2)' }}
+                      >
+                        {regra.codigo} — {regra.nome}
+                      </span>
+                    ))}
                   </p>
                 )}
-                {bloco.paragrafos.map((paragrafo) => (
-                  <p key={paragrafo.slice(0, 40)} style={{ whiteSpace: 'pre-line' }}>
+                {bloco.paragrafos.map((paragrafo, posicao) => (
+                  <p key={posicao} style={{ whiteSpace: 'pre-line' }}>
                     {paragrafo}
                   </p>
                 ))}
@@ -94,6 +113,13 @@ export function ComparadorTextos({ blocos, acaoAdaptado }) {
  * / "atenção"), não só cor, senão a informação sumiria em escala de cinza ou
  * para quem não distingue as cores (SC 1.4.1).
  */
+const SITUACOES = {
+  melhora: { tom: 'boa', rotulo: 'melhorou' },
+  piora: { tom: 'atencao', rotulo: 'piorou' },
+  igual: { tom: 'neutra', rotulo: 'sem mudança' },
+  atencao: { tom: 'atencao', rotulo: 'atenção' },
+};
+
 export function TabelaMetricas({ metricas }) {
   return (
     <section className="cartao" aria-labelledby="titulo-metricas">
@@ -129,11 +155,9 @@ export function TabelaMetricas({ metricas }) {
                 <td className="numero">{metrica.original}</td>
                 <td className="numero">{metrica.adaptado}</td>
                 <td>
-                  {metrica.situacao === 'melhora' ? (
-                    <Etiqueta tom="boa">melhorou</Etiqueta>
-                  ) : (
-                    <Etiqueta tom="atencao">atenção</Etiqueta>
-                  )}
+                  <Etiqueta tom={SITUACOES[metrica.situacao]?.tom ?? 'atencao'}>
+                    {SITUACOES[metrica.situacao]?.rotulo ?? 'atenção'}
+                  </Etiqueta>
                 </td>
               </tr>
             ))}

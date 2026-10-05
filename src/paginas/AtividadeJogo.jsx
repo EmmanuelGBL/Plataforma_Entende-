@@ -233,6 +233,12 @@ function esperaDoAviso(resultado) {
   return resultado === 'acerto' ? 1150 : 950;
 }
 
+/** A dica escrita para a questão, quando existe (questões do servidor); senão,
+ *  o trecho de origem, que é o que a demonstração tem. */
+function textoDaDica(questao) {
+  return questao.dica ? `Dica: ${questao.dica}` : `Dica: a resposta está no trecho ${questao.trecho}.`;
+}
+
 export function AtividadeJogo() {
   const { codigo } = useParams();
   const { material, valida, questoes } = usarAtividadeDoCodigo(codigo);
@@ -305,7 +311,7 @@ export function AtividadeJogo() {
 
   function pedirDica() {
     setDicasPedidas((atuais) => ({ ...atuais, [questao.id]: true }));
-    anunciar(`Dica: a resposta está no trecho ${questao.trecho}.`);
+    anunciar(textoDaDica(questao));
   }
 
   function mirar(posicao) {
@@ -572,8 +578,17 @@ export function AtividadeJogo() {
           {dicaAberta && fase === 'responder' && (
             <div className="jogo__dica" style={{ marginTop: 0, marginBottom: 'var(--e4)' }}>
               <h3>Dica</h3>
+              {/* Com questões geradas pelo servidor, a dica foi escrita para
+                  apontar onde procurar sem entregar a resposta. O trecho de
+                  origem não vai à criança: ele É a frase da resposta. */}
               <p>
-                A resposta está neste trecho do material: <strong>{questao.trecho}</strong>.
+                {questao.dica ? (
+                  questao.dica
+                ) : (
+                  <>
+                    A resposta está neste trecho do material: <strong>{questao.trecho}</strong>.
+                  </>
+                )}
               </p>
             </div>
           )}
@@ -634,11 +649,17 @@ export function AtividadeJogo() {
           <div className="jogo__dica">
             <h3>Dica</h3>
             <p>
-              A resposta está neste trecho do material: <strong>{questao.trecho}</strong>.
+              {questao.dica ? (
+                questao.dica
+              ) : (
+                <>
+                  A resposta está neste trecho do material: <strong>{questao.trecho}</strong>.
+                </>
+              )}
             </p>
             <p>
-              A pergunta e as alternativas continuam as mesmas: o que muda é você ter lido de onde a
-              resposta saiu.
+              A pergunta e as alternativas continuam as mesmas: o que muda é você ter lido onde
+              procurar a resposta.
             </p>
           </div>
         </div>

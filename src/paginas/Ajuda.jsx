@@ -1,5 +1,6 @@
 import { Cartao, Migalhas, TabelaEnvolvente } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
+import { usarCatalogo } from '../contextos/Aplicacao.jsx';
 import { CONJUNTO_REGRAS, REGRAS } from '../dados/conteudo.js';
 
 /* =========================================================================
@@ -57,6 +58,11 @@ const PERGUNTAS = [
 
 export function Ajuda() {
   usarTituloDaPagina('Ajuda');
+  // Enquanto o servidor não responde (ou se não responder), mostra a versão
+  // que acompanha a interface, em vez de uma tabela vazia.
+  const catalogo = usarCatalogo();
+  const conjunto = catalogo?.conjunto ?? CONJUNTO_REGRAS;
+  const regras = catalogo?.regras ?? REGRAS;
 
   return (
     <>
@@ -84,11 +90,11 @@ export function Ajuda() {
 
         <Cartao>
           <h2>
-            Conjunto de regras {CONJUNTO_REGRAS.identificador} v{CONJUNTO_REGRAS.versao}
+            Conjunto de regras {conjunto.identificador} v{conjunto.versao}
           </h2>
-          <p>{CONJUNTO_REGRAS.descricao}</p>
+          <p>{conjunto.descricao}</p>
           <p className="campo__dica" style={{ marginBottom: 'var(--e5)' }}>
-            Publicado em {CONJUNTO_REGRAS.publicadoEm}. Toda adaptação registra qual versão foi
+            Publicado em {conjunto.publicadoEm}. Toda adaptação registra qual versão foi
             usada, e esse registro não pode ser alterado.
           </p>
 
@@ -106,7 +112,7 @@ export function Ajuda() {
                 </tr>
               </thead>
               <tbody>
-                {REGRAS.map((regra) => (
+                {regras.map((regra) => (
                   <tr key={regra.codigo}>
                     <th scope="row" style={{ fontFamily: 'var(--fonte-mono)', whiteSpace: 'nowrap' }}>
                       {regra.codigo}

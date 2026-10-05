@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { CONJUNTO_REGRAS, REGRAS } from '../dados/conteudo.js';
 import { Etiqueta } from './basicos.jsx';
 
 /* =========================================================================
@@ -18,7 +17,10 @@ import { Etiqueta } from './basicos.jsx';
    anunciar estado e caber no mesmo padrão de foco do resto do app.
    ========================================================================= */
 
-export function PainelRegras({ destacada, aoDestacar }) {
+/** `conjunto` e `regras` são os da versão que ESTA adaptação usou — não os
+ *  do arquivo de hoje. A justificativa de RF10 tem de ser a que valia quando
+ *  o texto foi gerado. */
+export function PainelRegras({ conjunto, regras, destacada, aoDestacar }) {
   const [abertas, setAbertas] = useState(() => new Set());
 
   function alternar(codigo) {
@@ -36,13 +38,13 @@ export function PainelRegras({ destacada, aoDestacar }) {
       <h2 id="titulo-regras">Regras aplicadas</h2>
 
       <p className="campo__dica">
-        Conjunto <strong>{CONJUNTO_REGRAS.identificador} v{CONJUNTO_REGRAS.versao}</strong>,
-        publicado em {CONJUNTO_REGRAS.publicadoEm}.{' '}
+        Conjunto <strong>{conjunto.identificador} v{conjunto.versao}</strong>,
+        publicado em {conjunto.publicadoEm}.{' '}
         <span aria-hidden="true">🔒</span> Este registro não pode ser alterado.
       </p>
 
       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {REGRAS.map((regra) => {
+        {regras.map((regra) => {
           const aberta = abertas.has(regra.codigo);
           const idDetalhe = `detalhe-${regra.codigo}`;
           return (
@@ -75,7 +77,9 @@ export function PainelRegras({ destacada, aoDestacar }) {
                     <dd>{regra.justificativa}</dd>
                     <dt>Aplicações neste material</dt>
                     <dd>
-                      {regra.ocorrencias} {regra.ocorrencias === 1 ? 'trecho' : 'trechos'}
+                      {regra.aplicacao === 'apresentacao'
+                        ? 'Na formatação da folha impressa, e não no texto.'
+                        : `${regra.ocorrencias} ${regra.ocorrencias === 1 ? 'trecho' : 'trechos'}`}
                     </dd>
                   </dl>
                 </div>

@@ -3,9 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import { Aviso, AvisoConteudoDemo, Botao, Cartao, Etiqueta, Migalhas } from '../componentes/basicos.jsx';
 import { Dialogo } from '../componentes/Dialogo.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
-import { usarApp } from '../contextos/Aplicacao.jsx';
+import { usarAdaptacao, usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
-import { publicarAtividade, revogarLink } from '../servicos/api.js';
 
 /* =========================================================================
    UC13 — Gerar banco de questões (RF13)  ·  UC14 — Revisar (RF14)
@@ -20,11 +19,15 @@ import { publicarAtividade, revogarLink } from '../servicos/api.js';
 
 export function Atividade() {
   const { id } = useParams();
-  const { material, adaptacao, atualizarMaterial, definirQuestoes } = usarApp();
+  const { material, modoServidor, salvarQuestoes, gerarQuestoes, publicar: publicarNoSistema, revogar: revogarNoSistema } =
+    usarApp();
+  const { dados: adaptacao, carregando, erro: erroCarga } = usarAdaptacao(id);
   const { anunciar } = usarAnuncios();
 
   const dados = material(id);
-  const { questoes } = adaptacao(id);
+  const questoes = adaptacao?.questoes ?? [];
+  const [falha, setFalha] = useState(null);
+  const [gerando, setGerando] = useState(false);
 
   usarTituloDaPagina(dados ? `Atividade — ${dados.nome}` : 'Material não encontrado');
 
@@ -51,36 +54,59 @@ export function Atividade() {
     ? `${window.location.origin}${window.location.pathname}#/atividade/${atividade.codigo}`
     : null;
 
-  function salvarQuestao(questaoEditada) {
-    definirQuestoes(
-      id,
-      questoes.map((q) => (q.id === questaoEditada.id ? questaoEditada : q)),
-    );
-    setEmEdicao(null);
-    anunciar('Questão salva.');
+  /** Toda operação passa por aqui: o erro do servidor (RN02 ao publicar sem
+   *  aprovar, por exemplo) aparece na tela com o que fazer, em vez de sumir. */
+  async function tentar(operacao, aviso) {
+    setFalha(null);
+    try {
+      await operacao();
+      if (aviso) anunciar(aviso);
+      return true;
+    } catch (problema) {
+      setFalha(problema);
+      anunciar(`Erro: ${problema.titulo}`);
+      return false;
+    }
   }
 
-  function excluirQuestao() {
+  async function salvarQuestao(questaoEditada) {
+    const salvou = await tentar(
+      () => salvarQuestoes(id, questoes.map((q) => (q.id === questaoEditada.id ? questaoEditada : q))),
+      'Questão salva.',
+    );
+    if (salvou) setEmEdicao(null);
+  }
+
+  async function excluirQuestao() {
     const alvo = aExcluir;
     setAExcluir(null);
-    definirQuestoes(id, questoes.filter((q) => q.id !== alvo.id));
-    anunciar('Questão excluída da atividade.');
+    await tentar(
+      () => salvarQuestoes(id, questoes.filter((q) => q.id !== alvo.id)),
+      'Questão excluída da atividade.',
+    );
+  }
+
+  async function gerar() {
+    setGerando(true);
+    await tentar(() => gerarQuestoes(id), 'Questões geradas a partir do material.');
+    setGerando(false);
   }
 
   async function publicar() {
     setConfirmandoPublicacao(false);
-    const resultado = await publicarAtividade(id);
-    atualizarMaterial(id, {
-      atividade: { estado: 'publicada', codigo: resultado.codigo, publicadaEm: resultado.publicadaEm },
+    let codigo = '';
+    const publicou = await tentar(async () => {
+      codigo = (await publicarNoSistema(id)).codigo;
     });
-    anunciar(`Atividade publicada. O código de acesso é ${resultado.codigo.split('').join(' ')}.`);
+    if (publicou) anunciar(`Atividade publicada. O código de acesso é ${codigo.split('').join(' ')}.`);
   }
 
   async function revogar() {
     setConfirmandoRevogacao(false);
-    await revogarLink(id);
-    atualizarMaterial(id, { atividade: { ...atividade, estado: 'revogada' } });
-    anunciar('Link revogado. A atividade não pode mais ser acessada pelos estudantes.');
+    await tentar(
+      () => revogarNoSistema(id),
+      'Link revogado. A atividade não pode mais ser acessada pelos estudantes.',
+    );
   }
 
   async function copiarLink() {
@@ -113,6 +139,32 @@ export function Atividade() {
       </div>
 
       <AvisoConteudoDemo material={dados} />
+
+      {falha && (
+        <Aviso tipo="erro" titulo={falha.titulo} papel="alert">
+          <p>{falha.motivo}</p>
+          {falha.saida && (
+            <p>
+              <strong>O que fazer:</strong> {falha.saida}
+            </p>
+          )}
+        </Aviso>
+      )}
+
+      {carregando && (
+        <p role="status" className="campo__dica">
+          Carregando as questões…
+        </p>
+      )}
+
+      {erroCarga?.status === 404 && (
+        <Aviso tipo="atencao" titulo="Este material ainda não foi adaptado">
+          <p>
+            As questões são geradas a partir do texto adaptado.{' '}
+            <Link to={`/materiais/${id}/adaptacao`}>Abrir a adaptação</Link>
+          </p>
+        </Aviso>
+      )}
 
       {publicada && (
         <Aviso tipo="boa" titulo="Atividade publicada" papel="status">
@@ -171,8 +223,19 @@ export function Atividade() {
 
       {questoes.length === 0 ? (
         <div className="cartao vazio">
-          <h2>Nenhuma questão restante</h2>
-          <p>Você excluiu todas as questões. Não é possível publicar uma atividade vazia.</p>
+          <h2>{modoServidor ? 'Nenhuma questão nesta atividade' : 'Nenhuma questão restante'}</h2>
+          <p>
+            {modoServidor
+              ? 'As questões não foram geradas, ou todas foram excluídas. Não é possível publicar uma atividade vazia.'
+              : 'Você excluiu todas as questões. Não é possível publicar uma atividade vazia.'}
+          </p>
+          {modoServidor && adaptacao && (
+            <div className="linha" style={{ justifyContent: 'center', marginTop: 'var(--e4)' }}>
+              <Botao onClick={gerar} disabled={gerando}>
+                {gerando ? 'Gerando as questões…' : 'Gerar as questões a partir do material'}
+              </Botao>
+            </div>
+          )}
         </div>
       ) : (
         <ol className="questao-lista">
@@ -191,9 +254,11 @@ export function Atividade() {
                   <div className="questao__topo">
                     <span className="questao__numero">Questão {indice + 1}</span>
                     <Etiqueta tom="neutra">{questao.mecanica}</Etiqueta>
-                    <span className="campo__dica" style={{ marginBottom: 0 }}>
-                      Origem: {questao.trecho}
-                    </span>
+                    {questao.trecho && (
+                      <span className="campo__dica" style={{ marginBottom: 0 }}>
+                        Origem: {questao.trecho}
+                      </span>
+                    )}
                   </div>
 
                   <p className="questao__enunciado">{questao.enunciado}</p>

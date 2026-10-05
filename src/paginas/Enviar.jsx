@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Aviso, Botao, Cartao, Etiqueta, Migalhas } from '../componentes/basicos.jsx';
 import { BarraProgresso, Passos } from '../componentes/Passos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
-import { usarApp } from '../contextos/Aplicacao.jsx';
+import { usarApp, usarCatalogo } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 import { ARQUIVOS_DEMO, CONJUNTO_REGRAS } from '../dados/conteudo.js';
 import { enviarMaterial, processarAdaptacao, validarArquivo } from '../servicos/api.js';
@@ -25,6 +25,36 @@ import { enviarMaterial, processarAdaptacao, validarArquivo } from '../servicos/
 
 const PASSOS = ['Escolher o material', 'Configurar a adaptação', 'Processar'];
 
+const LIMITE_MB = 15; // RNF08 — o servidor confere de novo, e confere também as páginas
+
+function tamanhoLegivel(bytes) {
+  const mb = bytes / (1024 * 1024);
+  return mb >= 1
+    ? `${mb.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+/** Validação antes de enviar (H5): formato e tamanho. As páginas só o
+ *  servidor sabe contar. */
+function problemaDoArquivo(arquivo) {
+  if (!arquivo) return null;
+  if (!/\.(pdf|docx)$/i.test(arquivo.name)) {
+    return {
+      titulo: 'Este tipo de arquivo não é aceito',
+      motivo: `“${arquivo.name}” não é um PDF nem um documento do Word (.docx).`,
+      saida: 'Escolha o material em PDF ou em .docx.',
+    };
+  }
+  if (arquivo.size > LIMITE_MB * 1024 * 1024) {
+    return {
+      titulo: 'Este material está acima do limite aceito',
+      motivo: `O arquivo tem ${tamanhoLegivel(arquivo.size)}. O limite é de ${LIMITE_MB} MB por envio.`,
+      saida: 'Separe o material em partes menores — por exemplo, um capítulo por envio — e envie de novo.',
+    };
+  }
+  return null;
+}
+
 /* Perfis fora do escopo desta versão. Aparecem na tela desligados, nunca
    selecionáveis, e sempre rotulados como extensão futura. */
 const PERFIS_FUTUROS = [
@@ -43,8 +73,13 @@ const PERFIS_FUTUROS = [
 export function Enviar() {
   usarTituloDaPagina('Enviar material');
   const navegar = useNavigate();
-  const { acrescentarMaterial } = usarApp();
+  const { acrescentarMaterial, modoServidor, enviarArquivo, adaptarMaterial, excluir } = usarApp();
+  const catalogo = usarCatalogo();
+  const conjuntoVigente = catalogo?.conjunto ?? CONJUNTO_REGRAS;
   const { anunciar } = usarAnuncios();
+  const [arquivoReal, setArquivoReal] = useState(null);
+  const [enviado, setEnviado] = useState(null);
+  const [enviando, setEnviando] = useState(false);
 
   const [passo, setPasso] = useState(0);
   const [arquivo, setArquivo] = useState(ARQUIVOS_DEMO[0]);
@@ -55,7 +90,13 @@ export function Enviar() {
   const cancelamento = useRef({ cancelado: false });
   const areaProblema = useRef(null);
 
-  const problemaPrevio = validarArquivo(arquivo);
+  const problemaPrevio = modoServidor ? problemaDoArquivo(arquivoReal) : validarArquivo(arquivo);
+  const nomeDoMaterial = modoServidor ? (enviado?.nome_arquivo ?? arquivoReal?.name) : arquivo.nome;
+  const paginasDoMaterial = modoServidor
+    ? enviado?.paginas_estimadas
+      ? `cerca de ${enviado.numero_paginas}`
+      : enviado?.numero_paginas
+    : arquivo.paginas;
 
   function mostrarProblema(erro) {
     setProblema(erro);
@@ -65,6 +106,20 @@ export function Enviar() {
 
   async function avancarParaConfiguracao() {
     setProblema(null);
+    if (modoServidor) {
+      setEnviando(true);
+      anunciar('Enviando o material e lendo o texto.');
+      try {
+        setEnviado(await enviarArquivo(arquivoReal));
+        setPasso(1);
+        anunciar('Material aceito. Etapa 2 de 3: configurar a adaptação.');
+      } catch (erro) {
+        mostrarProblema(erro);
+      } finally {
+        setEnviando(false);
+      }
+      return;
+    }
     try {
       await enviarMaterial(arquivo);
       setPasso(1);
@@ -77,8 +132,33 @@ export function Enviar() {
   async function iniciarProcessamento() {
     setPasso(2);
     setProgresso(0);
-    cancelamento.current = { cancelado: false };
+    cancelamento.current = { cancelado: false, controle: new AbortController() };
     anunciar('Etapa 3 de 3: processando o material. Isso leva alguns segundos.');
+
+    if (modoServidor) {
+      try {
+        await adaptarMaterial(enviado.id, (percentual, etapa) => {
+          setProgresso(percentual);
+          setEtapaAtual(etapa);
+        }, cancelamento.current);
+        anunciar('Adaptação concluída. Abrindo a revisão do material.');
+        navegar(`/materiais/${enviado.id}/adaptacao`);
+      } catch (erro) {
+        if (cancelamento.current.cancelado) {
+          // "Se cancelar, nada é salvo": o material já enviado sai junto.
+          await excluir(enviado.id).catch(() => {});
+          setEnviado(null);
+          setArquivoReal(null);
+          setPasso(0);
+          anunciar('Processamento cancelado. Nenhum material foi salvo.');
+          return;
+        }
+        // O material continua enviado: dá para tentar adaptar de novo daqui.
+        setPasso(1);
+        mostrarProblema(erro);
+      }
+      return;
+    }
 
     try {
       await processarAdaptacao((percentual, etapa) => {
@@ -117,6 +197,7 @@ export function Enviar() {
 
   function cancelar() {
     cancelamento.current.cancelado = true;
+    cancelamento.current.controle?.abort();
   }
 
   return (
@@ -142,8 +223,9 @@ export function Enviar() {
             </p>
             {problema.regra && (
               <p className="campo__dica">
-                Regra do sistema: {problema.regra}. A recusa é proposital — adaptar um material
-                lido pela metade produziria um resultado errado sem avisar você.
+                Regra do sistema: {problema.regra}.
+                {problema.regra === 'RN09' &&
+                  ' A recusa é proposital — adaptar um material lido pela metade produziria um resultado errado sem avisar você.'}
               </p>
             )}
           </Aviso>
@@ -162,6 +244,27 @@ export function Enviar() {
               Fica visível e desligado, com a razão escrita ao lado: é a mesma
               postura do aviso de conteúdo de demonstração e da declaração de
               limites na tela de entrada. */}
+          {modoServidor ? (
+            <div className="area-envio">
+              <label className="campo" style={{ marginBottom: 0 }}>
+                <span className="campo__rotulo">Arquivo do material</span>
+                <input
+                  type="file"
+                  accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={(e) => {
+                    setArquivoReal(e.target.files?.[0] ?? null);
+                    setProblema(null);
+                  }}
+                />
+              </label>
+              {arquivoReal && (
+                <p className="campo__dica" style={{ marginTop: 'var(--e3)', marginBottom: 0 }}>
+                  {arquivoReal.name} · {tamanhoLegivel(arquivoReal.size)}
+                </p>
+              )}
+            </div>
+          ) : (
+          <>
           <div className="area-envio">
             <Botao variante="secundario" disabled>
               Upload do material
@@ -201,6 +304,8 @@ export function Enviar() {
               );
             })}
           </fieldset>
+          </>
+          )}
 
           {problemaPrevio && (
             <Aviso tipo="atencao" titulo="Este arquivo não vai ser aceito">
@@ -215,8 +320,11 @@ export function Enviar() {
             <Botao como="link" para="/painel" variante="discreto">
               Cancelar
             </Botao>
-            <Botao onClick={avancarParaConfiguracao} disabled={Boolean(problemaPrevio)}>
-              Continuar
+            <Botao
+              onClick={avancarParaConfiguracao}
+              disabled={Boolean(problemaPrevio) || enviando || (modoServidor && !arquivoReal)}
+            >
+              {enviando ? 'Enviando…' : 'Continuar'}
             </Botao>
           </div>
         </Cartao>
@@ -228,7 +336,7 @@ export function Enviar() {
 
           <Aviso tipo="boa" titulo="Material lido com sucesso">
             <p>
-              <strong>{arquivo.nome}</strong> — {arquivo.paginas} páginas, texto extraído com a
+              <strong>{nomeDoMaterial}</strong> — {paginasDoMaterial} páginas, texto extraído com a
               ordem de leitura e os títulos preservados.
             </p>
           </Aviso>
@@ -286,6 +394,7 @@ export function Enviar() {
             </span>
           </label>
 
+          {!modoServidor && (
           <label className="campo">
             <span className="campo__rotulo">Disciplina</span>
             <select
@@ -300,10 +409,11 @@ export function Enviar() {
               <option>Matemática</option>
             </select>
           </label>
+          )}
 
           <div className="linha" style={{ marginTop: 'var(--e4)' }}>
             <Etiqueta tom="info">
-              Conjunto {CONJUNTO_REGRAS.identificador} v{CONJUNTO_REGRAS.versao}
+              Conjunto {conjuntoVigente.identificador} v{conjuntoVigente.versao}
             </Etiqueta>
             <span className="campo__dica" style={{ marginBottom: 0 }}>
               A versão do conjunto de regras fica registrada junto com a adaptação e não pode ser
@@ -312,9 +422,11 @@ export function Enviar() {
           </div>
 
           <div className="linha linha-fim">
-            <Botao variante="discreto" onClick={() => setPasso(0)}>
-              Voltar
-            </Botao>
+            {!modoServidor && (
+              <Botao variante="discreto" onClick={() => setPasso(0)}>
+                Voltar
+              </Botao>
+            )}
             <Botao onClick={iniciarProcessamento}>Adaptar material</Botao>
           </div>
         </Cartao>

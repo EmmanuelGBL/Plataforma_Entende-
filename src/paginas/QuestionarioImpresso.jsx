@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Aviso, Botao } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
-import { usarApp } from '../contextos/Aplicacao.jsx';
-import { CONJUNTO_REGRAS } from '../dados/conteudo.js';
+import { usarAdaptacao, usarApp } from '../contextos/Aplicacao.jsx';
 import '../estilos/impressao.css';
 
 /* =========================================================================
@@ -28,7 +27,8 @@ import '../estilos/impressao.css';
 
 export function QuestionarioImpresso() {
   const { id } = useParams();
-  const { material, adaptacao } = usarApp();
+  const { material } = usarApp();
+  const { dados: adaptacao, carregando } = usarAdaptacao(id);
   const dados = material(id);
   const [comGabarito, setComGabarito] = useState(false);
 
@@ -47,7 +47,17 @@ export function QuestionarioImpresso() {
     );
   }
 
-  const { questoes } = adaptacao(id);
+  if (!adaptacao) {
+    return (
+      <main className="conteudo">
+        <p role="status" className="campo__dica">
+          {carregando ? 'Carregando as questões…' : 'Este material ainda não foi adaptado.'}
+        </p>
+      </main>
+    );
+  }
+
+  const { questoes, conjunto } = adaptacao;
 
   return (
     <>
@@ -137,7 +147,7 @@ export function QuestionarioImpresso() {
           Questões geradas pelo Entende+ a partir do material adaptado, e só dele. A revisão e a
           aprovação pedagógica são do professor responsável.
           <br />
-          Conjunto de regras {dados.versaoRegras}, publicado em {CONJUNTO_REGRAS.publicadoEm}.
+          Conjunto de regras {dados.versaoRegras}, publicado em {conjunto.publicadoEm}.
         </p>
 
         {comGabarito && questoes.length > 0 && (

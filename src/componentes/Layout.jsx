@@ -57,12 +57,13 @@ function Marca() {
 }
 
 function Rodape() {
+  const { modoServidor } = usarApp();
   return (
     <footer className="rodape" id="rodape" tabIndex={-1}>
       <div className="rodape-interno">
         <p>
           Entende+, protótipo acadêmico. Trabalho de Conclusão de Curso em Sistemas de Informação,
-          CEUNI FAMETRO. Os dados exibidos são de demonstração.
+          CEUNI FAMETRO.{modoServidor ? '' : ' Os dados exibidos são de demonstração.'}
         </p>
         <ul>
           <li>

@@ -5,7 +5,6 @@ import { Dialogo } from '../componentes/Dialogo.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
-import { excluirMaterial } from '../servicos/api.js';
 
 /* =========================================================================
    UC19 — Consultar materiais processados (RF19)
@@ -18,6 +17,7 @@ import { excluirMaterial } from '../servicos/api.js';
    ========================================================================= */
 
 const ESTADOS = {
+  enviado: { tom: 'neutra', rotulo: 'Enviado, ainda não adaptado' },
   adaptado: { tom: 'info', rotulo: 'Adaptado, aguardando sua revisão' },
   aprovado: { tom: 'boa', rotulo: 'Aprovado por você' },
   processando: { tom: 'atencao', rotulo: 'Em processamento' },
@@ -31,28 +31,46 @@ const ESTADOS_ATIVIDADE = {
 
 export function Painel() {
   usarTituloDaPagina('Meus materiais');
-  const { professor, materiais, removerMaterial } = usarApp();
+  const { professor, materiais, excluir } = usarApp();
   const { anunciar } = usarAnuncios();
   const [aExcluir, setAExcluir] = useState(null);
+  const [falha, setFalha] = useState(null);
 
   async function confirmarExclusao() {
     const alvo = aExcluir;
     setAExcluir(null);
-    await excluirMaterial(alvo.id);
-    removerMaterial(alvo.id);
-    anunciar(`Material ${alvo.nome} e todas as suas adaptações foram excluídos.`);
+    setFalha(null);
+    try {
+      await excluir(alvo.id);
+      anunciar(`Material ${alvo.nome} e todas as suas adaptações foram excluídos.`);
+    } catch (erro) {
+      setFalha(erro);
+      anunciar(`Erro: ${erro.titulo}`);
+    }
   }
+
+  // No modo servidor o professor não tem turma nem escola cadastradas.
+  const identificacao = professor
+    ? [professor.nome, professor.turma ?? professor.email, professor.escola].filter(Boolean).join(' · ')
+    : 'Materiais enviados por você.';
 
   return (
     <>
       <div className="cabecalho-pagina">
         <h1>Meus materiais</h1>
-        <p>
-          {professor
-            ? `${professor.nome} · ${professor.turma} · ${professor.escola}`
-            : 'Materiais enviados por você.'}
-        </p>
+        <p>{identificacao}</p>
       </div>
+
+      {falha && (
+        <Aviso tipo="erro" titulo={falha.titulo} papel="alert">
+          <p>{falha.motivo}</p>
+          {falha.saida && (
+            <p>
+              <strong>O que fazer:</strong> {falha.saida}
+            </p>
+          )}
+        </Aviso>
+      )}
 
       <div className="linha" style={{ marginBottom: 'var(--e5)' }}>
         <Botao como="link" para="/enviar">

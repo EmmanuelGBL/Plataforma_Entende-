@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout, LayoutSimples } from './componentes/Layout.jsx';
+import { CarregarAtividade } from './componentes/AtividadeAcesso.jsx';
 import { usarApp } from './contextos/Aplicacao.jsx';
 import { Entrar } from './paginas/Entrar.jsx';
 import { Painel } from './paginas/Painel.jsx';
@@ -39,11 +40,19 @@ import { NaoEncontrada } from './paginas/NaoEncontrada.jsx';
    pergunta qual das duas formas de tela a criança prefere (RF22).
    ========================================================================= */
 
-/** RNF12 — material só é acessível ao professor que o enviou. No protótipo
- *  isso se resume a exigir sessão para as telas do professor; o filtro por
- *  identificador do professor é assunto do back-end. */
+/** RNF12 — material só é acessível ao professor que o enviou. Aqui a tela
+ *  exige sessão; o filtro por professor é feito pelo servidor, em toda
+ *  consulta. Enquanto a sessão guardada é conferida (modo servidor), não
+ *  redireciona: senão recarregar a página jogaria o professor para fora. */
 function ExigeSessao({ children }) {
-  const { autenticado } = usarApp();
+  const { autenticado, pronto } = usarApp();
+  if (!pronto) {
+    return (
+      <p role="status" className="campo__dica">
+        Carregando…
+      </p>
+    );
+  }
   return autenticado ? children : <Navigate to="/" replace />;
 }
 
@@ -73,9 +82,30 @@ export default function App() {
       {/* Telas sem o menu do professor */}
       <Route element={<LayoutSimples />}>
         <Route path="/" element={<Entrar />} />
-        <Route path="/atividade/:codigo" element={<AtividadeEscolha />} />
-        <Route path="/atividade/:codigo/jogo" element={<AtividadeJogo />} />
-        <Route path="/atividade/:codigo/perguntas" element={<AtividadeEstudante />} />
+        <Route
+          path="/atividade/:codigo"
+          element={
+            <CarregarAtividade>
+              <AtividadeEscolha />
+            </CarregarAtividade>
+          }
+        />
+        <Route
+          path="/atividade/:codigo/jogo"
+          element={
+            <CarregarAtividade>
+              <AtividadeJogo />
+            </CarregarAtividade>
+          }
+        />
+        <Route
+          path="/atividade/:codigo/perguntas"
+          element={
+            <CarregarAtividade>
+              <AtividadeEstudante />
+            </CarregarAtividade>
+          }
+        />
       </Route>
 
       {/* Telas do professor */}

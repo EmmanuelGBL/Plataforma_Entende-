@@ -1,9 +1,19 @@
 """Formato das requisições e respostas da API."""
 
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timezone
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field
+
+
+def _em_utc(valor: datetime) -> datetime:
+    # O SQLite devolve data e hora sem fuso, mesmo gravadas em UTC. Sem o fuso
+    # na resposta, o navegador lê como hora local e erra em 4 horas em Manaus.
+    return valor if valor.tzinfo else valor.replace(tzinfo=timezone.utc)
+
+
+DataHora = Annotated[datetime, AfterValidator(_em_utc)]
 
 from .modelos import EtapaEscolar, FormatoArquivo, PerfilAdaptacao
 
@@ -30,7 +40,7 @@ class ProfessorPublico(BaseModel):
 class Sessao(BaseModel):
     token: str
     tipo: str = "bearer"
-    expira_em: datetime
+    expira_em: DataHora
     professor: ProfessorPublico
 
 
@@ -46,7 +56,7 @@ class MaterialResumo(BaseModel):
     paginas_estimadas: bool
     perfil: PerfilAdaptacao
     etapa_escolar: EtapaEscolar
-    data_envio: datetime
+    data_envio: DataHora
 
 
 class MaterialDetalhe(MaterialResumo):
@@ -59,8 +69,8 @@ class MaterialDetalhe(MaterialResumo):
 class AtividadeEstado(BaseModel):
     estado: str  # "rascunho" | "publicada" | "revogada"
     codigo: str | None = None
-    data_publicacao: datetime | None = None
-    data_revogacao: datetime | None = None
+    data_publicacao: DataHora | None = None
+    data_revogacao: DataHora | None = None
 
 
 class MaterialPainel(MaterialResumo):
@@ -118,8 +128,8 @@ class AdaptacaoDetalhe(BaseModel):
     status: str
     modelo: str
     editada: bool
-    data_geracao: datetime
-    data_aprovacao: datetime | None
+    data_geracao: DataHora
+    data_aprovacao: DataHora | None
     conjunto: ConjuntoPublico
     blocos_original: list[BlocoTexto]
     texto_adaptado: str

@@ -271,3 +271,16 @@ def test_rf20_excluir_material_apaga_tudo_que_dependia_dele(cliente):
     assert cliente.delete(f"/api/materiais/{material_id}", headers=cabecalho).status_code == 204
     for modelo in (Adaptacao, AplicacaoRegra, MetricaLegibilidade, Questao, AtividadePublicada):
         assert _contar(cliente, modelo) == 0, modelo.__name__
+
+
+def test_datas_saem_com_fuso_horario(cliente):
+    # O SQLite devolve data sem fuso; sem ele na resposta, o navegador leria
+    # a hora UTC como hora local (4 horas adiantada em Manaus).
+    cabecalho = cadastrar(cliente)
+    material_id, _ = _adaptado(cliente, cabecalho)
+    cliente.post(f"/api/materiais/{material_id}/adaptacao/aprovacao", headers=cabecalho)
+    cliente.post(f"/api/materiais/{material_id}/atividade", headers=cabecalho)
+
+    painel = cliente.get("/api/materiais", headers=cabecalho).json()[0]
+    for valor in (painel["data_envio"], painel["atividade"]["data_publicacao"]):
+        assert valor.endswith("Z") or valor.endswith("+00:00"), valor
