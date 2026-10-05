@@ -14,10 +14,14 @@ Orientação: Profa. Msc. Luana Leal.
 **É** o front-end: as telas do professor e do estudante, o design system, as folhas de impressão
 que geram os PDFs, a atividade gamificada e as decisões de acessibilidade que sustentam o trabalho.
 
-**Não é** o sistema funcionando. Não existem aqui motor de adaptação, chamada a modelo de
-linguagem, banco de dados nem autenticação real. Os textos, as métricas de legibilidade e as
-questões da atividade são **dados fixos**, escritos pela dupla, e estão em
-`src/dados/conteudo.js`.
+**Não é**, ainda, o sistema funcionando de ponta a ponta. Os textos, as métricas de legibilidade e
+as questões da atividade que a interface mostra são **dados fixos**, escritos pela dupla, e estão
+em `src/dados/conteudo.js`.
+
+O **servidor** começou em 05/10/2026, na pasta [`servidor/`](servidor/README.md) (Python, FastAPI):
+conta do professor, envio de PDF e DOCX e extração do texto já funcionam, com testes. O motor de
+adaptação e a chamada ao modelo de linguagem ainda não existem, e a interface ainda não foi ligada
+ao servidor.
 
 As exceções são a **exportação em PDF**, que funciona de verdade — a folha é formatada por
 `@media print` e o arquivo sai pela função de impressão do navegador, com texto selecionável —, e a

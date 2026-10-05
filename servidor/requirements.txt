@@ -1,0 +1,17 @@
+# Servidor do Entende+ — dependências de execução.
+# Python 3.11 ou mais recente.
+
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9      # envio de arquivo (RF02)
+pydantic-settings>=2.4
+email-validator>=2.2
+
+sqlalchemy>=2.0.30
+psycopg[binary]>=3.2         # PostgreSQL; em desenvolvimento o padrão é SQLite
+
+argon2-cffi>=23.1            # hash de senha com sal (RNF09)
+PyJWT>=2.9
+
+pdfplumber>=0.11             # extração de PDF (RF03)
+python-docx>=1.1             # extração de DOCX (RF03)

@@ -10,3 +10,10 @@ Entende+ (protótipo).html
 Thumbs.db
 .DS_Store
 *.tmp
+
+# Servidor (Python)
+servidor/.venv/
+servidor/.env
+servidor/*.db
+__pycache__/
+.pytest_cache/
