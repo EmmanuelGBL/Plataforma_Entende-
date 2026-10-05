@@ -29,8 +29,11 @@ src/
   contextos/
     Preferencias    Tamanho do texto, espaçamento, contraste e movimento
     Anuncios        Região aria-live única do aplicativo
-    Aplicacao       Professor autenticado e materiais (em memória)
-  servicos/api.js   Camada de dados simulada — trocar por HTTP depois
+    Aplicacao       Sessão, materiais e TODAS as operações, nos dois modos
+                    (servidor e demonstração) — as telas só falam com ele
+  servicos/
+    servidor.js     Cliente HTTP do servidor e conversão para o formato das telas
+    api.js          Modo demonstração: dados simulados com atraso proposital
   dados/conteudo.js Texto original e adaptado, dez regras, métricas, questões
   componentes/      Design system
   paginas/          As telas (13 rotas)
@@ -62,10 +65,31 @@ src/
    isso abria rolagem horizontal em tela estreita quando o professor aumentava o corpo do texto
    pelo painel de exibição — um recurso de acessibilidade quebrando outro.
 
-## O que é dado fixo
+## Os dois modos
 
-Tudo em `src/dados/conteudo.js`. Não existe motor de adaptação, chamada a modelo de linguagem
-nem banco de dados nesta entrega. O atraso simulado em `servicos/api.js` é proposital: é o que
+Com `VITE_API_URL` no ambiente do build, a interface usa o servidor (`servidor/`); sem ela, roda o
+**modo demonstração**, com tudo em memória — que é o que o GitHub Pages e o arquivo offline
+publicam. Quem decide é `servicos/servidor.js` (`modoServidor`), e quem esconde a diferença das
+telas é `contextos/Aplicacao.jsx`.
+
+```
+$env:VITE_API_URL = "http://localhost:8000"; npm run dev   # modo servidor
+npm run dev                                                 # modo demonstração
+```
+
+Regras para não quebrar um dos modos sem perceber:
+
+- **Tela não importa `dados/conteudo.js`** nem chama `servicos/api.js`. Regras, versão, original,
+  métricas e questões vêm de `usarAdaptacao(id)`, que nos dois modos devolve o mesmo formato. As
+  únicas exceções são o envio (a lista de exemplos só existe na demonstração) e a reserva da Ajuda.
+- **As regras mostradas numa adaptação são as da versão que ela usou**, e não as do arquivo de
+  hoje — é o que a justificativa de RF10 precisa mostrar.
+- **As rotas da criança passam por `CarregarAtividade`**: o jogo monta a ordem das questões ao
+  abrir, e montá-lo antes de a atividade chegar do servidor deixaria a partida vazia.
+
+## O que é dado fixo (modo demonstração)
+
+Tudo em `src/dados/conteudo.js`. O atraso simulado em `servicos/api.js` é proposital: é o que
 permite testar os estados de espera.
 
 **A exportação em PDF, essa funciona** — `paginas/Impressao.jsx` mais `estilos/impressao.css`

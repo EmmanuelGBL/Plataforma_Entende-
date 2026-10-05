@@ -1,7 +1,7 @@
-# Entende+ — protótipo do front-end
+# Entende+
 
-Protótipo navegável da interface do **Entende+**, sistema de adaptação de material didático para
-estudantes com Transtorno do Espectro Autista do 5º ano do ensino fundamental.
+Sistema de adaptação de material didático para estudantes com Transtorno do Espectro Autista do
+5º ano do ensino fundamental: a interface (React) e o servidor (Python, em [`servidor/`](servidor/README.md)).
 
 Trabalho de Conclusão de Curso em Sistemas de Informação — CEUNI FAMETRO.
 **Emmanuel Gabriel Martins Monteiro** e **Hugo Macedo Lima**.
@@ -9,23 +9,25 @@ Orientação: Profa. Msc. Luana Leal.
 
 ---
 
-## O que este repositório é, e o que não é
+## Dois modos, o mesmo código
 
-**É** o front-end: as telas do professor e do estudante, o design system, as folhas de impressão
-que geram os PDFs, a atividade gamificada e as decisões de acessibilidade que sustentam o trabalho.
+| | Modo servidor | Modo demonstração |
+| --- | --- | --- |
+| Como liga | `VITE_API_URL` apontando para o servidor | sem `VITE_API_URL` |
+| Conta | Real, com criação de conta | Qualquer senha entra |
+| Material | Arquivo do seu computador, lido de verdade | Quatro exemplos fixos |
+| Adaptação | Motor com regras versionadas e Claude | Texto escrito pela dupla |
+| Link da atividade | Abre em qualquer navegador | Só neste navegador |
+| Onde está | Localmente, por enquanto | GitHub Pages e arquivo offline |
 
-**Não é**, ainda, o sistema funcionando de ponta a ponta. Os textos, as métricas de legibilidade e
-as questões da atividade que a interface mostra são **dados fixos**, escritos pela dupla, e estão
-em `src/dados/conteudo.js`.
+**O endereço publicado no GitHub Pages é o modo demonstração**, porque o Pages só serve arquivo
+estático e não há servidor publicado. Os textos, métricas e questões que ele mostra são dados
+fixos, em `src/dados/conteudo.js`. Para usar o sistema de verdade, siga o
+[`servidor/README.md`](servidor/README.md).
 
-O **servidor** começou em 05/10/2026, na pasta [`servidor/`](servidor/README.md) (Python, FastAPI):
-conta do professor, envio de PDF e DOCX e extração do texto já funcionam, com testes. O motor de
-adaptação e a chamada ao modelo de linguagem ainda não existem, e a interface ainda não foi ligada
-ao servidor.
-
-As exceções são a **exportação em PDF**, que funciona de verdade — a folha é formatada por
-`@media print` e o arquivo sai pela função de impressão do navegador, com texto selecionável —, e a
-**atividade gamificada**, que é jogável do começo ao fim.
+Nos dois modos, a **exportação em PDF** funciona de verdade — a folha é formatada por
+`@media print` e o arquivo sai pela função de impressão do navegador, com texto selecionável —, e
+a **atividade gamificada** é jogável do começo ao fim.
 
 O texto didático da demonstração foi redigido por nós no estilo de um material de Ciências do
 5º ano — não é material de terceiros.
