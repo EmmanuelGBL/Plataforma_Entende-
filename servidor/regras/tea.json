@@ -1,0 +1,95 @@
+{
+  "identificador": "TEA",
+  "versao": "1.3",
+  "publicado_em": "2026-09-02",
+  "descricao": "Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho Universal para a Aprendizagem (CAST, 2024).",
+  "regras": [
+    {
+      "codigo": "TEA-01",
+      "nome": "Períodos curtos",
+      "descricao": "Dividir períodos com mais de 20 palavras em orações independentes.",
+      "base": "WCAG 2.2 — SC 3.1.5 Reading Level (AAA)",
+      "justificativa": "Período longo exige manter várias informações na memória de trabalho ao mesmo tempo. Dividir em frases curtas reduz essa carga sem tirar conteúdo do texto.",
+      "aplicacao": "modelo",
+      "instrucao": "Divida todo período com mais de 20 palavras em frases independentes, cada uma com uma informação. Prefira frases de até 12 palavras."
+    },
+    {
+      "codigo": "TEA-02",
+      "nome": "Uma ideia por bloco",
+      "descricao": "Separar em parágrafos distintos ideias que estavam no mesmo bloco.",
+      "base": "W3C COGA — Make Each Step Clear; DUA 3.2 (CAST, 2024)",
+      "justificativa": "Blocos com várias ideias dificultam localizar onde uma informação começa e termina.",
+      "aplicacao": "modelo",
+      "instrucao": "Quando um parágrafo tratar de mais de uma ideia, separe cada ideia em um parágrafo próprio."
+    },
+    {
+      "codigo": "TEA-03",
+      "nome": "Linguagem literal",
+      "descricao": "Substituir metáfora, comparação figurada e expressão idiomática por descrição literal.",
+      "base": "W3C COGA — Use Literal Language",
+      "justificativa": "A compreensão literal é uma característica frequente no perfil TEA. Chamar a folha de \"fábrica\" pode ser entendido ao pé da letra e produzir erro de conceito.",
+      "aplicacao": "modelo",
+      "instrucao": "Troque metáfora, comparação figurada, ironia e expressão idiomática pela descrição literal do que ela quer dizer. Não acrescente informação que a figura não continha."
+    },
+    {
+      "codigo": "TEA-04",
+      "nome": "Voz ativa e ordem direta",
+      "descricao": "Reescrever orações na voz passiva em voz ativa, na ordem sujeito-verbo-objeto.",
+      "base": "W3C COGA — Use a Simple Sentence Structure",
+      "justificativa": "A ordem direta reduz o esforço de identificar quem faz a ação.",
+      "aplicacao": "modelo",
+      "instrucao": "Reescreva orações na voz passiva em voz ativa e coloque as frases na ordem direta: quem faz, o que faz, sobre o quê."
+    },
+    {
+      "codigo": "TEA-05",
+      "nome": "Vocabulário explicado",
+      "descricao": "Explicar entre parênteses, na primeira ocorrência, todo termo fora do vocabulário esperado para o 5º ano.",
+      "base": "WCAG 2.2 — SC 3.1.3 Unusual Words (AAA)",
+      "justificativa": "Manter o termo técnico e explicá-lo preserva o conteúdo pedagógico (RN01) sem interromper a leitura para consultar outra fonte.",
+      "aplicacao": "modelo",
+      "instrucao": "Mantenha todo termo técnico do conteúdo e, na primeira vez que ele aparecer, explique-o entre parênteses com palavras que uma criança do 5º ano conhece. Palavra difícil que não é termo do conteúdo pode ser trocada por uma comum de mesmo sentido."
+    },
+    {
+      "codigo": "TEA-06",
+      "nome": "Conectivos explícitos",
+      "descricao": "Tornar explícita a relação de causa, consequência e sequência entre as frases.",
+      "base": "W3C COGA — Make the Relationship Between Ideas Clear",
+      "justificativa": "Relação implícita obriga o leitor a inferir. A inferência é justamente o ponto de maior dificuldade descrito na literatura sobre compreensão leitora no autismo.",
+      "aplicacao": "modelo",
+      "instrucao": "Quando a relação entre duas frases for de causa, consequência ou sequência, diga essa relação com um conectivo simples (porque, por isso, depois, então). Só explicite relação que o texto original já afirma."
+    },
+    {
+      "codigo": "TEA-07",
+      "nome": "Subtítulos a cada bloco",
+      "descricao": "Inserir subtítulo descritivo antes de cada bloco temático.",
+      "base": "WCAG 2.2 — SC 2.4.10 Section Headings (AAA)",
+      "justificativa": "O subtítulo antecipa o assunto do bloco e permite reencontrar a informação depois.",
+      "aplicacao": "modelo",
+      "instrucao": "Antes de cada bloco temático que não tenha título, insira um subtítulo curto que diga do que o bloco trata. Mantenha os títulos que o material já tem."
+    },
+    {
+      "codigo": "TEA-08",
+      "nome": "Apresentação visual do texto",
+      "descricao": "Alinhar à esquerda, com entrelinha 1,5, espaço entre parágrafos de 1,5 vez a entrelinha e linha de no máximo 80 caracteres.",
+      "base": "WCAG 2.2 — SC 1.4.8 Visual Presentation (AAA)",
+      "justificativa": "Texto justificado cria \"rios\" de espaço em branco e larguras de palavra irregulares, que atrapalham o rastreamento da linha. É a regra que responde por RNF02.",
+      "aplicacao": "apresentacao"
+    },
+    {
+      "codigo": "TEA-09",
+      "nome": "Antecipação da estrutura",
+      "descricao": "Abrir o material com a lista do que será lido, na ordem em que aparece.",
+      "base": "DUA 3.1 — Ativar conhecimento prévio (CAST, 2024)",
+      "justificativa": "Saber de antemão o que vem pela frente reduz a ansiedade diante do imprevisto e ajuda a organizar a leitura.",
+      "aplicacao": "estrutura"
+    },
+    {
+      "codigo": "TEA-10",
+      "nome": "Remoção de ruído visual",
+      "descricao": "Remover elemento decorativo que não carrega informação e concorre com o texto pela atenção.",
+      "base": "W3C COGA — Avoid Visual Clutter; DUA 7.3 (CAST, 2024)",
+      "justificativa": "Nenhuma informação é perdida: o que sai é ornamento, não conteúdo (RN01).",
+      "aplicacao": "apresentacao"
+    }
+  ]
+}

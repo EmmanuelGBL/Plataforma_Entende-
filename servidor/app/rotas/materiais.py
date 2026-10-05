@@ -14,7 +14,8 @@ from sqlalchemy.orm import Session
 
 from ..banco import obter_sessao
 from ..erros import ErroDeNegocio
-from ..esquemas import MaterialDetalhe, MaterialResumo
+from ..apresentacao import material_painel
+from ..esquemas import MaterialDetalhe, MaterialPainel
 from ..modelos import EtapaEscolar, Material, PerfilAdaptacao, Professor
 from ..seguranca import professor_atual
 from ..servicos.extrator import extrair
@@ -44,7 +45,7 @@ async def _ler_com_limite(arquivo: UploadFile, limite_bytes: int) -> bytes:
     return b"".join(partes)
 
 
-def _material_do_professor(sessao: Session, material_id: uuid.UUID, professor: Professor) -> Material:
+def material_do_professor(sessao: Session, material_id: uuid.UUID, professor: Professor) -> Material:
     material = sessao.scalar(
         select(Material).where(Material.id == material_id, Material.professor_id == professor.id)
     )
@@ -91,13 +92,14 @@ async def enviar(
     return material
 
 
-@rotas.get("", response_model=list[MaterialResumo])
+@rotas.get("", response_model=list[MaterialPainel])
 def listar(professor: Professor = Depends(professor_atual), sessao: Session = Depends(obter_sessao)):
-    return sessao.scalars(
+    materiais = sessao.scalars(
         select(Material)
         .where(Material.professor_id == professor.id)
         .order_by(Material.data_envio.desc())
     ).all()
+    return [material_painel(m) for m in materiais]
 
 
 @rotas.get("/{material_id}", response_model=MaterialDetalhe)
@@ -106,7 +108,7 @@ def consultar(
     professor: Professor = Depends(professor_atual),
     sessao: Session = Depends(obter_sessao),
 ):
-    return _material_do_professor(sessao, material_id, professor)
+    return material_do_professor(sessao, material_id, professor)
 
 
 @rotas.delete("/{material_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -117,6 +119,6 @@ def excluir(
 ):
     # RF20 — exclusão definitiva, não lógica: a linha sai do banco. As
     # adaptações, quando existirem, saem junto pela chave estrangeira.
-    sessao.delete(_material_do_professor(sessao, material_id, professor))
+    sessao.delete(material_do_professor(sessao, material_id, professor))
     sessao.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

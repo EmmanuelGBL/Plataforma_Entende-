@@ -4,6 +4,7 @@ import logging
 import secrets
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PASTA_SERVIDOR = Path(__file__).resolve().parent.parent
@@ -27,6 +28,13 @@ class Configuracao(BaseSettings):
     # que valida antes de enviar; aqui é a validação que vale.
     limite_paginas: int = 20
     limite_megabytes: int = 15
+
+    # Motor de adaptação. O arquivo de regras é lido a cada adaptação (RNF13).
+    caminho_regras: Path = PASTA_SERVIDOR / "regras" / "tea.json"
+    modelo: str = "claude-opus-5"
+    # Lida com o nome padrão do SDK, sem o prefixo ENTENDE_, para funcionar
+    # tanto no .env quanto exportada no terminal.
+    chave_api: str = Field(default="", validation_alias="ANTHROPIC_API_KEY")
 
     @property
     def lista_origens(self) -> list[str]:
