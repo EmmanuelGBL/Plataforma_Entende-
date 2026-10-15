@@ -10,6 +10,7 @@ estudante.
 Documentação interativa em http://localhost:8000/docs enquanto o servidor roda.
 """
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -23,7 +24,20 @@ from .rotas import adaptacoes, atividades, autenticacao, materiais
 from .servicos.cliente_llm import ClienteClaude, ClienteLLM
 
 
+def _configurar_registro() -> None:
+    # O uvicorn só configura os registros dele. Sem isto, as mensagens do
+    # sistema — como quantos blocos de cada adaptação foram ao modelo — não
+    # aparecem no terminal. Nenhuma delas leva dado de quem acessa (RN05).
+    registro = logging.getLogger("entende")
+    if not registro.handlers:
+        saida = logging.StreamHandler()
+        saida.setFormatter(logging.Formatter("%(levelname)s:     [entende] %(message)s"))
+        registro.addHandler(saida)
+        registro.setLevel(logging.INFO)
+
+
 def criar_app(configuracao: Configuracao | None = None, cliente_llm: ClienteLLM | None = None) -> FastAPI:
+    _configurar_registro()
     config = configuracao or Configuracao()
     config.garantir_segredo()
     motor = criar_motor(config.banco_url)

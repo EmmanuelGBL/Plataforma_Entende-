@@ -41,8 +41,10 @@ que é o que o GitHub Pages e o arquivo offline publicam, porque nenhum dos dois
 
 O motor de adaptação e o gerador de questões usam o modelo **Claude Opus 5** (`claude-opus-5`)
 pela API da Anthropic. Sem `ANTHROPIC_API_KEY` no `.env`, conta, envio e extração funcionam, e
-adaptar responde 503 com a explicação. Cada adaptação custa uma chamada por seção do material, e
-mais uma para as questões. O modelo usado fica registrado em cada adaptação (RN08); para trocar,
+adaptar responde 503 com a explicação. O motor é híbrido (ver abaixo): cada adaptação faz uma
+chamada por seção **que tem algo a reescrever** — seção sem nada marcado pelo código não gera
+chamada —, e mais uma para as questões. O terminal do servidor mostra, a cada adaptação, quantos
+blocos foram ao modelo e em quantos pedidos. O modelo usado fica registrado em cada adaptação (RN08); para trocar,
 `ENTENDE_MODELO` no `.env`.
 
 Os pedidos usam o **fallback do lado do servidor** da Anthropic (`fallbacks="default"`): se o
@@ -57,7 +59,7 @@ apontar a variável para ele; as tabelas são criadas na primeira partida.
 ### Testes e ferramentas
 
 ```
-.venv\Scripts\python -m pytest                 # 92 testes, sem rede e sem custo
+.venv\Scripts\python -m pytest                 # 111 testes, sem rede e sem custo
 .venv\Scripts\python extrair.py material.pdf   # ver a extração de um arquivo real
 ```
 
@@ -94,7 +96,7 @@ resposta sem traduzir nada:
 ## Onde está cada coisa
 
 ```
-regras/tea.json           Conjunto de regras TEA v1.3 — RNF13
+regras/tea.json           Conjunto de regras TEA v1.4, com gatilhos e glossário — RNF13
 app/
   principal.py            Monta a aplicação (criar_app)
   config.py               Variáveis ENTENDE_* e ANTHROPIC_API_KEY
@@ -106,7 +108,8 @@ app/
     extrator.py           ExtratorConteudo — RF03, RN09, RNF08
     regras.py             Leitura do arquivo e registro da versão — RNF13, RN08
     cliente_llm.py        ClienteLLM — a única porta para o modelo de linguagem
-    motor.py              MotorAdaptacao — RF05, RF06
+    gatilhos.py           O que o código detecta antes de chamar o modelo
+    motor.py              MotorAdaptacao — RF05, RF06; glossário (TEA-05)
     legibilidade.py       CalculadoraLegibilidade — RF07, RN10
     questoes.py           GeradorQuestoes — RF13, RN04
     processamento.py      A ordem do diagrama de sequência 03
@@ -115,15 +118,49 @@ app/
 
 ## Como o motor funciona
 
-1. O texto extraído é dividido por seção (no máximo ~3.500 caracteres por trecho), e os trechos
-   são adaptados **em paralelo**, para caber nos 120 s de RNF07.
-2. Cada trecho vai ao modelo com as **instruções das regras do arquivo** — nunca um "adapte este
-   texto" livre — e volta num **esquema JSON fixo**: cada bloco adaptado diz quais regras recebeu
-   e de que trecho do original saiu. É isso que vira o registro de RF06.
-3. **TEA-09** (antecipar a estrutura) é aplicada pelo código, a partir dos títulos do texto já
-   adaptado. **TEA-08 e TEA-10** são de apresentação: valem na folha impressa, não no texto.
-4. Se um trecho falha, **a adaptação inteira falha**. Não existe adaptação pela metade, pelo mesmo
-   motivo da RN09.
+O motor é **híbrido**: o código faz tudo o que uma regra do arquivo consegue fazer sozinha, e o
+modelo de linguagem só reescreve o que exige entender a frase. Quem decide é o arquivo de regras,
+não o modelo.
+
+| Regra | Quem aplica | Como |
+| --- | --- | --- |
+| TEA-01 períodos curtos | modelo, se o código disparar | período com mais de 20 palavras |
+| TEA-02 uma ideia por bloco | modelo, se o código disparar | parágrafo com mais de 3 frases |
+| TEA-03 linguagem literal | modelo, se o código disparar | expressão da lista do arquivo; e em todo bloco que já vai ao modelo |
+| TEA-04 voz ativa | modelo, se o código disparar | forma de "ser" + particípio ("é absorvida") |
+| TEA-05 vocabulário explicado | **código** | glossário do arquivo, na primeira ocorrência |
+| TEA-06 conectivos explícitos | modelo | junto com TEA-01 e TEA-02 |
+| TEA-07 subtítulos | modelo, se o código disparar | mais de 120 palavras desde o último título |
+| TEA-08, TEA-10 apresentação | folha impressa | `src/estilos/impressao.css` |
+| TEA-09 antecipar a estrutura | **código** | lista dos títulos do texto adaptado |
+
+1. **O código marca os blocos** (`servicos/gatilhos.py`): lê cada parágrafo e item e anota as
+   regras que dispararam nele. Os limites (20 palavras, 3 frases, 120 palavras, a lista de
+   expressões) estão no `tea.json`, no campo `gatilho` de cada regra — mudar um limite é editar o
+   arquivo e trocar a versão, sem tocar no código (RNF13, RN08).
+2. **Só vai ao modelo o que foi marcado.** O texto é dividido por seção (no máximo ~3.500
+   caracteres por trecho); seção sem bloco marcado não gera pedido. Bloco não marcado fica igual
+   ao original.
+3. **Cada pedido pede só os blocos marcados**, cada um com as instruções das regras que
+   dispararam nele — nunca um "adapte este texto" livre. O resto da seção vai como contexto e não
+   volta na resposta. A resposta tem um **esquema JSON fixo** que diz quais regras cada bloco
+   recebeu; é isso que vira o registro de RF06. O trecho de origem é o próprio bloco marcado, que
+   o código já conhece — o modelo não precisa copiá-lo de volta.
+4. **O código aplica o glossário (TEA-05)** e depois a **TEA-09**.
+5. Se um pedido falha, **a adaptação inteira falha**. Não existe adaptação pela metade, pelo mesmo
+   motivo da RN09. Bloco marcado que o modelo não devolve, ou devolve sem texto, **fica como
+   estava no original** — o modelo não apaga conteúdo por omissão (RN01).
+
+**De onde vem a economia.** Em relação ao motor anterior (v1.3), que mandava o material inteiro:
+parágrafo sem nada a corrigir não é enviado; título, item e tabela não precisam ser devolvidos;
+o modelo não copia mais o trecho de origem na resposta; o pedido leva só as instruções das regras
+que dispararam; e o vocabulário saiu do modelo. Quanto se economiza depende do material: texto
+simples deixa parágrafos inteiros de fora; texto de períodos longos, como o da demonstração (quatro
+parágrafos de uma frase só, de quase 60 palavras cada), ainda vai inteiro — e deve ir.
+
+**O gatilho é generoso de propósito.** Marcar a mais custa um pedido; marcar a menos deixa o
+texto sem adaptar. A voz passiva, por exemplo, é detectada por padrão e também pega "é rápido":
+o modelo recebe o bloco, não encontra passiva, não muda nada, e o registro fica vazio para ele.
 
 ## Decisões que não são detalhe
 
@@ -150,6 +187,12 @@ app/
   português (Martins et al., 1996), palavras por frase, palavras longas e total de palavras, com
   contagem de sílabas heurística. O NILC-Metrix continua sendo o instrumento da verificação de
   RNF03 na validação do trabalho.
+- **O glossário da TEA-05 cobre só os termos cadastrados.** Termo do conteúdo que não está no
+  `tea.json` não é explicado. Os termos iniciais (Ciências do 5º ano) foram escritos pela dupla e
+  precisam passar pela revisão das especialistas, como o resto do conjunto.
+- **Metáfora fora da lista de expressões só é tratada se o bloco já for ao modelo** por outro
+  motivo (TEA-03 acompanha qualquer regra). Uma frase curta, na voz ativa, com metáfora nova, passa
+  sem adaptação.
 - **A qualidade da reescrita não é medida pelos testes.** Os testes garantem que cada regra chega
   ao modelo e que o registro é feito; se o modelo reescreveu bem é a validação com especialistas
   (OE3).

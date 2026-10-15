@@ -14,12 +14,14 @@
 
 export const CONJUNTO_REGRAS = {
   identificador: 'TEA',
-  versao: '1.3',
-  publicadoEm: '02/09/2026',
+  versao: '1.4',
+  publicadoEm: '15/10/2026',
   descricao:
     'Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. ' +
     'Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho ' +
-    'Universal para a Aprendizagem (CAST, 2024).',
+    'Universal para a Aprendizagem (CAST, 2024). O código decide o que precisa de reescrita ' +
+    'e explica o vocabulário pelo glossário; o modelo de linguagem só reescreve o que o ' +
+    'código marcou.',
 };
 
 /** As dez regras do conjunto. `base` é a referência normativa exibida ao
@@ -67,8 +69,8 @@ export const REGRAS = [
     codigo: 'TEA-05',
     nome: 'Vocabulário explicado',
     descricao:
-      'Explicar entre parênteses, na primeira ocorrência, todo termo fora do vocabulário ' +
-      'esperado para o 5º ano.',
+      'Explicar entre parênteses, na primeira ocorrência, cada termo do glossário do ' +
+      'conjunto de regras — termos do conteúdo fora do vocabulário esperado para o 5º ano.',
     base: 'WCAG 2.2 — SC 3.1.3 Unusual Words (AAA)',
     justificativa:
       'Manter o termo técnico e explicá-lo preserva o conteúdo pedagógico (RN01) sem ' +
@@ -388,7 +390,7 @@ export const ARQUIVOS_DEMO = [
 export const ETAPAS_PROCESSAMENTO = [
   'Lendo o arquivo enviado',
   'Extraindo o texto e a ordem de leitura',
-  'Aplicando o conjunto de regras TEA v1.3',
+  'Aplicando o conjunto de regras TEA v1.4',
   'Calculando as métricas de legibilidade',
   'Gerando as questões a partir do mesmo material',
 ];

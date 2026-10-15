@@ -3,18 +3,45 @@
 O arquivo é lido a cada adaptação, e não uma vez na partida do servidor: é o
 que permite alterar uma regra e reprocessar o mesmo material sem novo deploy,
 que é exatamente a verificação que o RNF13 descreve.
+
+Além da instrução, o arquivo guarda o que torna o motor híbrido: o gatilho de
+cada regra do modelo (quando vale a pena pedir a reescrita) e o glossário da
+TEA-05. Os dois entram na impressão digital, então mudar um limiar ou um termo
+também exige trocar a versão (RN08).
 """
 
 import hashlib
 from datetime import date
 from pathlib import Path
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..erros import ErroDeNegocio
 from ..modelos import AplicacaoDaRegra, ConjuntoRegras, PerfilAdaptacao, RegraAdaptacao
+
+
+class Gatilho(BaseModel):
+    """Quando um bloco do material precisa desta regra. Ver gatilhos.py.
+
+    Regra do modelo sem gatilho vale para todo parágrafo e item — é o motor
+    antigo, que mandava o material inteiro. Com gatilho, só vai ao modelo o
+    bloco em que o código encontrou o que a regra corrige.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    palavras_por_frase_acima_de: int | None = Field(default=None, ge=1)
+    frases_por_paragrafo_acima_de: int | None = Field(default=None, ge=1)
+    palavras_sem_titulo_acima_de: int | None = Field(default=None, ge=1)
+    voz_passiva: bool = False
+    expressoes: list[str] = []
+    # Vale também no bloco que já vai ao modelo por causa destas regras ("*" =
+    # qualquer uma). É o caso da regra que só faz sentido junto com outra
+    # (conectivo ao dividir período) e da que o código não consegue detectar
+    # sozinho (metáfora que não está na lista de expressões).
+    acompanha: list[str] = []
 
 
 class RegraDeclarada(BaseModel):
@@ -25,6 +52,8 @@ class RegraDeclarada(BaseModel):
     justificativa: str
     aplicacao: AplicacaoDaRegra
     instrucao: str | None = None
+    gatilho: Gatilho | None = None
+    glossario: dict[str, str] | None = None
 
 
 class ConjuntoDeclarado(BaseModel):
@@ -36,6 +65,9 @@ class ConjuntoDeclarado(BaseModel):
 
     def regras_do_modelo(self) -> list[RegraDeclarada]:
         return [r for r in self.regras if r.aplicacao is AplicacaoDaRegra.MODELO]
+
+    def regras_de(self, aplicacao: AplicacaoDaRegra) -> list[RegraDeclarada]:
+        return [r for r in self.regras if r.aplicacao is aplicacao]
 
 
 def carregar(caminho: Path) -> tuple[ConjuntoDeclarado, str]:
@@ -67,6 +99,32 @@ def carregar(caminho: Path) -> tuple[ConjuntoDeclarado, str]:
             "Há regra sem instrução para o modelo",
             f"As regras {', '.join(faltando)} são aplicadas pelo modelo e não têm instrução.",
             "Acrescente o campo “instrucao” a essas regras no arquivo.",
+            "RNF13",
+            status=500,
+        )
+    sem_glossario = [
+        r.codigo for r in conjunto.regras_de(AplicacaoDaRegra.GLOSSARIO) if not r.glossario
+    ]
+    if sem_glossario:
+        raise ErroDeNegocio(
+            "Há regra de glossário sem termos",
+            f"As regras {', '.join(sem_glossario)} são aplicadas pelo glossário e não têm termos.",
+            "Acrescente o campo “glossario” a essas regras no arquivo.",
+            "RNF13",
+            status=500,
+        )
+    do_modelo = {r.codigo for r in conjunto.regras_do_modelo()}
+    acompanha_desconhecida = [
+        r.codigo
+        for r in conjunto.regras_do_modelo()
+        if r.gatilho and any(c != "*" and c not in do_modelo for c in r.gatilho.acompanha)
+    ]
+    if acompanha_desconhecida:
+        raise ErroDeNegocio(
+            "Há regra que acompanha uma regra inexistente",
+            f"O campo “acompanha” das regras {', '.join(acompanha_desconhecida)} cita "
+            "código que não é regra do modelo neste arquivo.",
+            "Corrija o campo “acompanha” no arquivo de regras.",
             "RNF13",
             status=500,
         )

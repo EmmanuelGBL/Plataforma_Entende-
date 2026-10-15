@@ -50,6 +50,13 @@ def adaptar_material(
     registro = regras.registrar(sessao, conjunto, impressao)
 
     resultado = motor.adaptar(material.texto_extraido, conjunto, cliente)
+    log.info(
+        "Adaptação de %s: %d de %d blocos foram ao modelo, em %d pedidos",
+        material.id,
+        resultado.blocos_ao_modelo,
+        resultado.blocos_adaptaveis,
+        resultado.pedidos,
+    )
 
     por_codigo = {r.codigo: r for r in registro.regras}
     aplicacoes = []

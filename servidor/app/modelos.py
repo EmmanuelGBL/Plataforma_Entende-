@@ -126,7 +126,8 @@ class Material(Base):
 # ---------------------------------------------------------------------------
 
 class AplicacaoDaRegra(str, enum.Enum):
-    MODELO = "modelo"  # o modelo de linguagem reescreve seguindo a instrução da regra
+    MODELO = "modelo"  # o modelo de linguagem reescreve, só onde o gatilho da regra dispara
+    GLOSSARIO = "glossario"  # o código explica os termos do glossário do arquivo (TEA-05)
     ESTRUTURA = "estrutura"  # aplicada pelo próprio código (TEA-09)
     APRESENTACAO = "apresentacao"  # aplicada na formatação da folha (TEA-08, TEA-10)
 

@@ -51,13 +51,18 @@ def test_adaptacao_registra_regras_versao_modelo_e_metricas(cliente):
 
     assert adaptacao["status"] == "GERADA"
     assert adaptacao["modelo"] == ClienteFalso.modelo
-    assert adaptacao["conjunto"]["versao"] == "1.3"
+    assert adaptacao["conjunto"]["versao"] == "1.4"
     assert len(adaptacao["conjunto"]["regras"]) == 10
     # RF06: a regra de cada trecho, e o trecho de origem
     assert adaptacao["ocorrencias"]["TEA-01"] > 0
     assert adaptacao["ocorrencias"]["TEA-09"] > 0
-    aplicacao = next(a for a in adaptacao["aplicacoes"] if a["regra"] == "TEA-01")
-    assert aplicacao["trecho_resultante"] in aplicacao["trecho_original"]
+    # A frase dividida sai do parágrafo de origem. "Alguma", e não "a primeira":
+    # na primeira o glossário (TEA-05) também acrescenta explicação.
+    assert any(
+        a["trecho_resultante"] in a["trecho_original"]
+        for a in adaptacao["aplicacoes"] if a["regra"] == "TEA-01"
+    )
+    assert adaptacao["ocorrencias"]["TEA-05"] > 0
     # RF08: o original vem junto para a comparação
     assert adaptacao["blocos_original"][0]["texto"] == "Capítulo 3 - A fotossíntese"
     # RF07 e RN10: as quatro métricas, sempre
@@ -163,7 +168,7 @@ def test_ciclo_da_atividade(cliente):
 
     painel = cliente.get("/api/materiais", headers=cabecalho).json()[0]
     assert painel["estado"] == "aprovada"
-    assert painel["versao_regras"] == "TEA v1.3"
+    assert painel["versao_regras"] == "TEA v1.4"
     assert painel["atividade"]["codigo"] == codigo
 
     # RF18 / RN06
@@ -212,13 +217,13 @@ def test_rnf13_alterar_regra_e_reprocessar_sem_reiniciar(cliente):
 
     arquivo = cliente.app.state.configuracao.caminho_regras
     dados = json.loads(arquivo.read_text(encoding="utf-8"))
-    dados["versao"] = "1.4"
+    dados["versao"] = "1.5"
     dados["regras"][0]["instrucao"] = "Frases de no máximo 10 palavras."
     arquivo.write_text(json.dumps(dados, ensure_ascii=False), encoding="utf-8")
 
     segunda = cliente.post(f"/api/materiais/{material_id}/adaptacoes", headers=cabecalho).json()
-    assert primeira["conjunto"]["versao"] == "1.3"
-    assert segunda["conjunto"]["versao"] == "1.4"
+    assert primeira["conjunto"]["versao"] == "1.4"
+    assert segunda["conjunto"]["versao"] == "1.5"
     assert "Frases de no máximo 10 palavras." in cliente.app.state.cliente_llm.chamadas[-1]["sistema"]
     # RF12: as questões que o professor já tinha não são apagadas
     assert cliente.get(f"/api/materiais/{material_id}/questoes", headers=cabecalho).json() == questoes_antes
@@ -241,7 +246,7 @@ def test_rn08_regra_alterada_sem_trocar_versao_e_recusada(cliente):
 
 def test_regras_vigentes_sao_publicas(cliente):
     regras = cliente.get("/api/regras").json()
-    assert regras["versao"] == "1.3"
+    assert regras["versao"] == "1.4"
     assert regras["regras"][7]["aplicacao"] == "apresentacao"
 
 

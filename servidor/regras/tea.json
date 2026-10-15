@@ -1,8 +1,8 @@
 {
   "identificador": "TEA",
-  "versao": "1.3",
-  "publicado_em": "2026-09-02",
-  "descricao": "Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho Universal para a Aprendizagem (CAST, 2024).",
+  "versao": "1.4",
+  "publicado_em": "2026-10-15",
+  "descricao": "Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho Universal para a Aprendizagem (CAST, 2024). Desde a versão 1.4, cada regra de reescrita declara o gatilho que o código verifica antes de pedir a reescrita ao modelo de linguagem, e o vocabulário (TEA-05) é explicado pelo código a partir do glossário deste arquivo.",
   "regras": [
     {
       "codigo": "TEA-01",
@@ -11,7 +11,10 @@
       "base": "WCAG 2.2 — SC 3.1.5 Reading Level (AAA)",
       "justificativa": "Período longo exige manter várias informações na memória de trabalho ao mesmo tempo. Dividir em frases curtas reduz essa carga sem tirar conteúdo do texto.",
       "aplicacao": "modelo",
-      "instrucao": "Divida todo período com mais de 20 palavras em frases independentes, cada uma com uma informação. Prefira frases de até 12 palavras."
+      "instrucao": "Divida todo período com mais de 20 palavras em frases independentes, cada uma com uma informação. Prefira frases de até 12 palavras.",
+      "gatilho": {
+        "palavras_por_frase_acima_de": 20
+      }
     },
     {
       "codigo": "TEA-02",
@@ -20,7 +23,10 @@
       "base": "W3C COGA — Make Each Step Clear; DUA 3.2 (CAST, 2024)",
       "justificativa": "Blocos com várias ideias dificultam localizar onde uma informação começa e termina.",
       "aplicacao": "modelo",
-      "instrucao": "Quando um parágrafo tratar de mais de uma ideia, separe cada ideia em um parágrafo próprio."
+      "instrucao": "Quando um parágrafo tratar de mais de uma ideia, separe cada ideia em um parágrafo próprio.",
+      "gatilho": {
+        "frases_por_paragrafo_acima_de": 3
+      }
     },
     {
       "codigo": "TEA-03",
@@ -29,7 +35,32 @@
       "base": "W3C COGA — Use Literal Language",
       "justificativa": "A compreensão literal é uma característica frequente no perfil TEA. Chamar a folha de \"fábrica\" pode ser entendido ao pé da letra e produzir erro de conceito.",
       "aplicacao": "modelo",
-      "instrucao": "Troque metáfora, comparação figurada, ironia e expressão idiomática pela descrição literal do que ela quer dizer. Não acrescente informação que a figura não continha."
+      "instrucao": "Troque metáfora, comparação figurada, ironia e expressão idiomática pela descrição literal do que ela quer dizer. Não acrescente informação que a figura não continha.",
+      "gatilho": {
+        "expressoes": [
+          "como se",
+          "é como",
+          "são como",
+          "parece um",
+          "parece uma",
+          "parecem",
+          "funciona como",
+          "funcionam como",
+          "uma espécie de",
+          "verdadeira fábrica",
+          "fábrica",
+          "pulmão do mundo",
+          "num piscar de olhos",
+          "ao pé da letra",
+          "de olho",
+          "dar uma mão",
+          "custa os olhos da cara",
+          "chover no molhado"
+        ],
+        "acompanha": [
+          "*"
+        ]
+      }
     },
     {
       "codigo": "TEA-04",
@@ -38,16 +69,36 @@
       "base": "W3C COGA — Use a Simple Sentence Structure",
       "justificativa": "A ordem direta reduz o esforço de identificar quem faz a ação.",
       "aplicacao": "modelo",
-      "instrucao": "Reescreva orações na voz passiva em voz ativa e coloque as frases na ordem direta: quem faz, o que faz, sobre o quê."
+      "instrucao": "Reescreva orações na voz passiva em voz ativa e coloque as frases na ordem direta: quem faz, o que faz, sobre o quê.",
+      "gatilho": {
+        "voz_passiva": true
+      }
     },
     {
       "codigo": "TEA-05",
       "nome": "Vocabulário explicado",
-      "descricao": "Explicar entre parênteses, na primeira ocorrência, todo termo fora do vocabulário esperado para o 5º ano.",
+      "descricao": "Explicar entre parênteses, na primeira ocorrência, cada termo do glossário do conjunto de regras — termos do conteúdo que estão fora do vocabulário esperado para o 5º ano.",
       "base": "WCAG 2.2 — SC 3.1.3 Unusual Words (AAA)",
       "justificativa": "Manter o termo técnico e explicá-lo preserva o conteúdo pedagógico (RN01) sem interromper a leitura para consultar outra fonte.",
-      "aplicacao": "modelo",
-      "instrucao": "Mantenha todo termo técnico do conteúdo e, na primeira vez que ele aparecer, explique-o entre parênteses com palavras que uma criança do 5º ano conhece. Palavra difícil que não é termo do conteúdo pode ser trocada por uma comum de mesmo sentido."
+      "aplicacao": "glossario",
+      "glossario": {
+        "clorofila": "substância verde que captura a luz do Sol",
+        "cloroplasto": "parte muito pequena da folha, que só aparece no microscópio",
+        "condensação": "passagem da água do estado de vapor para o estado líquido",
+        "decompositor": "ser vivo, como fungos e bactérias, que se alimenta de restos de seres vivos mortos e devolve substâncias ao solo",
+        "ecossistema": "conjunto dos seres vivos de um lugar e do ambiente onde eles vivem",
+        "estômato": "abertura muito pequena na superfície da folha",
+        "evaporação": "passagem da água do estado líquido para o estado de vapor",
+        "fotossíntese": "processo em que a planta usa a luz do Sol, a água e o gás carbônico para produzir o próprio alimento",
+        "glicose": "o alimento da planta",
+        "gás carbônico": "gás que existe no ar e que os seres vivos soltam quando respiram",
+        "habitat": "lugar onde um ser vivo costuma viver",
+        "invertebrado": "animal que não tem coluna vertebral",
+        "mamífero": "animal cuja fêmea produz leite para alimentar os filhotes",
+        "nutriente": "substância dos alimentos que o corpo usa para crescer e ter energia",
+        "precipitação": "queda da água das nuvens, como a chuva e o granizo",
+        "vertebrado": "animal que tem coluna vertebral"
+      }
     },
     {
       "codigo": "TEA-06",
@@ -56,7 +107,13 @@
       "base": "W3C COGA — Make the Relationship Between Ideas Clear",
       "justificativa": "Relação implícita obriga o leitor a inferir. A inferência é justamente o ponto de maior dificuldade descrito na literatura sobre compreensão leitora no autismo.",
       "aplicacao": "modelo",
-      "instrucao": "Quando a relação entre duas frases for de causa, consequência ou sequência, diga essa relação com um conectivo simples (porque, por isso, depois, então). Só explicite relação que o texto original já afirma."
+      "instrucao": "Quando a relação entre duas frases for de causa, consequência ou sequência, diga essa relação com um conectivo simples (porque, por isso, depois, então). Só explicite relação que o texto original já afirma.",
+      "gatilho": {
+        "acompanha": [
+          "TEA-01",
+          "TEA-02"
+        ]
+      }
     },
     {
       "codigo": "TEA-07",
@@ -65,7 +122,10 @@
       "base": "WCAG 2.2 — SC 2.4.10 Section Headings (AAA)",
       "justificativa": "O subtítulo antecipa o assunto do bloco e permite reencontrar a informação depois.",
       "aplicacao": "modelo",
-      "instrucao": "Antes de cada bloco temático que não tenha título, insira um subtítulo curto que diga do que o bloco trata. Mantenha os títulos que o material já tem."
+      "instrucao": "Se o bloco começa um assunto diferente do bloco anterior, devolva antes dele um subtítulo curto (tipo \"titulo\") que diga do que ele trata. Se o assunto continua o mesmo, não crie subtítulo.",
+      "gatilho": {
+        "palavras_sem_titulo_acima_de": 120
+      }
     },
     {
       "codigo": "TEA-08",

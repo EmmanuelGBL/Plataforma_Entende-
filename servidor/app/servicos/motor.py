@@ -1,29 +1,44 @@
 """MotorAdaptacao — RF05 e RF06, sob RN01, RN03 e RN08.
 
-Como funciona:
+O motor é híbrido: o código faz tudo o que uma regra declarada no arquivo
+consegue fazer sozinha, e o modelo de linguagem só reescreve o que exige
+entender a frase.
 
-1. O texto extraído é dividido em trechos — um por seção do material, e
-   nenhum maior que ~3.500 caracteres. Os trechos são adaptados em paralelo,
-   para caber no tempo de RNF07 (20 páginas em até 120 s).
-2. Cada trecho vai ao modelo com as instruções das regras do arquivo cuja
-   aplicação é "modelo". A resposta vem num esquema fixo: cada bloco
-   adaptado diz quais regras recebeu e de que trecho do original saiu.
-3. A regra de aplicação "estrutura" (TEA-09, antecipar a estrutura) é feita
-   aqui, pelo código, a partir dos títulos do texto já adaptado. Não há
-   motivo para pedir ao modelo o que uma lista de títulos resolve.
-4. As regras de "apresentação" (TEA-08, TEA-10) não mexem no texto: valem na
+1. O código lê cada parágrafo e item e marca os que precisam de reescrita,
+   com as regras que dispararam em cada um (gatilhos.py). Bloco sem marca
+   não vai ao modelo e fica igual ao original.
+2. O material é dividido em trechos — um por seção, nenhum maior que ~3.500
+   caracteres. Trecho sem bloco marcado não gera pedido. Os outros vão ao
+   modelo em paralelo, para caber no tempo de RNF07 (20 páginas em até 120 s).
+3. Cada pedido leva o trecho inteiro como contexto, mas pede de volta só os
+   blocos marcados, cada um com as instruções das regras que dispararam
+   nele — nunca um "adapte este texto" livre. A resposta vem num esquema
+   fixo, que diz quais regras cada bloco recebeu. O trecho de origem é o
+   próprio bloco marcado: o código já o conhece, e o modelo não precisa
+   copiá-lo de volta.
+4. A regra de "glossário" (TEA-05) é feita pelo código: explica entre
+   parênteses, na primeira ocorrência, cada termo do glossário do arquivo.
+5. A regra de "estrutura" (TEA-09, antecipar a estrutura) é feita pelo
+   código, a partir dos títulos do texto já adaptado.
+6. As regras de "apresentação" (TEA-08, TEA-10) não mexem no texto: valem na
    folha impressa (src/estilos/impressao.css) e na extração.
 
-Não existe adaptação parcial: se um trecho falha, a adaptação inteira falha,
+O modelo nunca apaga conteúdo por omissão: bloco marcado que não volta na
+resposta, ou volta sem texto, fica como estava no original (RN01).
+
+Não existe adaptação parcial: se um pedido falha, a adaptação inteira falha,
 pelo mesmo motivo da RN09.
 """
 
+import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
+from ..modelos import AplicacaoDaRegra
+from . import gatilhos
 from . import texto as md
 from .cliente_llm import ClienteLLM
-from .regras import ConjuntoDeclarado
+from .regras import ConjuntoDeclarado, RegraDeclarada
 
 TAMANHO_TRECHO = 3500
 PARALELISMO = 4
@@ -40,123 +55,223 @@ Limites que valem acima de qualquer regra (regra de negócio RN01 do sistema):
 - Mantenha a ordem em que as informações aparecem.
 - Escreva em português do Brasil, para uma criança de 10 a 11 anos.
 
-Regras a aplicar, com o código de cada uma:
+Regras deste pedido, com o código de cada uma:
 {regras}
 
-Formato da resposta:
-- Devolva o trecho adaptado como uma lista de blocos, na ordem de leitura.
-- "tipo": "titulo", "paragrafo", "item" (item de lista) ou "tabela".
+Como responder:
+- Você recebe um trecho do material com os blocos numerados (B1, B2...) e a \
+lista dos blocos a adaptar, cada um com as regras que valem para ele.
+- Adapte somente os blocos da lista, aplicando a cada um só as regras \
+indicadas para ele. Os outros blocos são contexto: não os devolva.
+- Para cada bloco adaptado, devolva o resultado como uma lista de blocos, na \
+ordem de leitura. Um parágrafo dividido vira vários blocos.
+- "tipo": "titulo" (só para subtítulo novo), "paragrafo" ou "item" (item de lista).
 - "nivel": de 1 a 3 para título (1 é o mais importante); 0 para os outros tipos.
-- "texto": o texto do bloco, sem marcação Markdown. Tabela vai como tabela Markdown.
+- "texto": o texto do bloco, sem marcação Markdown.
 - "regras_aplicadas": os códigos das regras que de fato mudaram aquele bloco. \
 Lista vazia se o bloco ficou igual ao original.
-- "trecho_original": a frase ou o trecho do original de onde o bloco saiu, \
-copiado exatamente como está no original. Para subtítulo novo, o primeiro \
-trecho do bloco que ele anuncia.
 """
 
 
 @dataclass
 class ResultadoAdaptacao:
     blocos: list[md.Bloco]
+    # Quanto do material precisou do modelo — o que o motor híbrido economiza.
+    blocos_adaptaveis: int = 0
+    blocos_ao_modelo: int = 0
+    pedidos: int = 0
 
     @property
     def texto(self) -> str:
         return md.escrever(self.blocos)
 
 
-def esquema_resposta(codigos: list[str]) -> dict:
+def esquema_resposta(rotulos: list[str], codigos: list[str]) -> dict:
     return {
         "type": "object",
         "properties": {
-            "blocos": {
+            "adaptados": {
                 "type": "array",
                 "items": {
                     "type": "object",
                     "properties": {
-                        "tipo": {"type": "string", "enum": ["titulo", "paragrafo", "item", "tabela"]},
-                        "nivel": {"type": "integer"},
-                        "texto": {"type": "string"},
-                        "regras_aplicadas": {
+                        "bloco": {"type": "string", "enum": rotulos},
+                        "resultado": {
                             "type": "array",
-                            "items": {"type": "string", "enum": codigos},
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "tipo": {"type": "string", "enum": ["titulo", "paragrafo", "item"]},
+                                    "nivel": {"type": "integer"},
+                                    "texto": {"type": "string"},
+                                    "regras_aplicadas": {
+                                        "type": "array",
+                                        "items": {"type": "string", "enum": codigos},
+                                    },
+                                },
+                                "required": ["tipo", "nivel", "texto", "regras_aplicadas"],
+                                "additionalProperties": False,
+                            },
                         },
-                        "trecho_original": {"type": "string"},
                     },
-                    "required": ["tipo", "nivel", "texto", "regras_aplicadas", "trecho_original"],
+                    "required": ["bloco", "resultado"],
                     "additionalProperties": False,
                 },
             }
         },
-        "required": ["blocos"],
+        "required": ["adaptados"],
         "additionalProperties": False,
     }
 
 
-def dividir_em_trechos(texto: str) -> list[str]:
-    trechos: list[list[md.Bloco]] = []
-    atual: list[md.Bloco] = []
+def _agrupar(blocos: list[md.Bloco]) -> list[list[int]]:
+    """Os índices dos blocos de cada trecho."""
+    trechos: list[list[int]] = []
+    atual: list[int] = []
     tamanho = 0
-    for bloco in md.ler(texto):
+    for indice, bloco in enumerate(blocos):
         # Título só abre trecho novo se o atual já tem conteúdo: o título do
         # capítulo vai junto com a primeira seção, e não sozinho num pedido.
-        tem_conteudo = any(b.tipo != "titulo" for b in atual)
+        tem_conteudo = any(blocos[i].tipo != "titulo" for i in atual)
         nova_secao = bloco.tipo == "titulo" and bloco.nivel <= 2 and tem_conteudo
         if nova_secao or (atual and tamanho + len(bloco.texto) > TAMANHO_TRECHO):
             trechos.append(atual)
             atual, tamanho = [], 0
-        atual.append(bloco)
+        atual.append(indice)
         tamanho += len(bloco.texto)
     if atual:
         trechos.append(atual)
-    return [md.escrever(t) for t in trechos]
+    return trechos
+
+
+def dividir_em_trechos(texto: str) -> list[str]:
+    blocos = md.ler(texto)
+    return [md.escrever([blocos[i] for i in trecho]) for trecho in _agrupar(blocos)]
 
 
 def adaptar(texto: str, conjunto: ConjuntoDeclarado, cliente: ClienteLLM) -> ResultadoAdaptacao:
-    regras = conjunto.regras_do_modelo()
-    sistema = SISTEMA.format(
-        regras="\n".join(f"- {r.codigo} ({r.nome}): {r.instrucao}" for r in regras)
-    )
-    esquema = esquema_resposta([r.codigo for r in regras])
-    trechos = dividir_em_trechos(texto)
+    originais = md.ler(texto)
+    marcas = gatilhos.marcar(originais, conjunto)
+    por_codigo = {r.codigo: r for r in conjunto.regras_do_modelo()}
+    trechos = [t for t in _agrupar(originais) if any(i in marcas for i in t)]
 
-    def adaptar_trecho(numero_e_trecho: tuple[int, str]) -> list[md.Bloco]:
+    def adaptar_trecho(numero_e_trecho: tuple[int, list[int]]) -> dict[int, list[md.Bloco]]:
         numero, trecho = numero_e_trecho
-        pedido = (
-            f"Trecho {numero} de {len(trechos)} do material. Adapte só este trecho.\n\n"
-            f"<original>\n{trecho}\n</original>"
+        rotulo = {indice: f"B{n}" for n, indice in enumerate(trecho, start=1)}
+        marcados = [i for i in trecho if i in marcas]
+        codigos = [c for c in por_codigo if any(c in marcas[i] for i in marcados)]
+        sistema = SISTEMA.format(
+            regras="\n".join(f"- {c} ({por_codigo[c].nome}): {por_codigo[c].instrucao}" for c in codigos)
         )
+        contexto = "\n\n".join(f"[{rotulo[i]}] {originais[i].em_markdown()}" for i in trecho)
+        lista = "\n".join(f"- {rotulo[i]}: {', '.join(marcas[i])}" for i in marcados)
+        pedido = (
+            f"Trecho {numero} de {len(trechos)} do material.\n\n"
+            f"<trecho>\n{contexto}\n</trecho>\n\n"
+            f"Blocos a adaptar e as regras de cada um:\n{lista}"
+        )
+        esquema = esquema_resposta([rotulo[i] for i in marcados], codigos)
         resposta = cliente.gerar_json(f"adaptacao {numero}/{len(trechos)}", sistema, pedido, esquema)
-        return _blocos_da_resposta(resposta, {r.codigo for r in regras})
+        return _blocos_da_resposta(resposta, {rotulo[i]: i for i in marcados}, originais, marcas)
 
     with ThreadPoolExecutor(max_workers=PARALELISMO) as execucao:
         partes = list(execucao.map(adaptar_trecho, enumerate(trechos, start=1)))
+    adaptados = {indice: blocos for parte in partes for indice, blocos in parte.items()}
 
-    blocos = [bloco for parte in partes for bloco in parte]
+    blocos: list[md.Bloco] = []
+    for indice, original in enumerate(originais):
+        blocos += adaptados.get(indice) or [md.Bloco(original.tipo, original.texto, original.nivel)]
+
+    for regra in conjunto.regras_de(AplicacaoDaRegra.GLOSSARIO):
+        blocos = aplicar_glossario(blocos, regra)
     if any(r.codigo == CODIGO_ESTRUTURA for r in conjunto.regras):
         blocos = antecipar_estrutura(blocos)
-    return ResultadoAdaptacao(blocos)
+    return ResultadoAdaptacao(
+        blocos,
+        blocos_adaptaveis=sum(b.tipo in gatilhos.TIPOS_ADAPTAVEIS for b in originais),
+        blocos_ao_modelo=len(marcas),
+        pedidos=len(trechos),
+    )
 
 
-def _blocos_da_resposta(resposta: dict, codigos_validos: set[str]) -> list[md.Bloco]:
-    blocos = []
-    for item in resposta.get("blocos", []):
-        texto = str(item.get("texto", "")).strip()
-        if not texto:
+def _blocos_da_resposta(
+    resposta: dict,
+    indice_do_rotulo: dict[str, int],
+    originais: list[md.Bloco],
+    marcas: dict[int, list[str]],
+) -> dict[int, list[md.Bloco]]:
+    adaptados: dict[int, list[md.Bloco]] = {}
+    for item in resposta.get("adaptados", []):
+        indice = indice_do_rotulo.get(str(item.get("bloco", "")))
+        if indice is None or indice in adaptados:
             continue
-        tipo = item.get("tipo", "paragrafo")
-        nivel = int(item.get("nivel") or 0)
-        blocos.append(
+        blocos = []
+        for parte in item.get("resultado", []):
+            texto = str(parte.get("texto", "")).strip()
+            if not texto:
+                continue
+            tipo = parte.get("tipo")
+            tipo = tipo if tipo in ("titulo", "paragrafo", "item") else "paragrafo"
+            nivel = int(parte.get("nivel") or 0)
+            blocos.append(
+                md.Bloco(
+                    tipo=tipo,
+                    texto=texto,
+                    nivel=max(1, min(nivel, 3)) if tipo == "titulo" else 0,
+                    # Mesmo com o esquema, só entra regra pedida para este bloco.
+                    regras=[
+                        c for c in dict.fromkeys(parte.get("regras_aplicadas", [])) if c in marcas[indice]
+                    ],
+                    trecho_original=originais[indice].texto,
+                )
+            )
+        # Resultado vazio, ou só com subtítulo, apagaria o conteúdo do bloco
+        # (RN01): nesse caso fica o original.
+        if any(b.tipo != "titulo" for b in blocos):
+            adaptados[indice] = blocos
+    return adaptados
+
+
+def aplicar_glossario(blocos: list[md.Bloco], regra: RegraDeclarada) -> list[md.Bloco]:
+    """TEA-05: na primeira vez que um termo do glossário aparece num parágrafo
+    ou item, a explicação entra entre parênteses logo depois dele.
+
+    O termo vale também no plural simples ("decompositor" acha
+    "decompositores"). Se o próprio texto já explica o termo entre parênteses
+    na primeira ocorrência, nada é acrescentado. Título e tabela ficam de fora.
+    """
+    pendentes = dict(regra.glossario or {})
+    resultado = []
+    for bloco in blocos:
+        if bloco.tipo not in gatilhos.TIPOS_ADAPTAVEIS or not pendentes:
+            resultado.append(bloco)
+            continue
+        # Procura no texto do material, e não no texto já com explicações: o
+        # termo que aparece dentro da explicação de outro não conta.
+        insercoes = []
+        for termo, explicacao in list(pendentes.items()):
+            achado = re.search(rf"(?<!\w){re.escape(termo)}(?:s|es)?(?!\w)", bloco.texto, re.IGNORECASE)
+            if achado is None:
+                continue
+            del pendentes[termo]
+            if not re.match(r"\s*\(", bloco.texto[achado.end():]):
+                insercoes.append((achado.end(), explicacao))
+        if not insercoes:
+            resultado.append(bloco)
+            continue
+        texto = bloco.texto
+        for posicao, explicacao in sorted(insercoes, reverse=True):
+            texto = f"{texto[:posicao]} ({explicacao}){texto[posicao:]}"
+        resultado.append(
             md.Bloco(
-                tipo=tipo,
-                texto=texto,
-                nivel=max(1, min(nivel, 3)) if tipo == "titulo" else 0,
-                # Mesmo com o esquema, só entra código que está no arquivo.
-                regras=[c for c in dict.fromkeys(item.get("regras_aplicadas", [])) if c in codigos_validos],
-                trecho_original=str(item.get("trecho_original", "")).strip(),
+                bloco.tipo,
+                texto,
+                bloco.nivel,
+                regras=[*bloco.regras, regra.codigo],
+                trecho_original=bloco.trecho_original or bloco.texto,
             )
         )
-    return blocos
+    return resultado
 
 
 def antecipar_estrutura(blocos: list[md.Bloco]) -> list[md.Bloco]:
