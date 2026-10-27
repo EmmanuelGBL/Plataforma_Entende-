@@ -1,8 +1,5 @@
-"""Liga os serviços na ordem do diagrama de sequência 03: regras → motor →
-registro das regras aplicadas → métricas → questões.
-
-Fica separado das rotas para que a ordem — e o que acontece quando uma etapa
-falha — esteja num lugar só.
+"""Liga os serviços na ordem da adaptação: regras → motor → registro das
+regras aplicadas → métricas → questões.
 """
 
 import logging
@@ -28,8 +25,7 @@ from .cliente_llm import ClienteLLM
 
 log = logging.getLogger("entende")
 
-# Sem I, O, 0 e 1: o código é ditado em voz alta na sala (o mesmo alfabeto
-# de src/servicos/api.js).
+# Sem I, O, 0 e 1, para não confundir ao ditar o código.
 ALFABETO_CODIGO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 
@@ -82,14 +78,14 @@ def adaptar_material(
     recalcular_metricas(adaptacao)
     sessao.add(adaptacao)
 
-    # Questões só na primeira adaptação: se o professor já revisou as dele
-    # (RF14), reprocessar o texto (RF12) não as apaga.
+    # Questões só na primeira adaptação: reprocessar (RF12) não apaga as
+    # questões já revisadas pelo professor (RF14).
     if not material.questoes:
         try:
             gerar_questoes(sessao, material, adaptacao.texto_adaptado, cliente)
         except ErroDeNegocio as erro:
-            # A adaptação não se perde por causa das questões: elas podem ser
-            # geradas de novo pela tela da atividade.
+            # Se as questões falharem, a adaptação é mantida; elas podem ser geradas
+            # de novo pela tela da atividade.
             log.warning("Questões não geradas para %s: %s", material.id, erro.titulo)
 
     sessao.commit()
@@ -112,8 +108,7 @@ def recalcular_metricas(adaptacao: Adaptacao) -> None:
 
 
 def editar_texto(adaptacao: Adaptacao, texto: str) -> None:
-    """RF09. Editar depois de aprovar volta a pedir aprovação (RN02): o que
-    foi aprovado não é mais o que está ali."""
+    """RF09. Editar depois de aprovar volta a pedir aprovação (RN02)."""
     adaptacao.texto_adaptado = texto.strip()
     adaptacao.status = StatusAdaptacao.EM_REVISAO
     adaptacao.data_aprovacao = None

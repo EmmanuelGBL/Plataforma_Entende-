@@ -1,8 +1,7 @@
 import { Botao } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 
-/* Heurística H9: a página de erro diz o que aconteceu, em linguagem de
-   gente, e oferece uma saída — nunca só um código de erro. */
+/* Página de endereço inexistente, com o caminho de volta. */
 export function NaoEncontrada() {
   usarTituloDaPagina('Página não encontrada');
 

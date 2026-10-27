@@ -1,13 +1,9 @@
 """MotorAdaptacao, gatilhos e conjunto de regras — RF05, RF06, RN01, RN08,
 RNF13, RNF14.
 
-Sobre RNF14 ("testes automatizados cobrindo cada regra"): o teste
-parametrizado abaixo passa por TODAS as regras do arquivo e confere que cada
-uma chega aonde deve — a instrução ao modelo, o glossário, o código da
-estrutura ou a folha impressa. Os testes de gatilho conferem, regra a regra,
-quando o código decide pedir a reescrita. O que nenhum teste automatizado
-mede é se o modelo de linguagem reescreveu bem: isso é a validação com
-especialistas (OE3), não a suíte.
+O teste parametrizado passa por todas as regras do arquivo e confere que cada
+uma chega aonde deve: instrução ao modelo, glossário, estrutura ou folha
+impressa. Os testes de gatilho conferem quando o código pede a reescrita.
 """
 
 import json

@@ -5,25 +5,9 @@ import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarAdaptacao, usarApp } from '../contextos/Aplicacao.jsx';
 import '../estilos/impressao.css';
 
-/* =========================================================================
-   UC23 — Imprimir as questões (RF23)
-   Exportar as questões da atividade em folha imprimível, no formato de
-   RNF05, com e sem gabarito.
-
-   Por que isso existe, agora que a atividade tem jogo: nem toda turma tem
-   máquina para todo mundo, e nem todo estudante quer fazer a atividade numa
-   tela. A folha é o terceiro caminho da mesma atividade — as questões são as
-   mesmas do jogo e da lista, todas geradas do próprio material (RN04) e
-   revisadas pelo professor antes de publicar (RF14, RN02).
-
-   A mecânica de gerar o PDF é a mesma de RF11: página formatada com `@page` e
-   `@media print`, e o PDF sai pela função de impressão do navegador. Sem
-   back-end e sem biblioteca — ver o cabeçalho de `Impressao.jsx`.
-
-   O gabarito é opcional e sai em página separada, pelo mesmo motivo da ficha
-   da adaptação: é documento do professor, não do estudante. O padrão é sem
-   gabarito, porque o caso comum é imprimir para entregar.
-   ========================================================================= */
+/* RF23 — folha imprimível das questões da atividade, com gabarito opcional
+   em página separada. O PDF sai pela impressão do navegador, como em
+   Impressao.jsx. */
 
 export function QuestionarioImpresso() {
   const { id } = useParams();
@@ -113,11 +97,7 @@ export function QuestionarioImpresso() {
           </dl>
         </div>
 
-        {/* Sem campo de nome, de turma ou de nota. RN05 vale também no papel:
-            o sistema não pede dado que identifique a criança, e uma folha
-            gerada por ele não vai pedir pelas nossas costas. Se o professor
-            quiser identificar as folhas da turma dele, ele escreve — é decisão
-            da escola, não do sistema. */}
+        {/* Sem campo de nome, turma ou nota (RN05). */}
         <p className="folha__instrucao">
           Leia cada pergunta e marque a resposta que você acha certa.
         </p>

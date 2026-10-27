@@ -1,13 +1,9 @@
-"""ClienteLLM — a única porta do sistema para o modelo de linguagem.
+"""ClienteLLM — único ponto do sistema que chama o modelo de linguagem.
 
-O motor e o gerador de questões dependem só da interface (`ClienteLLM`), não
-do fornecedor. É o que permite testar os dois sem rede e sem custo, com um
-cliente falso, e trocar de modelo sem tocar nas regras (risco R5 do
-documento de metodologia: o critério é do projeto, não do modelo).
-
-O modelo nunca recebe "adapte este texto" em prompt livre: recebe as
-instruções das regras do arquivo e devolve JSON num esquema fixo, que diz
-quais regras aplicou em cada trecho. Sem esse esquema não haveria RF06.
+O motor e o gerador de questões dependem só da interface `ClienteLLM`, o que
+permite testá-los com um cliente falso, sem rede. O modelo recebe as
+instruções das regras do arquivo e responde em JSON num esquema fixo, que diz
+quais regras aplicou em cada trecho (RF06).
 """
 
 import json
@@ -40,8 +36,8 @@ _INDISPONIVEL = ErroDeNegocio(
 
 
 class ClienteClaude:
-    # Cada trecho do material é um pedido. 32 mil tokens de saída sobram para
-    # um trecho de ~3.500 caracteres reescrito e explicado, com folga.
+    # Cada trecho do material é um pedido; 32 mil tokens de saída bastam para
+    # um trecho de ~3.500 caracteres.
     MAXIMO_SAIDA = 32000
 
     def __init__(self, modelo: str, chave: str | None = None):
@@ -59,8 +55,7 @@ class ClienteClaude:
                 system=sistema,
                 messages=[{"role": "user", "content": conteudo}],
                 output_config={"format": {"type": "json_schema", "schema": esquema}},
-                # Se o modelo principal recusar o pedido, o próprio serviço
-                # tenta o modelo reserva recomendado para aquele motivo.
+                # Se o modelo principal recusar o pedido, o serviço tenta o modelo reserva.
                 betas=["server-side-fallback-2026-07-01"],
                 fallbacks="default",
             ) as fluxo:

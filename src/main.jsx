@@ -10,9 +10,8 @@ import './estilos/tokens.css';
 import './estilos/base.css';
 import './estilos/componentes.css';
 
-/* HashRouter, e não BrowserRouter: o mesmo build precisa funcionar no GitHub
-   Pages (onde recarregar uma rota daria 404) e no arquivo único offline
-   levado às sessões presenciais de teste, onde não há servidor. */
+/* HashRouter: o mesmo build funciona no GitHub Pages e no arquivo offline,
+   que não têm servidor para reescrever as rotas. */
 
 createRoot(document.getElementById('raiz')).render(
   <StrictMode>

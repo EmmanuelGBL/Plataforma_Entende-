@@ -1,15 +1,8 @@
-/* =========================================================================
-   Indicadores de progresso — heurística H1 (visibilidade do status).
+/* Indicadores de progresso.
 
-   Passos: mostra onde o professor está dentro do envio e quantas etapas
-   faltam. `aria-current="step"` é o que informa isso a quem não vê a cor.
-
-   BarraProgresso: usa <progress> nativo por baixo? Não — foi preferido o
-   role="progressbar" com valores ARIA porque <progress> tem estilização
-   inconsistente entre navegadores, e RNF04 exige Chrome e Firefox iguais.
-   O texto ao lado repete o percentual, então a informação não depende da
-   barra (SC 1.4.1).
-   ========================================================================= */
+   Passos: etapa atual do envio (aria-current="step").
+   BarraProgresso: role="progressbar" com valores ARIA e o percentual repetido
+   em texto. */
 
 export function Passos({ passos, atual }) {
   return (

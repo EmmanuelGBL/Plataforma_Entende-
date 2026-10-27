@@ -5,27 +5,10 @@ import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarAdaptacao, usarApp } from '../contextos/Aplicacao.jsx';
 import '../estilos/impressao.css';
 
-/* =========================================================================
-   RF11 — exportar o material adaptado em PDF, no formato de RNF05.
+/* RF11 — material adaptado em PDF, no formato de RNF05.
 
-   Como isso funciona sem back-end: a saída é uma página formatada com
-   `@media print` e regra `@page`, e o PDF é gerado pela própria função de
-   impressão do navegador ("Salvar como PDF" no destino). O arquivo que sai
-   é um PDF de verdade, com texto selecionável — não é imagem.
-
-   Isso não é um contorno preguiçoso. É a forma correta de gerar documento
-   paginado a partir de HTML, e tem uma vantagem sobre montar o PDF no
-   servidor: o texto do PDF é o mesmo nó de texto que está na tela, então a
-   conformidade com RNF02 e RNF05 é verificável olhando o CSS, e não
-   confiando numa biblioteca.
-
-   O que continua sendo do back-end na versão final: guardar o arquivo
-   gerado, versioná-lo junto ao registro da adaptação e permitir baixá-lo de
-   novo depois. A formatação, que é o que os requisitos exigem, é aqui.
-
-   A folha `impressao.css` traz, comentado, qual parâmetro atende a qual
-   requisito.
-   ========================================================================= */
+   A página é formatada com @media print e @page (estilos/impressao.css), e
+   o PDF é gerado pela função de impressão do navegador, com texto selecionável. */
 
 export function Impressao() {
   const { id } = useParams();
@@ -66,9 +49,7 @@ export function Impressao() {
 
   return (
     <>
-      {/* Esta rota fica fora dos dois layouts, então precisa declarar os próprios
-          marcos de página: sem eles, a barra e a folha ficariam fora de qualquer
-          landmark e a página não teria `main` (SC 1.3.1, recomendação 1.4 do e-MAG). */}
+      {/* Rota fora dos layouts: declara os próprios marcos de página (header, main). */}
       <header className="barra-impressao" aria-label="Ações do material adaptado">
         <div className="barra-impressao__interna">
           <Botao onClick={() => window.print()}>Salvar como PDF ou imprimir</Botao>
@@ -112,9 +93,7 @@ export function Impressao() {
             <dd>{dados.perfil} — Transtorno do Espectro Autista</dd>
             <dt>Conjunto de regras:</dt>
             <dd>{dados.versaoRegras}</dd>
-            {/* Sai impresso de propósito: um PDF cujo cabeçalho diz "História" e
-                cujo texto é de Ciências, circulando fora da tela, seria pior que
-                a linha de aviso. */}
+            {/* O aviso de conteúdo de demonstração também sai no papel. */}
             {!dados.conteudoProprio && (
               <>
                 <dt>Observação:</dt>

@@ -1,33 +1,21 @@
 """MotorAdaptacao — RF05 e RF06, sob RN01, RN03 e RN08.
 
-O motor é híbrido: o código faz tudo o que uma regra declarada no arquivo
-consegue fazer sozinha, e o modelo de linguagem só reescreve o que exige
-entender a frase.
+O motor é híbrido: o código aplica o que uma regra do arquivo consegue fazer
+sozinha, e o modelo de linguagem só reescreve o que exige entender a frase.
 
-1. O código lê cada parágrafo e item e marca os que precisam de reescrita,
-   com as regras que dispararam em cada um (gatilhos.py). Bloco sem marca
-   não vai ao modelo e fica igual ao original.
-2. O material é dividido em trechos — um por seção, nenhum maior que ~3.500
-   caracteres. Trecho sem bloco marcado não gera pedido. Os outros vão ao
-   modelo em paralelo, para caber no tempo de RNF07 (20 páginas em até 120 s).
-3. Cada pedido leva o trecho inteiro como contexto, mas pede de volta só os
-   blocos marcados, cada um com as instruções das regras que dispararam
-   nele — nunca um "adapte este texto" livre. A resposta vem num esquema
-   fixo, que diz quais regras cada bloco recebeu. O trecho de origem é o
-   próprio bloco marcado: o código já o conhece, e o modelo não precisa
-   copiá-lo de volta.
-4. A regra de "glossário" (TEA-05) é feita pelo código: explica entre
-   parênteses, na primeira ocorrência, cada termo do glossário do arquivo.
-5. A regra de "estrutura" (TEA-09, antecipar a estrutura) é feita pelo
-   código, a partir dos títulos do texto já adaptado.
-6. As regras de "apresentação" (TEA-08, TEA-10) não mexem no texto: valem na
-   folha impressa (src/estilos/impressao.css) e na extração.
+1. O código marca os parágrafos e itens que precisam de reescrita, com as
+   regras que dispararam em cada um (gatilhos.py).
+2. O material é dividido em trechos (um por seção, até ~3.500 caracteres).
+   Trecho sem bloco marcado não gera pedido; os outros vão ao modelo em
+   paralelo (RNF07).
+3. Cada pedido leva o trecho como contexto e pede de volta só os blocos
+   marcados, cada um com as instruções das suas regras. A resposta segue um
+   esquema fixo, que diz quais regras cada bloco recebeu.
+4. O código aplica o glossário (TEA-05) e a antecipação da estrutura (TEA-09).
+5. TEA-08 e TEA-10 valem na folha impressa e na extração.
 
-O modelo nunca apaga conteúdo por omissão: bloco marcado que não volta na
-resposta, ou volta sem texto, fica como estava no original (RN01).
-
-Não existe adaptação parcial: se um pedido falha, a adaptação inteira falha,
-pelo mesmo motivo da RN09.
+Bloco marcado que não volta na resposta, ou volta vazio, fica como no
+original (RN01). Se um pedido falha, a adaptação inteira falha.
 """
 
 import re
@@ -76,7 +64,7 @@ Lista vazia se o bloco ficou igual ao original.
 @dataclass
 class ResultadoAdaptacao:
     blocos: list[md.Bloco]
-    # Quanto do material precisou do modelo — o que o motor híbrido economiza.
+    # Quantos blocos foram ao modelo e em quantos pedidos.
     blocos_adaptaveis: int = 0
     blocos_ao_modelo: int = 0
     pedidos: int = 0
@@ -131,7 +119,7 @@ def _agrupar(blocos: list[md.Bloco]) -> list[list[int]]:
     tamanho = 0
     for indice, bloco in enumerate(blocos):
         # Título só abre trecho novo se o atual já tem conteúdo: o título do
-        # capítulo vai junto com a primeira seção, e não sozinho num pedido.
+        # capítulo vai junto com a primeira seção.
         tem_conteudo = any(blocos[i].tipo != "titulo" for i in atual)
         nova_secao = bloco.tipo == "titulo" and bloco.nivel <= 2 and tem_conteudo
         if nova_secao or (atual and tamanho + len(bloco.texto) > TAMANHO_TRECHO):
@@ -234,11 +222,10 @@ def _blocos_da_resposta(
 
 def aplicar_glossario(blocos: list[md.Bloco], regra: RegraDeclarada) -> list[md.Bloco]:
     """TEA-05: na primeira vez que um termo do glossário aparece num parágrafo
-    ou item, a explicação entra entre parênteses logo depois dele.
+        ou item, a explicação entra entre parênteses logo depois dele.
 
-    O termo vale também no plural simples ("decompositor" acha
-    "decompositores"). Se o próprio texto já explica o termo entre parênteses
-    na primeira ocorrência, nada é acrescentado. Título e tabela ficam de fora.
+        Vale também o plural simples. Se o texto já explica o termo entre
+        parênteses, nada é acrescentado. Título e tabela ficam de fora.
     """
     pendentes = dict(regra.glossario or {})
     resultado = []
@@ -246,8 +233,7 @@ def aplicar_glossario(blocos: list[md.Bloco], regra: RegraDeclarada) -> list[md.
         if bloco.tipo not in gatilhos.TIPOS_ADAPTAVEIS or not pendentes:
             resultado.append(bloco)
             continue
-        # Procura no texto do material, e não no texto já com explicações: o
-        # termo que aparece dentro da explicação de outro não conta.
+        # Procura no texto do bloco, e não nas explicações já acrescentadas.
         insercoes = []
         for termo, explicacao in list(pendentes.items()):
             achado = re.search(rf"(?<!\w){re.escape(termo)}(?:s|es)?(?!\w)", bloco.texto, re.IGNORECASE)
@@ -277,8 +263,8 @@ def aplicar_glossario(blocos: list[md.Bloco], regra: RegraDeclarada) -> list[md.
 def antecipar_estrutura(blocos: list[md.Bloco]) -> list[md.Bloco]:
     """TEA-09: abre o material com a lista do que será lido, na ordem.
 
-    Se o material começa com um título único de nível mais alto (o nome do
-    capítulo), a lista entra logo depois dele e enumera as seções abaixo.
+        Se o material começa com o título do capítulo, a lista entra logo
+        depois dele e enumera as seções.
     """
     titulos = [b for b in blocos if b.tipo == "titulo"]
     if not titulos:

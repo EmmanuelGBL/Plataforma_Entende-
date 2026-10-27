@@ -6,26 +6,8 @@ import {
   usarAtividadeDoCodigo,
 } from '../componentes/AtividadeAcesso.jsx';
 
-/* =========================================================================
-   UC22 — Escolher a forma da atividade (RF22)
-   O estudante escolhe, ao abrir o link, entre a mecânica gamificada (RF21) e
-   a lista de perguntas (RF16/RF17). A atividade é a mesma nas duas: as
-   questões saem do mesmo banco gerado do material (RF13, RN04).
-
-   Por que existe uma tela antes da atividade, em vez de o link já cair no
-   jogo:
-
-   - Quem não quer jogar não deve ser obrigado a jogar. A lista de perguntas
-     continua sendo um caminho completo, e não um modo degradado — é ela que
-     corresponde à folha impressa que o professor entrega (RF23).
-   - Escolher antes de começar é agência sobre a atividade, e vem antes de
-     qualquer parte em que a criança possa errar. É a mesma razão pela qual,
-     dentro do jogo, ela mira antes de responder.
-   - Duas opções, com uma frase cada, ditas no mesmo lugar toda vez. Escolha
-     curta e estável não é o mesmo que excesso de escolha.
-
-   RN05 continua valendo: nada aqui pergunta quem é a criança.
-   ========================================================================= */
+/* Tela de escolha da forma da atividade (RF22): jogar (RF21) ou responder
+   às perguntas (RF16). As questões são as mesmas nas duas formas. */
 
 export function AtividadeEscolha() {
   const { codigo } = useParams();

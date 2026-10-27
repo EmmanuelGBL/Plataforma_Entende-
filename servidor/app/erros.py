@@ -1,9 +1,5 @@
-"""Erro de negócio com motivo legível e saída sugerida.
-
-É o mesmo formato do `ErroDeNegocio` de src/servicos/api.js — título, motivo,
-saída e regra —, para que o front-end mostre a resposta do servidor sem
-traduzir nada. Heurística H9: o professor precisa saber o que aconteceu e o
-que fazer a seguir, e não receber um código de status.
+"""Erro de negócio com título, motivo, saída sugerida e regra. É o formato
+que a interface mostra ao professor.
 """
 
 from fastapi import Request

@@ -3,15 +3,8 @@ import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarCatalogo } from '../contextos/Aplicacao.jsx';
 import { CONJUNTO_REGRAS, REGRAS } from '../dados/conteudo.js';
 
-/* =========================================================================
-   Heurística H10 — ajuda e documentação.
-   Também é onde RF10 se cumpre fora do contexto de um material específico: o
-   professor consegue consultar o conjunto inteiro de regras e a base
-   normativa de cada uma antes mesmo de enviar o primeiro arquivo.
-
-   A ajuda responde perguntas de professor, não de programador. "O que o
-   sistema muda no meu material" vem antes de "formatos aceitos".
-   ========================================================================= */
+/* Tela de Ajuda: perguntas frequentes e catálogo das regras do conjunto
+   vigente, com a base normativa de cada uma (RF10). */
 
 const PERGUNTAS = [
   {
@@ -58,8 +51,8 @@ const PERGUNTAS = [
 
 export function Ajuda() {
   usarTituloDaPagina('Ajuda');
-  // Enquanto o servidor não responde (ou se não responder), mostra a versão
-  // que acompanha a interface, em vez de uma tabela vazia.
+  // Enquanto o servidor não responde, mostra o catálogo que acompanha a
+  // interface.
   const catalogo = usarCatalogo();
   const conjunto = catalogo?.conjunto ?? CONJUNTO_REGRAS;
   const regras = catalogo?.regras ?? REGRAS;

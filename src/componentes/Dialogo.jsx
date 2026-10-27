@@ -1,19 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { Botao } from './basicos.jsx';
 
-/* =========================================================================
-   Diálogo de confirmação.
-
-   Usado nas duas ações irreversíveis do sistema — excluir material (RF20) e
-   publicar/revogar atividade (RN02, RN06). É a implementação da heurística
-   H5, e o lugar onde mais se erra em acessibilidade. Aqui:
-
-   - o foco entra no diálogo e fica preso enquanto ele estiver aberto;
-   - Esc fecha (H3 — saída de emergência);
-   - ao fechar, o foco volta para o botão que abriu, e não para o topo da
-     página, que é onde o leitor de tela se perderia;
-   - aria-modal + role="dialog" + título ligado por aria-labelledby.
-   ========================================================================= */
+/* Diálogo de confirmação das ações irreversíveis (excluir, publicar, revogar).
+   O foco fica preso no diálogo, Esc fecha e, ao fechar, o foco volta ao
+   botão que o abriu. */
 
 export function Dialogo({
   aberto,
@@ -26,10 +16,8 @@ export function Dialogo({
   confirmarDesabilitado,
   perigo,
   largo,
-  /* Substitui o par cancelar/confirmar. Existe para o diálogo servir também a
-     quem não tem o que confirmar — o painel de ajustes do jogo aplica cada
-     escolha na hora, e oferecer "Cancelar" ali prometeria um desfazer que não
-     existe (H5 ao contrário: pior que não ter saída é ter uma saída falsa). */
+  /* Substitui o par cancelar/confirmar, para diálogos que só têm "Pronto"
+     (por exemplo, os ajustes do jogo, que valem na hora). */
   acoes,
 }) {
   const caixa = useRef(null);

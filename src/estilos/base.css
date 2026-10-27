@@ -1,6 +1,4 @@
-/* =========================================================================
-   Entende+ — base: reset, tipografia, layout, foco, marcos de página
-   ========================================================================= */
+/* Base: reset, tipografia, layout, foco e marcos de página. */
 
 *,
 *::before,
@@ -30,9 +28,8 @@ body {
 
 img, svg { max-width: 100%; display: block; }
 
-/* `color: inherit` é obrigatório aqui, não estilo: sem ele, botão e campo
-   caem na cor padrão do navegador (preto) e desaparecem no modo de alto
-   contraste, que tem fundo preto. Foi assim que o defeito apareceu. */
+/* `color: inherit`: sem isto, botão e campo ficam pretos e somem no modo de
+   alto contraste, que tem fundo preto. */
 input, button, textarea, select {
   font: inherit;
   letter-spacing: inherit;
@@ -40,8 +37,8 @@ input, button, textarea, select {
 }
 
 /* --- Movimento -----------------------------------------------------------
-   Respeita a preferência do sistema (SC 2.3.3) e também o controle manual
-   do painel de preferências, para quem não sabe mexer no sistema.          */
+      Zera animações quando o sistema pede movimento reduzido ou quando o
+      painel Exibição está em "Reduzido". */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -85,9 +82,7 @@ a:hover { text-decoration-thickness: 2px; }
 
 code { font-family: var(--fonte-mono); font-size: 0.92em; }
 
-/* Tecla do teclado. Sem isto o <kbd> herda só a fonte monoespaçada do
-   navegador e "Shift + Tab" no meio da frase vira um borrão de texto cinza,
-   sem parecer tecla nenhuma. A borda é o que faz a leitura funcionar. */
+/* Tecla do teclado (<kbd>), com borda para parecer tecla. */
 kbd {
   font-family: var(--fonte-texto);
   font-size: 0.8125em;
@@ -104,8 +99,8 @@ kbd {
 }
 
 /* --- Foco visível --------------------------------------------------------
-   Um único estilo de foco no app inteiro (SC 2.4.7 e 2.4.13). Nunca use
-   outline:none sem substituir — foi decisão registrada no documento.       */
+      Um único estilo de foco no sistema inteiro. Não usar outline: none sem
+      substituir. */
 :focus-visible {
   outline: var(--contorno-foco);
   outline-offset: var(--deslocamento-foco);
@@ -113,8 +108,8 @@ kbd {
 }
 :focus:not(:focus-visible) { outline: none; }
 
-/* Alvo em que o foco é movido por código na troca de rota: recebe o mesmo
-   contorno, mas sem virar item de tabulação permanente. */
+/* Elemento que recebe foco por código na troca de rota: mesmo contorno,
+   sem entrar na ordem de tabulação. */
 [tabindex='-1']:focus { outline: none; }
 
 /* --- Conteúdo só para leitor de tela ------------------------------------- */
@@ -129,9 +124,8 @@ kbd {
   border: 0;
 }
 
-/* --- Links de salto (WCAG SC 2.4.1 + e-MAG rec. 1.5) ---------------------
-   Ficam fora da tela até receberem foco. São os primeiros elementos da
-   ordem de tabulação.                                                      */
+/* --- Links de salto (WCAG SC 2.4.1 e e-MAG rec. 1.5) ---------------------
+      Ficam fora da tela até receberem foco. */
 .saltos { position: absolute; top: 0; left: 0; z-index: 100; }
 .saltos a {
   position: absolute;
@@ -158,27 +152,18 @@ kbd {
   padding: var(--e6) var(--respiro-lateral) var(--e7);
 }
 
-/* Telas de texto corrido (Acessibilidade, 404) não usam a largura de trabalho:
-   num container de 90rem o parágrafo pararia em 68ch e sobraria meia tela
-   vazia à direita. Aqui o container encolhe até a coluna de leitura. */
+/* Telas de texto corrido (Acessibilidade, 404): o container encolhe até a
+   coluna de leitura. */
 .pagina-leitura { max-width: 58rem; }
 
-/* Fluxo linear (Enviar): três passos e um formulário, não uma comparação. No
-   container de trabalho o cabeçalho e os passos ficavam colados à esquerda e
-   o cartão, em fit-content, também; sobrava meia tela vazia à direita. A tela
-   inteira vira uma coluna centralizada, e o cartão passa a preencher a coluna
-   para alinhar as bordas com o cabeçalho e os passos. */
+/* Fluxo linear (Enviar): uma coluna centralizada. */
 .pagina-fluxo { max-width: 54rem; margin-inline: auto; }
 .pagina-fluxo .cartao--acao { max-width: none; }
 
 .cabecalho-pagina { margin-bottom: var(--e5); }
 .cabecalho-pagina p { color: var(--cor-texto-apoio); margin-top: var(--e2); }
 
-/* Cabeçalho com as ações principais da tela à direita do título. As duas ações
-   da adaptação (aprovar e ir para a atividade) ficavam no pé da página, depois
-   do quadro de métricas: quem já tinha revisado precisava rolar de volta para
-   agir. Aqui elas ficam visíveis na abertura da tela e continuam no fim da
-   ordem de tabulação do cabeçalho, depois do título e das etiquetas. */
+/* Cabeçalho com as ações principais da tela à direita do título. */
 .cabecalho-acoes {
   display: flex;
   flex-wrap: wrap;
@@ -252,12 +237,7 @@ kbd {
 }
 .rodape ul { display: flex; gap: var(--e4); flex-wrap: wrap; list-style: none; padding: 0; }
 
-/* O crédito do rodapé é a única exceção ao teto de 68 caracteres, e a exceção
-   é legítima: o limite do SC 1.4.8 existe para bloco de texto, onde o olho
-   precisa voltar da direita de uma linha para a esquerda da seguinte. Aqui é
-   uma linha só de crédito institucional, e quebrá-la em duas no meio de
-   "Sistemas / de Informação" é justamente o que atrapalha a leitura. Em tela
-   estreita ela volta a quebrar sozinha, porque o container é que encolhe. */
+/* O crédito do rodapé ocupa uma linha só; em tela estreita, quebra normalmente. */
 .rodape-interno p { max-width: none; }
 
 /* --- Utilitários de layout ----------------------------------------------- */
@@ -275,8 +255,7 @@ kbd {
   .duas-colunas { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* Zoom de 200% (SC 1.4.4) e telas de 360px (RNF04) caem no mesmo caminho:
-   tudo vira uma coluna, nada é escondido. */
+/* Tela estreita e zoom de 200%: tudo vira uma coluna. */
 @media (max-width: 40rem) {
   .conteudo { padding: var(--e4) var(--e3) var(--e6); }
   h1 { font-size: 1.5rem; }

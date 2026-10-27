@@ -12,54 +12,19 @@ import {
 } from '../componentes/AtividadeAcesso.jsx';
 import '../estilos/jogo.css';
 
-/* =========================================================================
-   UC21 — Jogar a mecânica gamificada (RF21)
-   RN04 — as questões são as do material enviado, e só dele.
-   RN05 — sem cadastro e sem nenhum dado que identifique o estudante.
-   RN11 — as catorze regras de desenho G01 a G14.
+/* Atividade em forma de jogo (RF21), com as questões do material (RN04)
+   e sem nenhum dado do estudante (RN05). Segue as regras de desenho G01–G14
+   (RN11).
 
-   O desenho desta tela vem de `Entrega-14-09/mecanica-atividade-gamificada.md`,
-   que registra a ideia original (jogo de pênalti), a pesquisa sobre jogo sério
-   para TEA e as mudanças que a pesquisa impôs à ideia. Cada regra G citada
-   abaixo está naquele documento com a diretriz de origem.
-
-   A estrutura de turno é sempre a mesma, do começo ao fim (G01):
+   Cada rodada tem sempre a mesma ordem:
 
        mirar  →  responder  →  resultado  →  próxima
 
-   As decisões que sustentam a tela, e que não devem ser "melhoradas" sem
-   reler a pesquisa:
-
-   · **A dica está disponível ANTES de errar** (G11). É a aplicação da
-     aprendizagem sem erro, prática consolidada no ensino a pessoas autistas: o
-     apoio vem antes da resposta e vai sendo retirado, em vez de a criança
-     errar primeiro para só então receber ajuda. Pedir dica não custa nada, não
-     é contado em lugar nenhum e não aparece no resumo do treino.
-   · **Errar não tira nada** (G04, G05). A conta mostra só acerto. Não existe
-     contador de erro, de tentativa nem de tempo. Quem erra recebe a dica e
-     tenta de novo, ou passa para a próxima se preferir — as duas saídas ficam
-     visíveis ao mesmo tempo, e nenhuma delas é apresentada como desistência.
-   · **A questão é o portão da ação.** A criança não responde para ganhar
-     ponto: responder é o que move a bola. É o que amarra a mecânica ao
-     conteúdo, em vez de pendurar conteúdo num jogo pronto.
-   · **Sem cronômetro, nunca** (G03). A bola espera. Não há nada na tela que
-     comunique urgência, e a cena só se mexe depois da resposta confirmada.
-   · **Tema é pele, não estrutura** (G07). Futebol é opção; o padrão é neutro.
-     Interesse circunscrito é motivador quando é o interesse *daquela* criança,
-     e tema fixo de futebol engaja quem gosta de futebol e perde o resto da
-     turma. A mecânica é idêntica nas duas peles.
-   · **O acerto tem reconhecimento visual, e ele vem ligado** (G08). Até 20/09
-     o jogo oferecia como recompensa apenas um contador — e contador é medida
-     quantitativa, justamente a forma de recompensa que a literatura descreve
-     como a MENOS preferida por criança autista, atrás de animação. O balanço
-     da rede é curto, silencioso e não pisca. O que continua desligado por
-     padrão é o som e qualquer efeito intenso.
-
-   Sobre o que se pode afirmar disso no artigo: que o desenho segue diretrizes
-   publicadas para TEA, com a diretriz declarada decisão a decisão. **Não** que
-   a mecânica melhore a aprendizagem de criança autista — não há base para
-   isso, e a seção 5 daquele documento explica por quê.
-   ========================================================================= */
+   - a dica pode ser vista antes de responder e não é contada (G11);
+   - errar não tira ponto: a contagem mostra só acertos (G04, G05);
+   - não há cronômetro, e a cena só se mexe depois da resposta (G03);
+   - o tema padrão é neutro; futebol é opção (G07);
+   - som começa desligado e o efeito visual do acerto, ligado (G08). */
 
 const TEMAS = {
   neutro: {
@@ -101,21 +66,15 @@ const TEMAS = {
 };
 
 /* --- Ajustes do jogo -----------------------------------------------------
-   Guardados em localStorage pelo mesmo motivo das preferências de exibição:
-   quem já escolheu o tema não deveria escolher de novo a cada atividade (H6).
-
-   Isto não conflita com RN05 nem com RNF11. O que fica gravado é a preferência
-   de apresentação no navegador da própria criança — não há identificador, não
-   há resposta, não há nota, e nada disso sai da máquina. O que a RN05 proíbe é
-   o sistema registrar dado que identifique o estudante, e preferência de tema
-   não identifica ninguém.                                                   */
+      Tema, som e efeito ficam no localStorage do navegador. É só preferência
+      de apresentação, sem nenhum dado que identifique o estudante. */
 
 const CHAVE_AJUSTES = 'entende-mais:jogo';
 
 const AJUSTES_PADRAO = {
-  tema: 'neutro', // G07 — opção neutra é o padrão
-  som: 'desligado', // G08 — som desligado por padrão
-  comemoracao: 'ligada', // G08 — o reconhecimento visual do acerto vem ligado
+  tema: 'neutro', // G07
+  som: 'desligado', // G08
+  comemoracao: 'ligada', // G08
 };
 
 const OPCOES_AJUSTES = {
@@ -170,12 +129,8 @@ function usarAjustesDoJogo() {
 }
 
 /* --- Som ------------------------------------------------------------------
-   Duas notas curtas geradas por oscilador. Nenhum arquivo de áudio: o
-   protótipo precisa abrir por duplo clique, sem servidor e sem internet, e um
-   .mp3 embutido em base64 pesaria mais que o resto do aplicativo.
-
-   Desligado por padrão (G08) e só toca a partir de um clique da criança, que é
-   o gesto que os navegadores exigem para liberar áudio.                     */
+      Duas notas curtas geradas por oscilador (Web Audio), sem arquivo de áudio.
+      Só toca se o som estiver ligado e a partir de um clique. */
 function usarSom(ligado) {
   const contexto = useRef(null);
 
@@ -211,30 +166,21 @@ function usarSom(ligado) {
   );
 }
 
-/**
- * Quanto o cartão do resultado espera antes de entrar.
- *
- * Lê os mesmos dois sinais que o `base.css` usa para zerar animação: o
- * atributo do painel de Exibição e a preferência do sistema operacional. Sem
- * isto, quem liga movimento reduzido veria a bola aparecer no destino
- * instantaneamente e depois encararia quase um segundo de tela parada.
- */
+/** Tempo de espera antes de mostrar o cartão de resultado. Com movimento
+ *  reduzido (painel Exibição ou sistema operacional), a espera é zero. */
 function esperaDoAviso(resultado) {
   const semMovimento =
     document.documentElement.dataset.movimento === 'reduzido' ||
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   if (semMovimento) return 0;
-  /* A bola leva 540 ms para chegar (`.jogo__movel` em jogo.css). Estes números
-     são esse trajeto MAIS o tempo de a criança ver onde a bola parou:
-     - no gol, ainda espera o balanço da rede terminar;
-     - no erro, basta ver a bola sair por cima.
-     Mexer na duração da transição da bola sem mexer aqui faz o cartão voltar a
-     aparecer por cima da bola em movimento, que era o defeito original. */
+  /* A bola leva 540 ms para chegar (`.jogo__movel` em jogo.css); estes valores
+     somam esse trajeto ao tempo de ver onde a bola parou. Mudar a duração da
+     animação exige mudar aqui também. */
   return resultado === 'acerto' ? 1150 : 950;
 }
 
-/** A dica escrita para a questão, quando existe (questões do servidor); senão,
- *  o trecho de origem, que é o que a demonstração tem. */
+/** Dica da questão (questões do servidor) ou, na demonstração, o trecho
+ *  de origem. */
 function textoDaDica(questao) {
   return questao.dica ? `Dica: ${questao.dica}` : `Dica: a resposta está no trecho ${questao.trecho}.`;
 }
@@ -251,9 +197,8 @@ export function AtividadeJogo() {
 
   usarTituloDaPagina(valida ? tema.nome : 'Atividade indisponível');
 
-  /* `ordem` é a lista de questões desta rodada. Começa com todas e encolhe
-     quando a criança escolhe treinar só as que faltaram — é o que permite
-     voltar no que ficou para trás sem refazer o que já saiu. */
+  /* `ordem`: questões desta rodada. Diminui quando a criança treina só as
+     que ficaram para depois. */
   const [ordem, setOrdem] = useState(() => questoes.map((_, posicao) => posicao));
   const [passo, setPasso] = useState(0);
   const [fase, setFase] = useState('mirar'); // mirar | responder | resultado | fim
@@ -262,14 +207,10 @@ export function AtividadeJogo() {
   const [resultado, setResultado] = useState(null); // acerto | erro
   const [acertos, setAcertos] = useState(0);
   const [faltaram, setFaltaram] = useState([]);
-  /* Dica pedida fica por questão, e não por tentativa: quem pediu ajuda não
-     tem de pedir de novo ao tentar outra vez na mesma cobrança. Isto NÃO é
-     contado em lugar nenhum — ver G11. */
+  /* Dicas pedidas, por questão. Não são contadas em lugar nenhum (G11). */
   const [dicasPedidas, setDicasPedidas] = useState({});
 
-  /* O cartão do resultado entra DEPOIS que a bola chega, e não junto com ela.
-     No gol isso é o essencial: o cartão fica no meio da cena, e aparecer na
-     hora taparia justamente a bola entrando na rede, que é a recompensa. */
+  /* O cartão do resultado entra depois que a bola chega, para não tapar o gol. */
   const [avisoVisivel, setAvisoVisivel] = useState(false);
   useEffect(() => {
     if (fase !== 'resultado') {
@@ -283,10 +224,8 @@ export function AtividadeJogo() {
   const botaoAviso = useRef(null);
   useEffect(() => {
     if (!avisoVisivel) return;
-    /* `preventScroll` e depois rolar a CENA, não o botão: o navegador levaria
-       só o botão para dentro da janela e deixaria o título acima da borda — a
-       criança receberia o foco num botão sem ter lido o que aconteceu. Rolar o
-       quadro inteiro mostra a mensagem e a bola junto. */
+    /* Rola a cena inteira para a vista, e não só o botão, para a mensagem e a
+        bola aparecerem juntas. */
     botaoAviso.current?.focus({ preventScroll: true });
     botaoAviso.current?.closest('.jogo__cena')?.scrollIntoView({ block: 'center' });
   }, [avisoVisivel]);
@@ -338,24 +277,8 @@ export function AtividadeJogo() {
     anunciar(`Não foi essa. ${tema.tituloErro}. Leia a dica e tente de novo, ou vá para a próxima.`);
   }
 
-  /**
-   * Nova tentativa na mesma cobrança.
-   *
-   * Volta direto para a pergunta, com a mira que a criança já escolheu e com a
-   * lista de alternativas inteira.
-   *
-   * - **Não refaz a mira.** A primeira versão mandava o turno recomeçar do
-   *   começo, em nome de G01. Mas a mira já foi feita e não foi ela que errou;
-   *   repeti-la é um passo a mais entre o erro e a nova tentativa, e transição
-   *   longa entre estados do jogo é justamente o que a literatura aponta como
-   *   perda de concentração. G01 continua valendo para o turno
-   *   (mirar → responder → resultado); a repetição reentra em "responder".
-   * - **Nenhuma alternativa é retirada.** Uma versão intermediária tirava da
-   *   lista a que tinha sido marcada. Parecia ajuda e era outra coisa: a tela
-   *   mudava de forma a cada tentativa, e a criança que tivesse decorado a
-   *   posição das opções perdia a referência. Previsibilidade vale mais aqui
-   *   que o atalho, e o apoio à criança que travou já existe na dica (G11).
-   */
+  /** Nova tentativa na mesma rodada: volta para a pergunta com a mesma mira
+   *  e com todas as alternativas, na mesma ordem. */
   function tentarDeNovo() {
     setEscolhida(null);
     setResultado(null);
@@ -446,8 +369,7 @@ export function AtividadeJogo() {
       </h1>
 
       <div className="jogo__topo">
-        {/* G05 — a conta mostra só progresso e acerto. Não existe, em lugar
-            nenhum da tela, contador de erro, de tentativa ou de tempo. */}
+        {/* G05 — só progresso e acertos; não há contador de erro nem de tempo. */}
         <p className="atividade__contador">
           {tema.unidade} {passo + 1} de {total}
         </p>
@@ -456,9 +378,8 @@ export function AtividadeJogo() {
         </p>
       </div>
 
-      {/* G14 — o mesmo progresso, em forma não textual. `aria-hidden` porque o
-          contador acima já diz exatamente isto por escrito, e repetir os dois
-          faria o leitor de tela anunciar a mesma informação duas vezes. */}
+      {/* G14 — o progresso em bolinhas. aria-hidden, porque o contador acima já
+         diz o mesmo em texto. */}
       <ul className="jogo__trilha" aria-hidden="true">
         {ordem.map((indice, posicao) => (
           <li
@@ -499,9 +420,7 @@ export function AtividadeJogo() {
               }`}
               role="status"
             >
-              {/* O símbolo é redundância, não decoração: nenhum estado neste
-                  sistema é comunicado só por cor (SC 1.4.1). Quem não distingue
-                  verde de vermelho recebe o ícone e o texto. */}
+              {/* Ícone junto da cor: o resultado não depende só da cor. */}
               <span className="jogo__aviso-icone" aria-hidden="true">
                 {resultado === 'acerto' ? '✓' : '✕'}
               </span>
@@ -522,10 +441,7 @@ export function AtividadeJogo() {
                     <Botao ref={botaoAviso} onClick={tentarDeNovo}>
                       {tema.repetir}
                     </Botao>
-                    {/* G04 — a saída de seguir adiante fica visível junto, e
-                        não escondida atrás de um menu. Quem travou numa questão
-                        precisa de um caminho que não seja nem fracassar nem
-                        ficar preso. */}
+                    {/* G04 — a opção de seguir para a próxima fica visível junto. */}
                     <Botao variante="secundario" onClick={() => avancar({ semAcerto: true })}>
                       {ultima ? tema.terminar : tema.proxima}
                     </Botao>
@@ -564,9 +480,7 @@ export function AtividadeJogo() {
             {questao.enunciado}
           </h2>
 
-          {/* G11 — aprendizagem sem erro: o apoio fica disponível ANTES da
-              resposta, e não como consolo depois da falha. Não custa nada, não
-              é contado e não aparece no resumo. */}
+          {/* G11 — a dica está disponível antes da resposta. */}
           {fase === 'responder' && !dicaAberta && (
             <div className="jogo__pedir-dica">
               <Botao variante="secundario" onClick={pedirDica}>
@@ -578,9 +492,7 @@ export function AtividadeJogo() {
           {dicaAberta && fase === 'responder' && (
             <div className="jogo__dica" style={{ marginTop: 0, marginBottom: 'var(--e4)' }}>
               <h3>Dica</h3>
-              {/* Com questões geradas pelo servidor, a dica foi escrita para
-                  apontar onde procurar sem entregar a resposta. O trecho de
-                  origem não vai à criança: ele É a frase da resposta. */}
+              {/* A dica aponta onde procurar sem entregar a resposta. */}
               <p>
                 {questao.dica ? (
                   questao.dica
@@ -593,12 +505,8 @@ export function AtividadeJogo() {
             </div>
           )}
 
-          {/* Na nova tentativa a lista volta inteira, com as mesmas quatro
-              alternativas na mesma ordem. Uma versão intermediária retirava da
-              lista a que a criança tinha marcado; a tela ficava diferente a
-              cada tentativa, e tela que muda de forma no meio da cobrança é
-              exatamente o que G01 existe para impedir. Marcação de erro só
-              enquanto o resultado daquela tentativa está visível. */}
+          {/* Na nova tentativa a lista volta inteira e na mesma ordem; a marcação de
+             erro só aparece enquanto o resultado está na tela. */}
           <ul className="atividade__opcoes">
             {questao.alternativas.map((alternativa, posicao) => {
               const respondido = fase === 'resultado';
@@ -641,9 +549,7 @@ export function AtividadeJogo() {
         </section>
       )}
 
-      {/* G04 — erro gera dica e nova tentativa, nunca perda. O aviso e os
-          botões estão por cima da cena; aqui fica só a dica, que é texto para
-          ler com calma e não caberia dentro do quadro. */}
+      {/* G04 — depois do erro, a dica aparece abaixo da cena. */}
       {fase === 'resultado' && resultado === 'erro' && (
         <div className="atividade__retorno">
           <div className="jogo__dica">
@@ -673,19 +579,8 @@ export function AtividadeJogo() {
   );
 }
 
-/**
- * Ajustes do jogo, num diálogo.
- *
- * Era uma sanfona que empurrava a cena para baixo ao abrir: a criança clicava
- * para trocar o tema e o campo saía da tela. O diálogo resolve isso — a cena
- * fica onde está e os ajustes vêm por cima, com o foco preso dentro, Esc para
- * sair e o foco voltando ao botão que abriu (tudo isso já vem do `Dialogo`,
- * que é o mesmo das ações irreversíveis do professor).
- *
- * O gatilho fica no mesmo lugar em toda partida (SC 3.2.6), e não existe
- * "Cancelar": cada escolha vale no instante do clique, e um Cancelar prometeria
- * um desfazer que não existe.
- */
+/** Ajustes do jogo num diálogo, para a cena não sair do lugar ao abrir.
+ *  Cada escolha vale na hora, por isso não há botão Cancelar. */
 function AjustesDoJogo({ aberto, aoAbrir, aoFechar, ajustes, aoDefinir }) {
   return (
     <div className="jogo__ajustes">

@@ -2,9 +2,7 @@
 
     .venv\Scripts\python extrair.py "C:\caminho\material.pdf"
 
-Serve para conferir o critério da semana 6 com material real do 5º ano: ver se
-os títulos saíram com o nível certo, se os parágrafos voltaram inteiros e se
-cabeçalho e número de página sumiram. O arquivo não é gravado em lugar nenhum.
+O arquivo não é gravado em lugar nenhum.
 """
 
 import sys

@@ -1,11 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// base: './' e HashRouter (ver src/main.jsx) fazem o mesmo build servir ao
-// GitHub Pages e ao arquivo offline. Atenção: `dist/` funciona em servidor
-// HTTP, mas NÃO abre por duplo clique — o navegador bloqueia <script
-// type="module"> em file://. Para o disco, use `npm run offline`, que gera
-// um HTML único com tudo embutido (ver empacotar-offline.js).
+// base: './' e HashRouter fazem o mesmo build servir ao GitHub Pages e ao
+// arquivo offline. dist/ precisa de servidor HTTP; para abrir do disco, use
+// `npm run offline`.
 export default defineConfig({
   base: './',
   plugins: [react()],

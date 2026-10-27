@@ -1,16 +1,5 @@
-# Publica o protótipo do Entende+ no GitHub Pages a cada envio para a branch
-# principal.
-#
-# Este fluxo pressupõe que a RAIZ do repositório é a pasta do protótipo — foi a
-# escolha feita em 11/09, para que o material didático da professora e os
-# endereços de e-mail que estão na pasta do TCC não fossem para um repositório
-# público. Se um dia o repositório passar a ser a pasta inteira do TCC, é
-# preciso acrescentar `working-directory: SISTEMA` aos passos de
-# instalar e construir, e ajustar os caminhos de `cache-dependency-path` e
-# `path`.
-#
-# O mesmo build serve ao Pages e ao arquivo offline (`base: './'` mais
-# HashRouter), então não existem duas versões para manter.
+# Publica o modo demonstração no GitHub Pages a cada envio para a branch
+# principal. A raiz do repositório é a pasta do sistema.
 
 name: Publicar protótipo
 
@@ -46,10 +35,7 @@ jobs:
       - name: Construir
         run: npm run build
 
-      # enablement: true faz a própria ação habilitar o Pages no repositório se
-      # ele ainda não estiver ligado, em vez de falhar. Sem isto, a primeira
-      # execução quebra aqui enquanto ninguém tiver ido em Settings > Pages
-      # escolher "GitHub Actions" como origem — foi o que aconteceu em 11/09.
+      # enablement: true habilita o Pages no repositório, se ainda não estiver.
       - uses: actions/configure-pages@v5
         with:
           enablement: true

@@ -4,23 +4,10 @@ import { Aviso, Botao, Campo } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 
-/* =========================================================================
-   UC01 — Autenticar-se (RF01)
+/* Tela de entrada e criação de conta (RF01).
 
-   Decisões de acessibilidade que valem registro:
-
-   - O campo de senha não bloqueia colar. Bloquear impede o uso de gerenciador
-     de senhas e reprova no SC 3.3.8 (Accessible Authentication), novo na
-     WCAG 2.2.
-   - Erro de formulário aparece em um resumo no topo, que recebe o foco. Quem
-     usa leitor de tela descobre o problema sem precisar percorrer o
-     formulário de novo (SC 3.3.1).
-   - A mensagem de erro diz o que fazer, não só o que está errado (SC 3.3.3).
-
-   No modo servidor a mesma tela cria a conta: um formulário a mais, com o
-   campo de nome. Duas telas separadas dobrariam o caminho para quem só quer
-   entrar, que é o caso de todos os dias.
-   ========================================================================= */
+   O campo de senha aceita colar (gerenciador de senhas). Os erros aparecem
+   em um resumo no topo, que recebe o foco. */
 
 export function Entrar() {
   const { entrar, cadastrar, modoServidor } = usarApp();
@@ -59,8 +46,7 @@ export function Entrar() {
       else await entrar(email.trim(), senha);
       navegar('/painel');
     } catch (erro) {
-      // O motivo é o que diz qual campo o servidor recusou; sem ele, a
-      // mensagem seria só "alguns dados não foram aceitos".
+      // Mostra o motivo devolvido pelo servidor, que diz qual campo foi recusado.
       setErros({ servidor: [erro.motivo || erro.titulo, erro.saida].filter(Boolean).join(' ') });
       focarResumo();
     } finally {
@@ -153,8 +139,6 @@ export function Entrar() {
         )}
       </section>
 
-      {/* nivel={2}: nesta tela o aviso é o primeiro título depois do h1, e h3
-          aqui abriria um salto de nível (SC 1.3.1). */}
       {modoServidor ? (
         <Aviso tipo="info" titulo="Sobre os seus dados" nivel={2}>
           <p>

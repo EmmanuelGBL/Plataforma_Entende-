@@ -4,24 +4,14 @@ import { Aviso } from './basicos.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { servidor } from '../servicos/servidor.js';
 
-/* =========================================================================
-   Porta de entrada das três telas do estudante: a escolha do modo, o jogo e
-   a lista de perguntas.
-
-   RF18 e RN06 dizem que o professor revoga o link quando quiser, e as três
-   telas precisam recusar o acesso do mesmo jeito. Enquanto havia uma tela só,
-   a verificação morava dentro dela; com três, repetir o bloco em cada uma
-   seria combinar para as mensagens divergirem no primeiro ajuste de texto.
-
-   No modo servidor, a atividade vem da rota pública /api/atividades/{código},
-   que não pede conta e não guarda nada sobre quem abriu (RN05).
-   ========================================================================= */
+/* Acesso às três telas do estudante (escolha, jogo e lista de perguntas).
+   Centraliza a busca da atividade pelo código e a mensagem de link revogado.
+   No modo servidor, usa a rota pública /api/atividades/{código}, sem conta. */
 
 const ContextoAtividade = createContext(null);
 
-/** Envolve as rotas do estudante. Busca a atividade uma vez e só monta a tela
- *  quando ela chegou: o jogo monta a ordem das questões ao abrir, e montá-lo
- *  com a lista ainda vazia deixaria a partida sem questão nenhuma. */
+/** Busca a atividade uma vez e só monta a tela quando ela chega, para o
+ *  jogo não começar sem questões. */
 export function CarregarAtividade({ children }) {
   const { modoServidor } = usarApp();
   const { codigo } = useParams();
@@ -73,16 +63,8 @@ export function usarAtividadeDoCodigo(codigo) {
   return { material, valida, questoes };
 }
 
-/**
- * Assunto anunciado ao leitor de tela.
- *
- * Nesta demonstração as questões são sempre as de Ciências. Um material de
- * História anunciaria "Atividade sobre História" com perguntas sobre
- * fotossíntese, e quem ouviria o erro seria justamente quem depende do
- * anúncio. As telas do professor tratam o descompasso com o AvisoConteudoDemo;
- * nas do estudante o tratamento é este. No modo servidor, o assunto é o
- * primeiro título do material adaptado.
- */
+/** Assunto da atividade mostrado ao estudante. No modo servidor é o
+ *  primeiro título do material adaptado; na demonstração, Ciências. */
 export function assuntoDaAtividade(material) {
   if (!material) return 'o material da aula';
   return material.conteudoProprio ? (material.disciplina ?? 'o material da aula') : 'Ciências';

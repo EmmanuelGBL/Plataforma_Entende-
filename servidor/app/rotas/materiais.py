@@ -1,9 +1,8 @@
 """Materiais do professor: enviar (RF02–RF04), listar (RF19), consultar e
-excluir definitivamente (RF20).
+excluir (RF20).
 
-RNF12: toda consulta filtra pelo professor autenticado. Material de outro
-professor responde 404, e não 403, para não confirmar que aquele
-identificador existe.
+RNF12: toda consulta filtra pelo professor autenticado; material de outro
+professor responde 404.
 """
 
 import uuid
@@ -26,8 +25,7 @@ _BLOCO_LEITURA = 1024 * 1024
 
 
 async def _ler_com_limite(arquivo: UploadFile, limite_bytes: int) -> bytes:
-    """Lê em partes e para assim que passa do limite (RNF08), em vez de
-    carregar na memória um arquivo de qualquer tamanho para só depois medir."""
+    """Lê em partes e para assim que passa do limite (RNF08)."""
     partes, lidos = [], 0
     while parte := await arquivo.read(_BLOCO_LEITURA):
         lidos += len(parte)
@@ -64,8 +62,7 @@ def material_do_professor(sessao: Session, material_id: uuid.UUID, professor: Pr
 async def enviar(
     request: Request,
     arquivo: UploadFile = File(...),
-    # RF04 — a etapa é informada pelo professor e registrada. Nesta versão só
-    # existe uma; o campo existe para que o registro seja explícito.
+    # RF04 — etapa escolar informada pelo professor.
     etapa_escolar: EtapaEscolar = Form(EtapaEscolar.ANOS_INICIAIS_5_ANO),
     professor: Professor = Depends(professor_atual),
     sessao: Session = Depends(obter_sessao),
@@ -117,8 +114,7 @@ def excluir(
     professor: Professor = Depends(professor_atual),
     sessao: Session = Depends(obter_sessao),
 ):
-    # RF20 — exclusão definitiva, não lógica: a linha sai do banco. As
-    # adaptações, quando existirem, saem junto pela chave estrangeira.
+    # RF20 — exclusão definitiva; adaptações e questões saem junto.
     sessao.delete(material_do_professor(sessao, material_id, professor))
     sessao.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

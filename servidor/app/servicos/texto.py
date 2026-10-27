@@ -1,6 +1,4 @@
-"""O texto do sistema é Markdown simples, e este módulo é o único que o lê.
-
-Formato, o mesmo que o extrator produz (ver extrator._bloco_em_markdown):
+"""Leitura e escrita do Markdown simples usado para guardar o texto:
 blocos separados por linha em branco; "#", "##", "###" para títulos; "- "
 para item de lista; "|" no começo para tabela; o resto é parágrafo.
 """

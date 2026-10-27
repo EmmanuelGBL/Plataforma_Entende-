@@ -1,29 +1,13 @@
-/* =========================================================================
-   Entende+ — folha do material adaptado para impressão / PDF
+/* Folha do material adaptado para impressão e PDF.
 
-   Esta folha NÃO é decoração: cada valor aqui é a implementação de um
-   requisito do projeto, e é o que o professor entrega ao estudante.
-
-   RNF02 (WCAG 2.2 SC 1.4.8, AAA)
-     · linha com no máximo 80 caracteres
-     · texto NÃO justificado
-     · entrelinha mínima de 1,5
-     · espaço entre parágrafos de ao menos 1,5 vez a entrelinha
-
-   RNF05
-     · fonte sem serifa
-     · corpo mínimo 12
-     · espaçamento entre caracteres não condensado
-     · alinhamento à esquerda
-     · uma ideia por bloco de texto
-
-   Quem alterar esta folha está alterando a conformidade do material, não o
-   visual dele. Conferir os dois requisitos antes de mexer.
-   ========================================================================= */
+   RNF02 (WCAG 2.2 SC 1.4.8): no máximo 80 caracteres por linha, texto não
+   justificado, entrelinha de 1,5 e espaço entre parágrafos de 1,5 vez a
+   entrelinha.
+   RNF05: fonte sem serifa, corpo mínimo 12, espaçamento entre caracteres não
+   condensado e alinhamento à esquerda. */
 
 .folha {
-  /* Sem serifa, por RNF05. Nenhuma fonte externa é carregada — o material
-     precisa sair igual em máquina de escola, sem internet. */
+  /* Sem serifa (RNF05). Nenhuma fonte externa é carregada. */
   font-family: 'Segoe UI', system-ui, -apple-system, 'Noto Sans', Arial, sans-serif;
   font-size: 12pt;              /* RNF05 — corpo mínimo 12 */
   line-height: 1.5;             /* RNF02 — entrelinha mínima */
@@ -41,7 +25,7 @@
 .folha li {
   max-width: 68ch;              /* RNF02 — teto de 80 caracteres por linha */
   margin: 0;
-  hyphens: none;                /* separar sílaba atrapalha o rastreio da linha */
+  hyphens: none; /* sem hifenização */
 }
 
 /* RNF02 — espaço entre parágrafos de 1,5 × a entrelinha (1,5 × 1,5 = 2,25em) */
@@ -73,10 +57,8 @@
   font-size: 10.5pt;
   line-height: 1.5;
 }
-/* `minmax(0, max-content)` em vez de `max-content` puro: no papel a coluna de
-   rótulos sempre cabe, mas na tela estreita o `max-content` se recusava a
-   encolher e abria rolagem horizontal (SC 1.4.10). O resultado impresso é o
-   mesmo. */
+/* `minmax(0, max-content)`: no papel é igual a max-content, e na tela
+   estreita a coluna pode encolher. */
 .folha__identificacao dl {
   display: grid;
   grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
@@ -88,15 +70,10 @@
 .folha__identificacao dd { margin: 0; }
 
 /* --- Folha de questões (RF23) -------------------------------------------
-   Mesmos parâmetros de RNF02 e RNF05 da folha do material: o que muda é o
-   conteúdo, não a conformidade. A questão inteira nunca se parte entre duas
-   páginas — enunciado numa folha e alternativas na seguinte obriga a criança
-   a virar o papel para trás e para a frente enquanto responde.              */
+      Mesmos parâmetros da folha do material. A questão nunca se parte entre
+      duas páginas. */
 
-/* O seletor repete `.folha` de propósito: a regra `.folha p { margin: 0 }` lá
-   em cima tem especificidade (0,1,1), e uma classe sozinha (0,1,0) perde dela
-   mesmo vindo depois no arquivo. Vale para toda margem declarada por classe
-   nesta folha. */
+/* `.folha` repetido para vencer a especificidade de `.folha p { margin: 0 }`. */
 .folha .folha__instrucao { font-weight: 600; margin-bottom: 1.5em; }
 
 .folha__questoes {
@@ -133,9 +110,8 @@
   line-height: 1.5;
 }
 
-/* Quadrado de marcar. Desenhado com borda, e não com o caractere ☐: o
-   caractere depende de a fonte da máquina tê-lo, e some em impressora que cai
-   para uma fonte de reserva. */
+/* Quadrado de marcar desenhado com borda, e não com o caractere ☐, que
+   depende da fonte da máquina. */
 .folha__caixa {
   flex: none;
   width: 0.95em;
@@ -161,9 +137,7 @@
 }
 .folha__ficha thead th { background: #eeeeee; }
 
-/* `.folha` repetido pelo mesmo motivo explicado na folha de questões: sem
-   isso, `.folha p { margin: 0 }` zerava este afastamento e o rodapé colava no
-   último parágrafo do material. */
+/* `.folha` repetido pelo mesmo motivo da folha de questões. */
 .folha .folha__rodape {
   margin-top: 3em;
   padding-top: 0.75em;
@@ -223,9 +197,8 @@
     padding: 0;
   }
 
-  /* O material sai sempre no esquema de tinta, mesmo que a tela esteja em
-     alto contraste ou com o corpo aumentado — quem lê o papel é outra
-     pessoa, com outras preferências. */
+  /* No papel, sempre o esquema padrão, mesmo com alto contraste ou texto
+     aumentado na tela. */
   .folha, .folha * {
     color: #000000 !important;
     background: transparent !important;

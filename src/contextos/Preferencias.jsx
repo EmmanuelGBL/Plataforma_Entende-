@@ -1,16 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-/* =========================================================================
-   Preferências de exibição do usuário.
-   Não é enfeite: é a implementação dos critérios de sucesso da WCAG 2.2
-   1.4.4 (redimensionar texto), 1.4.12 (espaçamento do texto), 1.4.3/1.4.11
-   (contraste) e 2.3.3 (animação a partir de interação), somados à
-   recomendação 1.6 do e-MAG (alto contraste).
-
-   As escolhas são gravadas em localStorage. Um professor que aumenta a fonte
-   não deveria precisar refazer isso a cada aula — e "lembrar do usuário" é a
-   heurística H6.
-   ========================================================================= */
+/* Preferências de exibição (tamanho do texto, espaçamento, contraste e
+   animações), gravadas em localStorage e aplicadas como atributos na raiz
+   do documento. */
 
 const CHAVE = 'entende-mais:preferencias';
 

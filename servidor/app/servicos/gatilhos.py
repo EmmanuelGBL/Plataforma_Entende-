@@ -1,9 +1,5 @@
-"""Gatilhos — a parte do motor híbrido que decide, sem modelo de linguagem,
-quais blocos do material precisam de reescrita e por quais regras.
-
-O motor antigo mandava o material inteiro ao modelo, e o modelo devolvia o
-material inteiro — inclusive o que não mudava. Aqui o código lê cada parágrafo
-e item e só marca o bloco em que encontrou o que uma regra corrige:
+"""Gatilhos: decidem, sem modelo de linguagem, quais blocos do material
+precisam de reescrita e por quais regras.
 
 - período com mais palavras que o limite (TEA-01);
 - parágrafo com mais frases que o limite (TEA-02);
@@ -11,14 +7,8 @@ e item e só marca o bloco em que encontrou o que uma regra corrige:
 - forma de "ser" seguida de particípio, a voz passiva (TEA-04);
 - texto longo demais desde o último título (TEA-07).
 
-Bloco sem marca nenhuma não vai ao modelo e fica como está no original.
-
-O gatilho é deliberadamente generoso: marcar a mais custa um pedido; marcar a
-menos deixa o texto sem adaptar. Por isso a voz passiva é detectada por um
-padrão simples, que também pega "é rápido" — o modelo recebe o bloco, não
-encontra passiva e não muda nada, e o registro (RF06) continua vazio para ele.
-
-Os limites ficam no arquivo de regras (RNF13), não aqui.
+Bloco sem marca não vai ao modelo e fica como no original. Os limites estão
+no arquivo de regras (RNF13).
 """
 
 import re
@@ -26,8 +16,8 @@ import re
 from . import texto as md
 from .regras import ConjuntoDeclarado, RegraDeclarada
 
-# Só parágrafo e item têm texto corrido para reescrever. Título e tabela vão
-# ao modelo apenas como contexto.
+# Só parágrafo e item são reescritos; título e tabela vão ao modelo apenas
+# como contexto.
 TIPOS_ADAPTAVEIS = ("paragrafo", "item")
 
 _PALAVRA = re.compile(r"[A-Za-zÀ-ÿ0-9]+(?:-[A-Za-zÀ-ÿ]+)*")
@@ -115,7 +105,7 @@ def _dispara(
 
 def _acompanhantes(regras: list[RegraDeclarada], disparadas: set[str]) -> set[str]:
     # Repete até estabilizar: uma regra que acompanha outra acompanhante
-    # também entra. Com dez regras, termina em duas ou três voltas.
+    # também entra.
     while True:
         novas = {
             r.codigo

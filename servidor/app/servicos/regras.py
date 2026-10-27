@@ -1,13 +1,8 @@
 """ConjuntoRegras — leitura do arquivo de regras (RNF13) e registro da versão (RN08).
 
-O arquivo é lido a cada adaptação, e não uma vez na partida do servidor: é o
-que permite alterar uma regra e reprocessar o mesmo material sem novo deploy,
-que é exatamente a verificação que o RNF13 descreve.
-
-Além da instrução, o arquivo guarda o que torna o motor híbrido: o gatilho de
-cada regra do modelo (quando vale a pena pedir a reescrita) e o glossário da
-TEA-05. Os dois entram na impressão digital, então mudar um limiar ou um termo
-também exige trocar a versão (RN08).
+O arquivo é lido a cada adaptação, então alterar uma regra vale no próximo
+processamento sem reiniciar o servidor. Gatilhos e glossário entram na
+impressão digital: mudar qualquer um deles exige trocar a versão.
 """
 
 import hashlib
@@ -23,11 +18,9 @@ from ..modelos import AplicacaoDaRegra, ConjuntoRegras, PerfilAdaptacao, RegraAd
 
 
 class Gatilho(BaseModel):
-    """Quando um bloco do material precisa desta regra. Ver gatilhos.py.
+    """Quando um bloco do material precisa desta regra (ver gatilhos.py).
 
-    Regra do modelo sem gatilho vale para todo parágrafo e item — é o motor
-    antigo, que mandava o material inteiro. Com gatilho, só vai ao modelo o
-    bloco em que o código encontrou o que a regra corrige.
+        Regra do modelo sem gatilho vale para todo parágrafo e item.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -37,10 +30,8 @@ class Gatilho(BaseModel):
     palavras_sem_titulo_acima_de: int | None = Field(default=None, ge=1)
     voz_passiva: bool = False
     expressoes: list[str] = []
-    # Vale também no bloco que já vai ao modelo por causa destas regras ("*" =
-    # qualquer uma). É o caso da regra que só faz sentido junto com outra
-    # (conectivo ao dividir período) e da que o código não consegue detectar
-    # sozinho (metáfora que não está na lista de expressões).
+    # Regras que entram junto quando estas já foram disparadas no bloco
+    # ("*" = qualquer uma).
     acompanha: list[str] = []
 
 
@@ -134,9 +125,7 @@ def carregar(caminho: Path) -> tuple[ConjuntoDeclarado, str]:
 def registrar(sessao: Session, conjunto: ConjuntoDeclarado, impressao: str) -> ConjuntoRegras:
     """Devolve o registro desta versão no banco, criando-o na primeira vez.
 
-    Se a mesma versão já foi registrada com outro conteúdo, recusa: alguém
-    alterou o arquivo sem trocar o número da versão, e as adaptações antigas
-    passariam a parecer produzidas por regras que não eram as delas.
+        Se a mesma versão já existe com outro conteúdo, recusa (RN08).
     """
     existente = sessao.scalar(
         select(ConjuntoRegras).where(

@@ -8,8 +8,7 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field
 
 
 def _em_utc(valor: datetime) -> datetime:
-    # O SQLite devolve data e hora sem fuso, mesmo gravadas em UTC. Sem o fuso
-    # na resposta, o navegador lê como hora local e erra em 4 horas em Manaus.
+    # O SQLite devolve data e hora sem fuso; a resposta acrescenta UTC.
     return valor if valor.tzinfo else valor.replace(tzinfo=timezone.utc)
 
 
@@ -160,17 +159,16 @@ class QuestaoProfessor(QuestaoEntrada):
 
 
 class QuestaoEstudante(BaseModel):
-    """Vai com a resposta certa. A atividade é formativa: não há nota, ranking
-    nem registro de resposta (RN05, G06), e as duas telas da criança mostram a
-    resposta certa depois de responder (RF17). Esconder o gabarito no servidor
-    obrigaria cada clique a esperar a rede, sem proteger nada que importe."""
+    """Vai com a resposta certa: a atividade é formativa, sem nota nem registro
+        de resposta (RN05), e as telas do estudante mostram a resposta depois que
+        ele responde (RF17).
+    """
 
     id: uuid.UUID
     enunciado: str
     alternativas: list[str]
     correta: int
-    # Sem o trecho de origem: ele é a frase que contém a resposta. A dica
-    # diz onde procurar sem entregar (G11).
+    # Sem o trecho de origem, que é a frase da resposta. A dica vai no lugar.
     dica: str
 
 

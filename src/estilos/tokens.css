@@ -1,16 +1,13 @@
-/* =========================================================================
-   Entende+ — tokens do design system
-   Paleta herdada da marca (Logo/README.md). Os valores de contraste anotados
-   ao lado de cada cor foram calculados pela fórmula da WCAG 2.2 (SC 1.4.3) e
-   estão registrados em documentacao/acessibilidade-wcag-emag.md.
-   ========================================================================= */
+/* Variáveis de design: cores, tipografia, espaçamento, foco, alvo de toque
+   e os modos do painel Exibição. Ao lado de cada cor, o contraste calculado
+   pela fórmula da WCAG 2.2. */
 
 :root {
   /* --- Cores da marca ---------------------------------------------------- */
   --cor-petroleo: #10323a;  /* 13,85:1 sobre branco — texto principal        */
   --cor-teal: #0e7c86;      /*  4,94:1 sobre branco — fundo de botão, ícone  */
   --cor-teal-escuro: #0b5f67; /* 7,38:1 sobre branco — links e texto de apoio */
-  --cor-menta: #3bb6a6;     /*  2,49:1 — NUNCA em texto. Só traço e fundo.   */
+  --cor-menta: #3bb6a6; /* 2,49:1 — não usar em texto; só traço e fundo */
   --cor-ambar: #e0912b;     /*  2,54:1 sobre branco — só sobre petróleo      */
   --cor-ambar-escuro: #8a5410; /* 5,72:1 sobre branco — texto de alerta      */
 
@@ -23,10 +20,8 @@
   --cor-texto: var(--cor-petroleo);
   --cor-texto-apoio: #405c62;  /* 7,54:1 sobre branco                        */
 
-  /* Barra superior. Tokens próprios, e não --cor-petroleo direto: no alto
-     contraste o petróleo vira branco (porque ali ele é cor de TEXTO), e a
-     barra ficaria branca com texto branco. Foi um defeito real encontrado
-     na primeira verificação do modo de alto contraste.                      */
+  /* Barra superior com variáveis próprias: no alto contraste o petróleo vira
+     branco (cor de texto) e a barra ficaria branca com texto branco. */
   --cor-barra-fundo: #10323a;
   --cor-barra-texto: #ffffff;
 
@@ -40,9 +35,7 @@
   --cor-info-fundo: #e7f1f3;
 
   /* --- Tipografia -------------------------------------------------------- */
-  /* Sem serifa por RNF05. Segoe UI é a fonte do Windows usada na marca;
-     as demais são reservas para Linux/macOS. Nenhuma fonte externa é
-     carregada — o protótipo abre sem internet.                              */
+  /* Fontes sem serifa do sistema (RNF05). Nenhuma fonte externa é carregada. */
   --fonte-texto: 'Segoe UI', system-ui, -apple-system, 'Noto Sans', Arial, sans-serif;
   --fonte-mono: 'Cascadia Mono', Consolas, 'Courier New', monospace;
 
@@ -77,33 +70,18 @@
   --duracao: 180ms;
 
   /* --- Largura ------------------------------------------------------------
-     Duas medidas diferentes, e confundir as duas é o erro comum:
-
-     --largura-conteudo é o CONTAINER da página. As telas de trabalho do
-     professor são de comparar, conferir e decidir, não de ler corrido, então
-     o container acompanha o monitor: o teto de 120rem só passa a valer em
-     tela maior que 1920 px, e abaixo disso a página ocupa a largura toda. A
-     primeira versão travava em 68rem e espremia a comparação original ×
-     adaptado em duas colunas de ~300 px, o que forçava justificação com
-     buracos entre as palavras e deixava mais de 400 px mortos de cada lado.
-
-     --medida-leitura é a MEDIDA DE LINHA do texto corrido, e essa NÃO
-     acompanha: continua em 68ch por RNF02 e pelo SC 1.4.8 da WCAG (teto de 80
-     caracteres). Alargar o container não alarga a linha, porque `p` e
-     `.texto-adaptado` se limitam sozinhos. É o que sustenta a decisão na
-     banca: o que cresce é a área de trabalho, não a linha de leitura.        */
+          --largura-conteudo é a largura da página e acompanha o monitor até 120rem.
+          --medida-leitura é o comprimento da linha do texto corrido: 68ch, abaixo
+          do teto de 80 caracteres (RNF02, WCAG SC 1.4.8). */
   --largura-conteudo: 120rem;
   --medida-leitura: 68ch;
 
-  /* Respiro lateral do container. Cresce com a viewport, com piso e teto: em
-     360 px não desperdiça largura, e em tela larga afasta o conteúdo da borda
-     em vez de deixar o texto encostado no vidro. */
+  /* Margem lateral do container, proporcional à tela, com mínimo e máximo. */
   --respiro-lateral: clamp(1rem, 3.5vw, 4rem);
 }
 
-/* --- Preferência: corpo do texto ----------------------------------------
-   Recalibra a raiz inteira, então todo rem acompanha. Atende SC 1.4.4
-   (redimensionar texto até 200% sem perda de conteúdo).                     */
+/* --- Preferência: tamanho do texto --------------------------------------
+      Muda o tamanho da raiz; todo rem acompanha (WCAG SC 1.4.4). */
 :root[data-fonte='grande'] { font-size: 112.5%; }
 :root[data-fonte='maior']  { font-size: 125%; }
 
@@ -117,7 +95,7 @@
 }
 
 /* --- Preferência: alto contraste (e-MAG, recomendação 1.6) ---------------
-   Esquema preto/amarelo, o mesmo adotado nos portais do governo federal.    */
+      Esquema preto e amarelo. */
 :root[data-contraste='alto'] {
   --cor-fundo: #000000;
   --cor-superficie: #000000;

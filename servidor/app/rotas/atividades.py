@@ -1,6 +1,6 @@
-"""Questões e atividade: revisar as questões (RF13, RF14, RF23), publicar e
-revogar o link (RF15, RF18, RN06) e a rota pública da criança (RF16, RF21,
-RF22), que não pede cadastro e não guarda nada (RN05)."""
+"""Questões e atividade: revisar as questões (RF13, RF14), publicar e revogar
+o link (RF15, RF18) e a rota pública do estudante (RF16), sem cadastro (RN05).
+"""
 
 import uuid
 
@@ -123,7 +123,7 @@ def revogar(
     return material_painel(material).atividade
 
 
-# --- Rota pública da criança --------------------------------------------------
+# --- Rota pública do estudante ------------------------------------------------
 
 LINK_INDISPONIVEL = ErroDeNegocio(
     "Esta atividade não está disponível",

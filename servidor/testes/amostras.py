@@ -1,10 +1,5 @@
-"""Arquivos de teste gerados por código.
-
-Gerar em vez de versionar tem duas vantagens: o repositório é público e não
-recebe material de terceiros (RN07), e cada amostra declara aqui mesmo o
-defeito que existe para provocar.
-
-O texto imita um material de Ciências do 5º ano, como o do protótipo.
+"""Arquivos de teste (PDF e DOCX) gerados por código, para o repositório não
+ter material de terceiros. O texto imita um material de Ciências do 5º ano.
 """
 
 import io

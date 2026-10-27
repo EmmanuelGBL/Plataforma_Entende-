@@ -1,22 +1,8 @@
-/* =========================================================================
-   Gera um arquivo HTML único, que abre por duplo clique.
+/* Gera um HTML único, com CSS, JavaScript e a marca embutidos, que abre
+   por duplo clique. A pasta dist/ não abre direto do disco porque o navegador
+   bloqueia <script type="module"> em file://.
 
-   POR QUE ISSO É NECESSÁRIO. A pasta `dist/` do Vite não abre direto do
-   disco: o `index.html` referencia o pacote como <script type="module">, e o
-   navegador bloqueia o carregamento de módulo em file:// por política de
-   origem (a origem de um arquivo local é "null"). O resultado seria tela
-   branca justamente na sessão presencial de teste, onde não há servidor.
-
-   A saída deste script inclina o CSS, o JavaScript e o SVG da marca dentro
-   do próprio HTML. Módulo declarado inline não precisa ser buscado, então
-   executa normalmente em file://.
-
-   Resumindo os dois destinos:
-     dist/                 → GitHub Pages e qualquer servidor (HTTP)
-     Entende+ (protótipo).html → pendrive, notebook, anexo de e-mail
-
-   Uso:  npm run build && node empacotar-offline.js
-   ========================================================================= */
+   Uso:  npm run build && node empacotar-offline.js */
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -42,8 +28,6 @@ html = html.replace(
 );
 
 // --- Marca, como data URI --------------------------------------------------
-// O <img> do cabeçalho aponta para ./marca/…svg. Em arquivo único não existe
-// pasta ao lado, então o SVG entra embutido.
 const svg = fs.readFileSync(path.join(dist, 'marca', 'entende-mais-icone.svg'), 'utf8');
 const svgEmbutido = `data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`;
 

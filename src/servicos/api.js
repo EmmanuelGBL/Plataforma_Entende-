@@ -1,16 +1,5 @@
-/* =========================================================================
-   Camada de serviço do protótipo.
-
-   Tudo aqui devolve Promise com atraso proposital. Duas razões:
-
-   1. Quando o back-end existir, só o corpo destas funções muda — as telas
-      já esperam Promise e já tratam carregamento e erro. A troca de mock por
-      HTTP não vira reescrita de interface.
-   2. O atraso é o que torna testáveis os estados de "processando", que são
-      metade da heurística H1 (visibilidade do status do sistema). Sem ele, o
-      protótipo esconderia justamente o momento em que o professor mais
-      precisa de retorno — a espera pela adaptação (RNF07 admite até 120s).
-   ========================================================================= */
+/* Modo demonstração: simula a API em memória. As funções devolvem Promise
+   com atraso, para que os estados de carregamento apareçam como no servidor. */
 
 import { ETAPAS_PROCESSAMENTO, QUESTOES, TEXTO_ADAPTADO, METRICAS } from '../dados/conteudo.js';
 
@@ -19,7 +8,7 @@ const LIMITE_MB = 15; // RNF08
 
 const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Erro de negócio, com motivo legível e saída sugerida (H9). */
+/** Erro de negócio, com motivo e saída sugerida. */
 export class ErroDeNegocio extends Error {
   constructor(titulo, motivo, saida, regra) {
     super(titulo);
@@ -30,8 +19,7 @@ export class ErroDeNegocio extends Error {
   }
 }
 
-/** Validação feita antes de enviar (H5 — prevenção de erro).
- *  Devolve null quando o arquivo é aceitável. */
+/** Validação antes do envio. Devolve null quando o arquivo é aceito. */
 export function validarArquivo(arquivo) {
   const mb = Number(String(arquivo.tamanho).replace(/[^\d,]/g, '').replace(',', '.'));
   if (arquivo.paginas > LIMITE_PAGINAS || mb > LIMITE_MB) {
@@ -105,7 +93,7 @@ export async function excluirMaterial() {
 }
 
 function gerarCodigo() {
-  const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sem I, O, 0 e 1 — o código é ditado em voz alta
+  const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sem I, O, 0 e 1, para não confundir ao ditar
   return Array.from({ length: 6 }, () => alfabeto[Math.floor(Math.random() * alfabeto.length)]).join('');
 }
 

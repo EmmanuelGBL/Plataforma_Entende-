@@ -1,13 +1,7 @@
-"""Modelo de dados — projeção das classes do diagrama 02 (Diagramas/fonte/02-classes.puml).
+"""Modelo de dados (classes do diagrama de classes).
 
-O que NÃO existe aqui, por decisão de projeto:
-
-- Tabela de estudante (RN05, RNF11). O estudante acessa a atividade por link,
-  sem cadastro, e o sistema não guarda nada que o identifique — nem as
-  respostas que ele dá, que são conferidas e esquecidas.
-- O arquivo enviado. Só o texto extraído é guardado. O reprocessamento de RF12
-  precisa do texto, não do PDF, e guardar o arquivo seria reter mais do que a
-  finalidade exige — e o material é responsabilidade autoral do professor (RN07).
+Não há tabela de estudante (RN05, RNF11), e o arquivo enviado não é
+guardado: só o texto extraído.
 """
 
 import enum
@@ -42,7 +36,7 @@ class FormatoArquivo(str, enum.Enum):
 
 
 class PerfilAdaptacao(str, enum.Enum):
-    # RN03 — perfil único nesta versão. TDAH e dislexia são trabalhos futuros.
+    # RN03 — perfil único nesta versão.
     TEA = "TEA"
 
 
@@ -76,8 +70,8 @@ class Material(Base):
     nome_arquivo: Mapped[str] = mapped_column(String(255))
     formato: Mapped[FormatoArquivo] = mapped_column(Enum(FormatoArquivo, native_enum=False))
     numero_paginas: Mapped[int] = mapped_column(Integer)
-    # DOCX não traz número de páginas confiável: quando o Word não gravou a
-    # contagem no arquivo, ela é estimada pelo volume de texto, e isso fica dito.
+    # Quando o DOCX não traz o número de páginas, ele é estimado pelo volume
+    # de texto.
     paginas_estimadas: Mapped[bool] = mapped_column(default=False)
     tamanho_bytes: Mapped[int] = mapped_column(Integer)
     # Texto em Markdown simples: "#" marca o nível do título (RF03 — hierarquia).
@@ -112,8 +106,7 @@ class Material(Base):
 
     @property
     def adaptacao_atual(self) -> "Adaptacao | None":
-        # RF12: reprocessar cria uma adaptação nova; vale a mais recente, e as
-        # anteriores ficam como registro do que cada versão das regras produziu.
+        # RF12: reprocessar cria uma adaptação nova; vale a mais recente.
         return self.adaptacoes[-1] if self.adaptacoes else None
 
     @property
@@ -133,12 +126,11 @@ class AplicacaoDaRegra(str, enum.Enum):
 
 
 class ConjuntoRegras(Base):
-    """Cópia, no banco, da versão do arquivo de regras que uma adaptação usou.
+    """Cópia, no banco, da versão do arquivo de regras usada numa adaptação.
 
-    O arquivo (regras/tea.json) é a fonte; esta tabela é o registro. Mesmo que
-    o arquivo mude depois, a adaptação continua apontando para as regras exatas
-    que a produziram (RN08). A impressão digital (SHA-256 do arquivo) impede
-    que o conteúdo mude sem que a versão mude junto.
+        A adaptação aponta sempre para as regras que a produziram (RN08). A
+        impressão digital (SHA-256 do arquivo) impede que o conteúdo mude sem
+        mudar a versão.
     """
 
     __tablename__ = "conjunto_regras"
@@ -192,11 +184,10 @@ class Adaptacao(Base):
         ForeignKey("material.id", ondelete="CASCADE"), index=True
     )
     conjunto_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("conjunto_regras.id"))
-    # Modelo de linguagem que gerou o texto. Faz parte do registro auditável:
-    # as mesmas regras em outro modelo podem dar outro texto.
+    # Modelo de linguagem que gerou o texto (faz parte do registro).
     modelo: Mapped[str] = mapped_column(String(80))
-    # O que o motor produziu, nunca editado (RN08), e o texto que vale depois
-    # da revisão do professor (RF09). A diferença entre os dois é a edição.
+    # Texto gerado pelo motor, nunca editado (RN08), e texto atual, depois da
+    # revisão do professor (RF09).
     texto_gerado: Mapped[str] = mapped_column(Text)
     texto_adaptado: Mapped[str] = mapped_column(Text)
     status: Mapped[StatusAdaptacao] = mapped_column(
@@ -270,7 +261,7 @@ class Questao(Base):
     ordem: Mapped[int] = mapped_column(Integer)
     # RN04: o trecho do material em que a resposta está. Conferido na geração.
     origem_no_material: Mapped[str] = mapped_column(Text)
-    # G11: a dica aparece antes da resposta, de graça.
+    # G11: dica mostrada antes da resposta.
     dica: Mapped[str] = mapped_column(Text, default="")
 
     material: Mapped[Material] = relationship(back_populates="questoes")
@@ -297,8 +288,7 @@ class Alternativa(Base):
 
 
 class AtividadePublicada(Base):
-    """O link da atividade. Não existe aqui nada sobre quem a abriu (RN05):
-    nem contagem de acesso, nem resposta, nem identificador do navegador."""
+    """Link da atividade. Não guarda nada sobre quem a abriu (RN05)."""
 
     __tablename__ = "atividade_publicada"
 

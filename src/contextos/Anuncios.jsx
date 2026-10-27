@@ -1,16 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-/* =========================================================================
-   Região de status única do aplicativo (aria-live="polite").
-
-   Mudança que aparece na tela sem recarregar a página — adaptação concluída,
-   questão excluída, link revogado — não chega a quem usa leitor de tela a
-   menos que seja anunciada. É o SC 4.1.3 (Status Messages) da WCAG 2.2 e,
-   do lado da usabilidade, a heurística H1.
-
-   Uma região só, no fim do documento, evita o erro comum de espalhar vários
-   aria-live pela página e fazer o leitor de tela falar por cima de si mesmo.
-   ========================================================================= */
+/* Região de status única (aria-live="polite"): anuncia ao leitor de tela
+   as mensagens que aparecem sem recarregar a página. */
 
 const ContextoAnuncios = createContext(null);
 

@@ -1,25 +1,11 @@
 import { useState } from 'react';
 import { Etiqueta } from './basicos.jsx';
 
-/* =========================================================================
-   Painel das regras aplicadas — o diferencial do projeto virado interface.
+/* Painel das regras aplicadas na adaptação (RF06, RF10), com a base
+   normativa e a justificativa de cada regra. O registro não é editável (RN08). */
 
-   RF06 manda registrar quais regras foram aplicadas e a versão do conjunto.
-   RF10 manda deixar o professor consultar a justificativa normativa de cada
-   uma. RN08 diz que esse registro não é editável.
-
-   Sem esta tela, o Entende+ é indistinguível de jogar o PDF no ChatGPT: o
-   que separa adaptação estruturada de adaptação não estruturada é o critério
-   ficar visível e auditável. É por isso que ela ocupa a coluna fixa da tela
-   de adaptação, e não uma aba escondida.
-
-   Sanfona feita com <button aria-expanded> em vez de <details>: precisa
-   anunciar estado e caber no mesmo padrão de foco do resto do app.
-   ========================================================================= */
-
-/** `conjunto` e `regras` são os da versão que ESTA adaptação usou — não os
- *  do arquivo de hoje. A justificativa de RF10 tem de ser a que valia quando
- *  o texto foi gerado. */
+/** `conjunto` e `regras` são os da versão usada nesta adaptação, e não os
+ *  da versão vigente. */
 export function PainelRegras({ conjunto, regras, destacada, aoDestacar }) {
   const [abertas, setAbertas] = useState(() => new Set());
 

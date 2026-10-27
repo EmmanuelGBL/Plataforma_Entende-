@@ -1,17 +1,9 @@
 import { Etiqueta, TabelaEnvolvente } from './basicos.jsx';
 
-/* =========================================================================
-   Comparação original × adaptado (RF08) e quadro de métricas (RF07).
-   ========================================================================= */
+/* Comparação original × adaptado (RF08) e quadro de métricas (RF07). */
 
-/**
- * O painel do original imita deliberadamente o material como ele chega hoje:
- * justificado, entrelinha apertada, sem subtítulo. É a única parte do
- * aplicativo que desobedece às próprias regras tipográficas — e desobedece de
- * propósito, para que a diferença entre os dois lados seja visível na tela e
- * não só nos números. Está registrado no documento para não parecer descuido
- * numa auditoria.
- */
+/** O painel do original mostra o material como ele chegou: justificado,
+ *  entrelinha apertada e sem subtítulos, para a diferença ficar visível. */
 export function ComparadorTextos({ original, blocos, regras, acaoAdaptado }) {
   return (
     <div className="comparador">
@@ -20,18 +12,15 @@ export function ComparadorTextos({ original, blocos, regras, acaoAdaptado }) {
           <h3 id="titulo-original">Material original</h3>
           <Etiqueta tom="neutra">como foi enviado</Etiqueta>
         </header>
-        {/* tabIndex=0 porque o painel rola: sem ele, quem navega só por teclado
-            não alcança o conteúdo que passa da altura visível (SC 2.1.1). Com
-            role="region" e nome acessível, o leitor de tela anuncia onde entrou. */}
+        {/* tabIndex=0: o painel rola e precisa ser alcançável pelo teclado. */}
         <div
           className="painel-texto__corpo texto-original"
           tabIndex={0}
           role="region"
           aria-labelledby="titulo-original"
         >
-          {/* Títulos do original vão em negrito, e não como cabeçalho: o
-              painel mostra o material como chegou, e cabeçalho aqui entraria
-              na estrutura de títulos da página (SC 1.3.1). */}
+          {/* Títulos do original em negrito, e não como cabeçalho, para não entrarem
+             na estrutura de títulos da página. */}
           {original.map((trecho, indice) =>
             trecho.tipo === 'titulo' ? (
               <p key={indice}>
@@ -47,16 +36,8 @@ export function ComparadorTextos({ original, blocos, regras, acaoAdaptado }) {
       </article>
 
       <article className="painel-texto" aria-labelledby="titulo-adaptado">
-        {/* A ação de editar mora no cabeçalho do painel que ela edita, e não
-            no título da seção de comparação: ali valia tanto para o original
-            (que é imutável, RF12) quanto para o adaptado, e era ambígua.
-
-            Quando a ação está presente, ela ocupa o lugar da etiqueta em vez
-            de se somar a ela. Os dois juntos não cabem na coluna e jogavam o
-            cabeçalho para duas linhas, o que fazia o texto adaptado começar
-            mais abaixo que o original e estragava a comparação lado a lado.
-            A informação da etiqueta não se perde: perfil e etapa estão no
-            cabeçalho da página, logo acima. */}
+        {/* A ação de editar fica no cabeçalho do painel do adaptado, no lugar
+           da etiqueta. */}
         <header className="painel-texto__cabecalho">
           <h3 id="titulo-adaptado">Material adaptado</h3>
           {acaoAdaptado ?? <Etiqueta tom="info">perfil TEA · 5º ano</Etiqueta>}
@@ -74,9 +55,7 @@ export function ComparadorTextos({ original, blocos, regras, acaoAdaptado }) {
             return (
               <section key={indice}>
                 {bloco.titulo && <h4>{bloco.titulo}</h4>}
-                {/* A etiqueta vem logo abaixo do subtítulo, e não no fim do
-                    bloco: no fim, ela ficava colada no subtítulo seguinte e
-                    parecia rotular o bloco errado. */}
+                {/* Etiqueta da regra logo abaixo do subtítulo do bloco. */}
                 {aplicadas.length > 0 && (
                   <p className="campo__dica">
                     {aplicadas.map((regra) => (
@@ -105,14 +84,8 @@ export function ComparadorTextos({ original, blocos, regras, acaoAdaptado }) {
   );
 }
 
-/**
- * Quadro de métricas de legibilidade.
- *
- * RN10 manda exibir sempre, inclusive quando o número piora — e é o que a
- * linha "Total de palavras" faz. A coluna de situação traz texto ("melhorou"
- * / "atenção"), não só cor, senão a informação sumiria em escala de cinza ou
- * para quem não distingue as cores (SC 1.4.1).
- */
+/** Quadro de métricas de legibilidade. Mostra sempre as duas medidas,
+ *  inclusive quando o número piora (RN10), com a situação em texto. */
 const SITUACOES = {
   melhora: { tom: 'boa', rotulo: 'melhorou' },
   piora: { tom: 'atencao', rotulo: 'piorou' },

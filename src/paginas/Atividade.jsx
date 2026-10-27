@@ -6,16 +6,9 @@ import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarAdaptacao, usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
-/* =========================================================================
-   UC13 — Gerar banco de questões (RF13)  ·  UC14 — Revisar (RF14)
-   UC15 — Publicar e gerar link (RF15)    ·  UC18 — Revogar link (RF18)
-   RN04 — questões vêm só do material enviado.
-   RN06 — o link pode ser revogado a qualquer momento.
-
-   A origem de cada questão fica escrita no cartão ("Bloco 3 — ..."). É o que
-   permite ao professor conferir a RN04 sem confiar na nossa palavra, e é
-   também H6: ele não precisa lembrar de que parte do texto aquilo saiu.
-   ========================================================================= */
+/* Tela da atividade: revisar, editar e excluir as questões (RF13, RF14),
+   publicar e revogar o link (RF15, RF18). Cada questão mostra o trecho do
+   material de onde saiu (RN04). */
 
 export function Atividade() {
   const { id } = useParams();
@@ -54,8 +47,7 @@ export function Atividade() {
     ? `${window.location.origin}${window.location.pathname}#/atividade/${atividade.codigo}`
     : null;
 
-  /** Toda operação passa por aqui: o erro do servidor (RN02 ao publicar sem
-   *  aprovar, por exemplo) aparece na tela com o que fazer, em vez de sumir. */
+  /** Executa uma operação e, se falhar, mostra o erro do servidor na tela. */
   async function tentar(operacao, aviso) {
     setFalha(null);
     try {
@@ -206,13 +198,8 @@ export function Atividade() {
         <Etiqueta tom="info">Geradas do próprio material (RN04)</Etiqueta>
       </div>
 
-      {/* RF23 — a folha impressa é o terceiro caminho da mesma atividade, ao
-          lado do jogo e da lista de perguntas. Fica disponível antes de
-          publicar: quem vai entregar no papel não precisa gerar link nenhum.
-
-          Sai da tela quando não há questão, em vez de ficar desabilitado:
-          `disabled` não existe em <a>, e um link "desligado" só na aparência
-          continua alcançável por teclado e leva a uma folha vazia. */}
+      {/* RF23 — folha impressa das questões, disponível antes de publicar.
+         Só aparece quando há questões. */}
       {questoes.length > 0 && (
         <div className="linha" style={{ marginBottom: 'var(--e5)' }}>
           <Botao como="link" para={`/materiais/${id}/questionario`} variante="secundario">
@@ -310,11 +297,8 @@ export function Atividade() {
         </div>
       </Cartao>
 
-      {/* Publicar de novo gera um código diferente e, com isso, mata o link que
-          a turma já pode ter recebido. É uma revogação implícita, e precisa ser
-          dita: o diálogo de revogação avisa a consequência com todas as letras,
-          e este não pode avisar menos só porque o botão tem nome mais simpático
-          (H5, e RN06 pela porta dos fundos). */}
+      {/* Publicar de novo gera código novo e invalida o link anterior; o diálogo
+         avisa isso. */}
       <Dialogo
         aberto={confirmandoPublicacao}
         titulo={publicada ? 'Publicar de novo com um código novo?' : 'Publicar a atividade?'}
@@ -368,8 +352,7 @@ export function Atividade() {
   );
 }
 
-/** Edição da questão no lugar onde ela está, sem abrir outra tela — evita
- *  que o professor perca o contexto das questões vizinhas (H7). */
+/** Edição da questão no próprio lugar, sem trocar de tela. */
 function EditorQuestao({ questao, numero, aoMudar, aoSalvar, aoCancelar }) {
   return (
     <article className="questao" aria-label={`Editando a questão ${numero}`}>

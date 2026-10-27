@@ -1,9 +1,5 @@
-/* =========================================================================
-   Entende+ — componentes do design system
-   Regra que vale para o arquivo inteiro: alvo clicável nunca abaixo de
-   44px (SC 2.5.8 exige 24px; adotamos 44px), e nenhum estado é comunicado
-   só por cor (SC 1.4.1) — sempre há texto, ícone ou borda junto.
-   ========================================================================= */
+/* Componentes da interface. Alvo clicável com no mínimo 44px e nenhum estado
+   comunicado só por cor: sempre há texto, ícone ou borda junto. */
 
 /* --- Botões -------------------------------------------------------------- */
 .botao {
@@ -69,18 +65,11 @@
 .cartao--compacto { padding: var(--e4); }
 .cartao > h2, .cartao > h3 { margin-bottom: var(--e3); }
 
-/* Cartão de ação: um título, uma ou duas frases e um botão. Mesmo motivo do
-   `.aviso` — esticado na largura de trabalho inteira, ele fica com o texto
-   parado em 68 caracteres (RNF02) e mais de mil pixels vazios à direita, o
-   que lê como texto quebrado no meio. A caixa acompanha o conteúdo; a linha
-   de leitura continua onde estava. */
+/* Cartão de ação: a largura acompanha o conteúdo. */
 .cartao--acao { max-width: fit-content; }
 
-/* Cada material é um cartão independente, e o cartão tem os dados à esquerda e
-   as ações à direita. Numa linha só, em tela larga, sobravam uns 500 px de nada
-   entre um e outro, e o olho perdia a ligação entre o material e o botão que
-   age sobre ele. Duas colunas aproximam os dois e mostram mais material sem
-   rolar. Volta para uma coluna sozinho quando não couber. */
+/* Cartão de material: dados à esquerda, ações à direita; uma coluna em
+   tela estreita. */
 .cartao-lista {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(40rem, 100%), 1fr));
@@ -147,11 +136,8 @@
 .area-texto[aria-invalid='true'] { border-color: var(--cor-erro); background: var(--cor-erro-fundo); }
 .area-texto { min-height: 16rem; line-height: var(--altura-linha); resize: vertical; }
 
-/* min-inline-size: 0 é obrigatório aqui. O valor padrão que o navegador dá a
-   fieldset é `min-content`, e com ele a caixa se recusa a encolher abaixo da
-   largura da maior palavra do conteúdo — o que abria rolagem horizontal na tela
-   de envio em viewport estreito com o corpo do texto no nível máximo (SC 1.4.10
-   e 1.4.4). Nenhum outro elemento do sistema tem esse padrão. */
+/* min-inline-size: 0 deixa o fieldset encolher abaixo da maior palavra;
+   sem isto, a tela estreita ganhava rolagem horizontal. */
 fieldset {
   border: 1px solid var(--cor-borda); border-radius: var(--raio);
   padding: var(--e4); margin: 0 0 var(--e4);
@@ -174,17 +160,12 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .opcao:hover { background: var(--cor-superficie-alt); }
 .opcao input { margin-top: 0.28em; width: 1.15rem; height: 1.15rem; flex: none; accent-color: var(--cor-teal); }
 .opcao--marcada { border-color: var(--cor-teal-escuro); background: var(--cor-info-fundo); }
-/* Nome de arquivo é palavra longa sem espaço e não quebra sozinho: sem isto,
-   "Ciencias-5ano-Fotossintese.pdf" empurra a caixa para fora da tela estreita. */
+/* Nome de arquivo longo e sem espaço quebra em qualquer ponto. */
 .opcao__titulo { font-weight: 600; display: block; overflow-wrap: anywhere; }
 .opcao__apoio { font-size: 0.9375rem; color: var(--cor-texto-apoio); display: block; }
 
-/* Opção presente na tela, mas fora do escopo desta versão (perfis TDAH e
-   dislexia). Não é um controle desligado por erro nem por estado temporário:
-   é o recorte do trabalho aparecendo na interface, e por isso vem sempre com
-   a etiqueta "Extensão futura" ao lado. O estado não é comunicado só pelo
-   cinza (SC 1.4.1) — há a etiqueta em texto, a borda tracejada e o
-   aria-disabled para quem usa leitor de tela. */
+/* Opção fora do escopo desta versão: aparece desligada, com borda tracejada,
+   etiqueta "Extensão futura" e aria-disabled. */
 .opcao--indisponivel {
   background: var(--cor-superficie-alt);
   border-style: dashed;
@@ -197,9 +178,7 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .opcao--indisponivel:hover { background: var(--cor-superficie-alt); }
 
 /* --- Área de envio de arquivo ------------------------------------------- */
-/* Mostra a interação real do produto (escolher um arquivo do computador) sem
-   fingir que ela funciona na demonstração. A alternativa seria esconder o
-   botão, e aí a tela de envio não mostraria o passo que dá nome a ela. */
+/* Na demonstração, a área de envio aparece desligada. */
 .area-envio {
   border: 2px dashed var(--cor-borda-forte);
   border-radius: var(--raio-g);
@@ -212,15 +191,8 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .area-envio p { max-width: 46ch; margin-inline: auto; }
 
 /* --- Avisos -------------------------------------------------------------- */
-/* `fit-content` resolve o defeito que aparecia em monitor largo: a caixa
-   esticava até a largura de trabalho inteira enquanto o texto dentro dela
-   parava em 68 caracteres (RNF02), deixando cerca de mil pixels vazios à
-   direita e dando a impressão de texto quebrado no meio.
-   A correção é encolher a CAIXA, não soltar a linha: soltar a linha poria
-   textos de 170 caracteres justamente na tela onde o sistema promete no
-   máximo 80. Quando o conteúdo é mais largo que o espaço disponível,
-   `fit-content` devolve a largura disponível sozinho, então nada estoura em
-   tela de 360 px (SC 1.4.10). */
+/* `fit-content`: a caixa acompanha o conteúdo em vez de esticar na largura
+   toda, e nunca passa da largura disponível. */
 .aviso {
   display: flex;
   gap: var(--e3);
@@ -239,7 +211,7 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .aviso--erro { background: var(--cor-erro-fundo); border-color: var(--cor-erro); }
 :root[data-contraste='alto'] .aviso { border: 2px solid #ffffff; border-left-width: 6px; }
 
-/* --- Passos (stepper) — H1 ----------------------------------------------- */
+/* --- Passos ---------------------------------------------------------------- */
 .passos { display: flex; flex-wrap: wrap; gap: var(--e2); margin-bottom: var(--e5); padding: 0; list-style: none; }
 .passos li {
   display: flex;
@@ -284,7 +256,7 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .progresso__texto { margin-top: var(--e2); font-weight: 600; }
 .progresso__etapa { color: var(--cor-texto-apoio); font-size: 0.9375rem; }
 
-/* --- Comparação original × adaptado (tela núcleo) ------------------------ */
+/* --- Comparação original × adaptado --------------------------------------- */
 .comparador { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e4); }
 @media (max-width: 62rem) { .comparador { grid-template-columns: minmax(0, 1fr); } }
 
@@ -294,10 +266,8 @@ legend { font-weight: 600; padding-inline: var(--e2); }
   border-radius: var(--raio-g);
   overflow: hidden;
 }
-/* min-height mantém os dois cabeçalhos com a mesma altura: um traz uma
-   etiqueta baixa e o outro um botão de 44 px, e sem isto o texto adaptado
-   começaria alguns pixels abaixo do original, justamente na tela cujo sentido
-   é comparar os dois na mesma linha. */
+/* min-height iguala a altura dos dois cabeçalhos, para os textos começarem
+   na mesma linha. */
 .painel-texto__cabecalho {
   padding: var(--e3) var(--e4);
   min-height: calc(var(--alvo-minimo) + 2 * var(--e3));
@@ -309,16 +279,8 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .painel-texto__cabecalho h3 { font-size: 1rem; }
 .painel-texto__corpo { padding: var(--e4); max-height: 34rem; overflow-y: auto; }
 
-/* O painel do original imita o material como ele é hoje: justificado e
-   apertado. É a única exceção deliberada às regras tipográficas do app —
-   está anotada no documento para não parecer descuido.
-
-   O teto de 80ch NÃO é parte da imitação, é contenção: com o container
-   acompanhando o monitor, a coluna passa de 700 px em tela larga e a linha
-   chegaria perto de 100 caracteres. Justamente nesta tela o documento defende
-   o limite de 80 do SC 1.4.8 — deixar a demonstração violar o número que ela
-   existe para defender é o tipo de detalhe que a banca encontra. A exceção
-   declarada na seção 3.4 é justificação e entrelinha, não comprimento. */
+/* O painel do original reproduz o material como ele chega: justificado e
+   com entrelinha apertada. A linha continua limitada a 80 caracteres. */
 .texto-original p { text-align: justify; line-height: 1.35; max-width: 80ch; }
 .texto-original p + p { margin-top: 0.75em; }
 
@@ -329,7 +291,7 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .texto-adaptado section:first-child h4 { margin-top: 0; }
 .texto-adaptado p { text-align: left; }
 
-/* Trecho alterado por uma regra: sublinhado + fundo, nunca só cor. */
+/* Trecho alterado por uma regra: sublinhado e fundo, não só cor. */
 .marca-regra {
   background: #fff3d6;
   border-bottom: 2px solid var(--cor-ambar-escuro);
@@ -350,10 +312,8 @@ legend { font-weight: 600; padding-inline: var(--e2); }
   text-align: left; font-weight: 600; color: var(--cor-texto);
 }
 .regra__botao:hover { background: var(--cor-superficie-alt); }
-/* O nome da regra é o único item elástico da linha, entre o código e a seta,
-   que não encolhem. Item de flex tem `min-width: auto` por padrão e se recusa a
-   ficar menor que a própria palavra mais longa — era o que empurrava a seta
-   para fora da tela estreita (SC 1.4.10). */
+/* min-width: 0 deixa o nome da regra encolher; sem isto, a seta saía da
+   tela estreita. */
 .regra__botao > span:not([class]) { min-width: 0; overflow-wrap: anywhere; }
 .regra__codigo {
   font-family: var(--fonte-mono); font-size: 0.8125rem; font-weight: 700;
@@ -376,16 +336,12 @@ table.dados th, table.dados td {
   vertical-align: top;
 }
 table.dados thead th { background: var(--cor-superficie-alt); border-bottom: 2px solid var(--cor-borda-forte); }
-/* O `th` precisa entrar aqui junto com o `td`: sem ele, a última linha ficava
-   com o traço só embaixo da primeira coluna, e a tabela terminava com um risco
-   curto e torto que parecia defeito de renderização. */
+/* `th` junto com o `td`, para o traço da última linha cobrir todas as colunas. */
 table.dados tbody tr:last-child td,
 table.dados tbody tr:last-child th { border-bottom: none; }
 table.dados td.numero { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* Tabela de poucas colunas curtas. Esticada na largura de trabalho inteira,
-   a de atalhos de teclado ficava com dois rótulos de três palavras separados
-   por 1200 px de nada — o olho perdia a ligação entre a tecla e o destino. */
+/* Tabela de poucas colunas: largura pelo conteúdo. */
 table.dados--estreita { max-width: 46rem; }
 
 /* --- Diálogo modal ------------------------------------------------------- */
@@ -408,26 +364,15 @@ table.dados--estreita { max-width: 46rem; }
 .dialogo h2 { margin-bottom: var(--e3); }
 .dialogo .linha { margin-top: var(--e5); }
 
-/* Diálogo de edição de texto. 34rem serve para confirmar uma ação de uma
-   frase; para editar o material inteiro seria uma fresta.
-
-   A largura não é um número escolhido no olho: é a medida de leitura (68
-   caracteres, RNF02) mais o respiro interno. Assim a área de edição ocupa o
-   diálogo inteiro, sem sobra à direita, e mesmo assim a linha que o professor
-   digita respeita o mesmo limite que o sistema aplica ao material. Um
-   diálogo mais largo que isso só serviria para alongar a linha. */
+/* Diálogo de edição de texto: largura da medida de leitura mais o espaço
+   interno. */
 .dialogo--largo { max-width: calc(68ch + 2 * var(--e5) + 4px); }
 .dialogo--largo .area-texto { min-height: 24rem; }
 .dialogo--largo .campo { max-width: none; margin-bottom: 0; }
 .dialogo--largo .campo__dica { margin-bottom: var(--e3); }
 
 /* --- Questões ------------------------------------------------------------ */
-/* Questão é unidade curta e independente: enunciado e quatro alternativas.
-   Numa tela larga, uma por linha deixaria o cartão com mais de 1000 px vazios
-   à direita e obrigaria a rolar cinco vezes para conferir cinco questões. A
-   grade encaixa duas lado a lado e volta para uma quando não couber. A ordem
-   de leitura e a de tabulação continuam sendo a do DOM, que é a mesma da tela:
-   esquerda para a direita, de cima para baixo. */
+/* Questões em grade: duas por linha em tela larga, uma em tela estreita. */
 .questao-lista {
   list-style: none;
   padding: 0;
@@ -482,15 +427,11 @@ table.dados--estreita { max-width: 46rem; }
 .atividade__retorno { margin-top: var(--e5); }
 .atividade__contador { color: var(--cor-texto-apoio); font-weight: 600; margin-bottom: var(--e3); }
 
-/* Troca de forma no pé das duas telas do estudante. Mora aqui, e não em
-   jogo.css, porque as duas telas a usam e só uma delas carrega aquela folha. */
+/* Link de troca de forma no pé das duas telas do estudante. */
 .atividade__troca { margin-top: var(--e6); }
 
-/* --- Escolha do modo da atividade (RF22) ---------------------------------
-   Duas opções, do mesmo tamanho e com o mesmo peso visual. Nenhuma das duas é
-   "a principal": jogar e responder a lista são caminhos completos da mesma
-   atividade, e destacar um induziria a escolha que a tela existe para deixar
-   com a criança.                                                            */
+/* --- Escolha da forma da atividade (RF22) --------------------------------
+      As duas opções têm o mesmo tamanho e o mesmo peso visual. */
 .escolha__intro { font-size: 1.125rem; margin: var(--e4) 0 var(--e5); }
 
 .escolha {
@@ -573,22 +514,15 @@ table.dados--estreita { max-width: 46rem; }
 .migalhas li + li::before { content: '›'; margin-right: var(--e2); color: var(--cor-texto-apoio); }
 
 /* --- Estado vazio -------------------------------------------------------- */
-/* Estado vazio e página de erro: o cartão não acompanha a largura de trabalho.
-   Texto centralizado esticado até 90rem obriga o olho a varrer a tela inteira
-   para achar o começo da linha seguinte. */
+/* Estado vazio e página de erro: cartão estreito. */
 .vazio { text-align: center; padding: var(--e7) var(--e4); max-width: 52rem; margin-inline: auto; }
 .vazio p { margin-inline: auto; }
 
 /* --- Perguntas frequentes ------------------------------------------------
-   A resposta para em 68ch por RNF02, então num cartão de 90rem sobraria meia
-   tela vazia à direita. A grade encaixa duas perguntas lado a lado e volta
-   sozinha para uma coluna quando não couberem — inclusive com o texto em 125%
-   ou o zoom em 200%, porque o limite está em rem, não em pixel de tela. */
+      Duas perguntas por linha em tela larga, uma quando não couber. */
 .perguntas {
   display: grid;
-  /* O `min(...)` não é enfeite: `minmax(26rem, 1fr)` sozinho obriga a pista a
-     ter 416 px e estoura a tela de 360 px na horizontal (SC 1.4.10). Com ele,
-     a pista encolhe até a largura disponível. */
+  /* `min(...)` deixa a coluna encolher abaixo de 26rem em tela de 360px. */
   grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr));
   gap: var(--e5) var(--e6);
   align-items: start;

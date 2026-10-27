@@ -1,16 +1,6 @@
-/* =========================================================================
-   Entende+ — conteúdo de demonstração do protótipo
-   ---------------------------------------------------------------------------
-   IMPORTANTE PARA A BANCA: nada aqui é gerado em tempo real. O motor de
-   adaptação e a chamada ao LLM não fazem parte desta entrega. Os textos,
-   as regras, as métricas e as questões abaixo são dados fixos, escritos por
-   nós, e servem para demonstrar a INTERFACE e o FLUXO.
-
-   O texto original foi redigido pela dupla no estilo de um material de
-   Ciências do 5º ano — denso, com período longo e linguagem figurada. Não é
-   material de terceiros: evita questão de direito autoral (RN07) e nos dá
-   controle sobre os defeitos que a adaptação precisa corrigir.
-   ========================================================================= */
+/* Dados fixos do modo demonstração: texto original e adaptado, regras,
+   métricas, questões e materiais. O texto de Ciências foi escrito pelos
+   autores para a demonstração. */
 
 export const CONJUNTO_REGRAS = {
   identificador: 'TEA',
@@ -24,8 +14,7 @@ export const CONJUNTO_REGRAS = {
     'código marcou.',
 };
 
-/** As dez regras do conjunto. `base` é a referência normativa exibida ao
- *  professor quando ele pergunta "por que isso mudou?" (RF10). */
+/** As dez regras do conjunto TEA, com a base normativa de cada uma (RF10). */
 export const REGRAS = [
   {
     codigo: 'TEA-01',
@@ -153,8 +142,7 @@ export const TEXTO_ORIGINAL = [
     'vegetal e, em última análise, a manutenção da vida na Terra tal como a conhecemos.',
 ];
 
-/** Cada bloco vira um <h4> + parágrafos. Os trechos com `regra` recebem
- *  marcação visual e o professor consegue perguntar "por que isso mudou?". */
+/** Cada bloco do texto adaptado tem título, parágrafos e a regra que o originou. */
 export const TEXTO_ADAPTADO = [
   {
     titulo: 'O que você vai ler',
@@ -205,9 +193,7 @@ export const TEXTO_ADAPTADO = [
 ];
 
 /* --- Métricas de legibilidade (RF07) --------------------------------------
-   RN10 manda exibir a métrica sempre, inclusive quando ela piora. A linha
-   de contagem de palavras é justamente a que piora: explicar termo e dividir
-   período alonga o texto. Esconder isso seria propaganda, não medição.      */
+      O total de palavras aumenta na adaptação e é exibido assim mesmo (RN10). */
 export const METRICAS = [
   {
     nome: 'Palavras por período',
@@ -303,11 +289,8 @@ export const QUESTOES = [
 ];
 
 /* --- Materiais do professor (RF19) ---------------------------------------
-   `conteudoProprio` marca o único material desta demonstração que tem texto
-   adaptado escrito para ele. Os outros dois existem para o histórico ter mais
-   de uma linha e para mostrar os estados da atividade (publicada, revogada) —
-   abri-los reaproveita o texto de Ciências, e a interface avisa isso em vez
-   de deixar parecer erro. Ver `AvisoConteudoDemo`.                          */
+      Só o material com `conteudoProprio` tem texto adaptado próprio; os outros
+      mostram o texto de Ciências com o aviso AvisoConteudoDemo. */
 export const MATERIAIS_INICIAIS = [
   {
     id: 'm-102',

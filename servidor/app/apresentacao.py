@@ -41,8 +41,7 @@ def conjunto_do_arquivo(conjunto: ConjuntoDeclarado) -> ConjuntoPublico:
 
 
 def conjunto_do_registro(conjunto: ConjuntoRegras) -> ConjuntoPublico:
-    """As regras como estavam na versão que a adaptação usou — não as do arquivo
-    de hoje. É o que a justificativa de RF10 precisa mostrar."""
+    """As regras da versão que a adaptação usou, e não as do arquivo atual (RF10)."""
     return ConjuntoPublico(
         perfil=conjunto.perfil.value,
         versao=conjunto.versao,
@@ -85,9 +84,8 @@ def material_painel(material: Material) -> MaterialPainel:
 
 
 def adaptacao_detalhe(adaptacao: Adaptacao) -> AdaptacaoDetalhe:
-    # Marca de regra por bloco: vem do registro das aplicações. Bloco que o
-    # professor editou deixa de coincidir com o que o motor produziu e perde a
-    # marca — o que é verdade: aquele texto já não é obra da regra.
+    # Marca de regra por bloco, a partir do registro das aplicações. Bloco
+    # editado pelo professor perde a marca.
     regras_por_texto: dict[str, list[str]] = {}
     for aplicacao in adaptacao.aplicacoes:
         regras_por_texto.setdefault(aplicacao.trecho_resultante, []).append(aplicacao.regra.codigo)
@@ -156,8 +154,9 @@ def questao_professor(questao: Questao) -> QuestaoProfessor:
 
 
 def titulo_do_material(material: Material) -> str:
-    """Para a tela da criança: o primeiro título do texto adaptado, e não o
-    nome do arquivo, que costuma ter sigla de turma ou nome do professor."""
+    """Para a tela do estudante: o primeiro título do texto adaptado, e não o
+        nome do arquivo.
+    """
     adaptacao = material.adaptacao_atual
     if adaptacao and adaptacao.status is StatusAdaptacao.APROVADA:
         for bloco in md.ler(adaptacao.texto_adaptado):

@@ -21,19 +21,18 @@ class Configuracao(BaseSettings):
 
     banco_url: str = f"sqlite:///{(PASTA_SERVIDOR / 'entende.db').as_posix()}"
     segredo_token: str = ""
-    validade_token_horas: int = 8  # um turno de trabalho do professor
+    validade_token_horas: int = 8  # 8 horas
     origens: str = "http://localhost:5173,http://127.0.0.1:5173,https://emmanuelgbl.github.io"
 
-    # RNF08 — limites de envio. Os mesmos valores estão em src/servicos/api.js,
-    # que valida antes de enviar; aqui é a validação que vale.
+    # RNF08 — limites de envio. A interface valida antes de enviar; aqui é a
+    # validação que vale.
     limite_paginas: int = 20
     limite_megabytes: int = 15
 
     # Motor de adaptação. O arquivo de regras é lido a cada adaptação (RNF13).
     caminho_regras: Path = PASTA_SERVIDOR / "regras" / "tea.json"
     modelo: str = "claude-opus-5"
-    # Lida com o nome padrão do SDK, sem o prefixo ENTENDE_, para funcionar
-    # tanto no .env quanto exportada no terminal.
+    # Lida com o nome padrão do SDK, sem o prefixo ENTENDE_.
     chave_api: str = Field(default="", validation_alias="ANTHROPIC_API_KEY")
 
     @property

@@ -9,19 +9,8 @@ import { usarAdaptacao, usarApp, usarCatalogo } from '../contextos/Aplicacao.jsx
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 import { BarraProgresso } from '../componentes/Passos.jsx';
 
-/* =========================================================================
-   TELA NÚCLEO DO PROJETO.
-
-   UC05 a UC12 — gerar adaptação, registrar regras, calcular métricas,
-   revisar, editar, consultar justificativa, aprovar e exportar, reprocessar.
-   RF05 a RF12; RN01, RN02, RN08, RN10.
-
-   É aqui que o diferencial declarado no pré-projeto vira algo que se vê: o
-   critério de adaptação fica exposto ao lado do texto, com base normativa,
-   e a métrica aparece mesmo quando piora. Uma ferramenta de IA genérica
-   entrega o texto reescrito e nada mais; a diferença do Entende+ não está no
-   texto de saída, está nesta coluna da direita.
-   ========================================================================= */
+/* Revisão da adaptação: comparação original × adaptado, métricas, regras
+   aplicadas, edição, aprovação e reprocessamento (RF05–RF12). */
 
 /* Edição no modo de demonstração: os blocos viram texto com "##" e voltam. */
 function serializar(blocos) {
@@ -38,8 +27,8 @@ function desserializar(texto, blocosOriginais) {
     const corpo = linhas.slice(1).join('\n').trim();
     return {
       titulo,
-      // A regra que originou o bloco continua atribuída a ele: o professor
-      // edita o texto, não o registro do que o sistema fez (RN08).
+      // O bloco mantém a regra que o originou: o professor edita o texto, não
+      // o registro (RN08).
       regra: blocosOriginais[indice]?.regra,
       paragrafos: corpo.split(/\n\s*\n/).filter(Boolean),
     };
@@ -67,7 +56,7 @@ export function Adaptacao() {
   const [etapaAtual, setEtapaAtual] = useState('');
   const [falha, setFalha] = useState(null);
 
-  // No modo servidor, edita-se o Markdown que o servidor guarda, sem perda.
+  // No modo servidor, edita-se o Markdown guardado pelo servidor.
   const textoSalvo = useMemo(() => {
     if (!adaptacao) return '';
     return modoServidor ? adaptacao.textoAdaptado : serializar(adaptacao.blocos);
@@ -93,8 +82,8 @@ export function Adaptacao() {
   }
 
   function abrirEdicao() {
-    // Reabrir sempre parte do que está salvo. Sem isto, um rascunho
-    // descartado ressuscitaria na próxima abertura do diálogo.
+    // Sempre reabre a partir do texto salvo, para não recuperar um rascunho
+    // descartado.
     setRascunho(textoSalvo);
     setEditando(true);
   }
@@ -190,10 +179,7 @@ export function Adaptacao() {
           </div>
         </div>
 
-        {/* RN02 — o botão do PDF só aparece depois da aprovação. Material já
-            aprovado antes continua com o PDF disponível, sem aprovar de novo.
-            A garantia de que nada sai sem aprovação continua dita onde ela
-            importa: no diálogo de confirmação, no instante da decisão. */}
+        {/* RN02 — o botão do PDF só aparece depois da aprovação. */}
         {adaptacao && (
           <div className="linha">
             {dados.estado === 'aprovado' ? (
@@ -225,9 +211,6 @@ export function Adaptacao() {
 
       {exportado && (
         <Aviso tipo="boa" titulo="Material aprovado" papel="status">
-          {/* O botão do PDF não se repete aqui: depois da aprovação ele passa
-              a ocupar, de forma permanente, o lugar do "Aprovar e exportar"
-              no topo da tela, a dois centímetros deste aviso. */}
           <p>
             Aprovado em {exportado.aprovadoEm}. O material sai com fonte sem serifa, alinhamento à
             esquerda, entrelinha 1,5 e linha de no máximo 80 caracteres. O botão no topo da tela
@@ -295,11 +278,7 @@ export function Adaptacao() {
                 Comparar original e adaptado
               </h2>
 
-              {/* A edição virou diálogo em vez de trocar o conteúdo da seção.
-                  Trocando, a comparação sumia justamente enquanto o professor
-                  corrigia o texto, e era ela a referência da correção. No
-                  diálogo, o comparador continua atrás e volta inteiro ao
-                  fechar. */}
+              {/* A edição abre em diálogo, e a comparação continua visível atrás. */}
               <ComparadorTextos
                 original={adaptacao.original}
                 blocos={adaptacao.blocos}

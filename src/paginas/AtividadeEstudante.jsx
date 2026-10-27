@@ -9,29 +9,9 @@ import {
   usarAtividadeDoCodigo,
 } from '../componentes/AtividadeAcesso.jsx';
 
-/* =========================================================================
-   UC16 — Executar a atividade (RF16)  ·  UC17 — Retorno de acerto ou erro (RF17)
-   RN05 — sem cadastro e sem nenhum dado que identifique o estudante.
-   RNF04 — funciona de 360 px a 1920 px, em Chrome e Firefox, sem instalar nada.
-
-   Esta é a forma SEM jogo da atividade, e continua sendo um caminho completo,
-   não um modo reduzido: é ela que corresponde à folha impressa que o professor
-   entrega (RF23), e é ela que atende quem não quer jogo nenhum. O jogo mora em
-   `AtividadeJogo.jsx` e usa exatamente as mesmas questões (RF13, RN04); a
-   escolha entre os dois é da criança, em `AtividadeEscolha.jsx` (RF22).
-
-   As decisões desta tela vêm do perfil, não do gosto:
-
-   - Uma questão por vez, sem rolagem: reduz a quantidade de coisa disputando
-     a atenção.
-   - Sem cronômetro e sem placar de tempo. Pressão de tempo é fonte conhecida
-     de ansiedade e não mede compreensão.
-   - O retorno é imediato e literal ("Você acertou" / "A resposta certa era"),
-     sem ironia, sem emoji ambíguo, sem som.
-   - Errar não bloqueia: a criança vê a resposta certa e segue. A atividade é
-     de leitura, não de avaliação.
-   - Alvo grande (56 px de altura), bem acima do mínimo da WCAG.
-   ========================================================================= */
+/* Lista de perguntas, a forma da atividade sem jogo (RF16, RF17).
+   Uma questão por vez, sem cronômetro; depois de responder, mostra se acertou
+   e qual é a resposta certa. Não guarda nenhum dado do estudante (RN05). */
 
 export function AtividadeEstudante() {
   const { codigo } = useParams();
@@ -106,13 +86,7 @@ export function AtividadeEstudante() {
 
   return (
     <div className="atividade">
-      {/* A disciplina anunciada tem de ser a do conteúdo que está na tela, e não
-          a do material no histórico. Nesta demonstração as questões são sempre
-          as de Ciências, então um material de História anunciaria "Atividade
-          sobre História" com perguntas sobre fotossíntese — e quem ouviria o
-          erro seria justamente quem usa leitor de tela, porque este título é
-          `apenas-leitor`. As telas do professor já tratam esse descompasso com
-          o AvisoConteudoDemo; esta era a única que não tratava. */}
+      {/* Título só para leitor de tela, com o assunto da atividade. */}
       <h1 className="apenas-leitor">Atividade sobre {assuntoDaAtividade(material)}</h1>
 
       <p className="atividade__contador">

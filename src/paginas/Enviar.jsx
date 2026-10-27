@@ -8,24 +8,12 @@ import { usarAnuncios } from '../contextos/Anuncios.jsx';
 import { ARQUIVOS_DEMO, CONJUNTO_REGRAS } from '../dados/conteudo.js';
 import { enviarMaterial, processarAdaptacao, validarArquivo } from '../servicos/api.js';
 
-/* =========================================================================
-   UC02 — Enviar material (RF02)   ·   UC03 — Extrair conteúdo (RF03)
-   UC04 — Configurar adaptação (RF04)
-
-   Por que três passos e não um formulário só: cada passo tem uma decisão e
-   uma só. Um formulário único com arquivo, perfil, etapa e disciplina junto
-   é mais rápido para quem já conhece o sistema e pior para quem está na
-   primeira vez — e o público aqui é professor sem formação técnica, no fim
-   do dia de trabalho (H8 e H2).
-
-   O passo 1 valida antes de enviar (H5). O erro de extração da RN09 é
-   deliberadamente demonstrável: o arquivo "Aula-digitalizada-scanner.pdf"
-   sempre recusa, e é o que sustenta a heurística H9 na avaliação.
-   ========================================================================= */
+/* Envio do material em três passos: escolher o arquivo (RF02), configurar
+   a adaptação (RF04) e processar. O arquivo é validado antes do envio. */
 
 const PASSOS = ['Escolher o material', 'Configurar a adaptação', 'Processar'];
 
-const LIMITE_MB = 15; // RNF08 — o servidor confere de novo, e confere também as páginas
+const LIMITE_MB = 15; // RNF08; o servidor confere de novo, inclusive as páginas
 
 function tamanhoLegivel(bytes) {
   const mb = bytes / (1024 * 1024);
@@ -34,8 +22,8 @@ function tamanhoLegivel(bytes) {
     : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
-/** Validação antes de enviar (H5): formato e tamanho. As páginas só o
- *  servidor sabe contar. */
+/** Validação antes de enviar: formato e tamanho. As páginas só o servidor
+ *  conta. */
 function problemaDoArquivo(arquivo) {
   if (!arquivo) return null;
   if (!/\.(pdf|docx)$/i.test(arquivo.name)) {
@@ -55,8 +43,7 @@ function problemaDoArquivo(arquivo) {
   return null;
 }
 
-/* Perfis fora do escopo desta versão. Aparecem na tela desligados, nunca
-   selecionáveis, e sempre rotulados como extensão futura. */
+/* Perfis fora do escopo desta versão: aparecem desligados, como extensão futura. */
 const PERFIS_FUTUROS = [
   {
     sigla: 'TDAH',
@@ -145,7 +132,7 @@ export function Enviar() {
         navegar(`/materiais/${enviado.id}/adaptacao`);
       } catch (erro) {
         if (cancelamento.current.cancelado) {
-          // "Se cancelar, nada é salvo": o material já enviado sai junto.
+          // Cancelar descarta também o material já enviado.
           await excluir(enviado.id).catch(() => {});
           setEnviado(null);
           setArquivoReal(null);
@@ -177,8 +164,7 @@ export function Enviar() {
         etapa: '5º ano do ensino fundamental',
         estado: 'adaptado',
         versaoRegras: `${CONJUNTO_REGRAS.identificador} v${CONJUNTO_REGRAS.versao}`,
-        // Só o arquivo de Ciências tem texto adaptado escrito para ele nesta
-        // demonstração. Os demais abrem com o aviso de conteúdo de demonstração.
+        // Só o arquivo de Ciências tem texto adaptado próprio na demonstração.
         conteudoProprio: arquivo.id === 'ok',
         atividade: { estado: 'rascunho', codigo: null },
       });
@@ -239,11 +225,7 @@ export function Enviar() {
             Aceitamos PDF e Word (.docx), com até 20 páginas e 15 MB por envio.
           </p>
 
-          {/* O envio de arquivo próprio é a interação principal do produto, e
-              some da tela se a demonstração mostrar só a lista de exemplos.
-              Fica visível e desligado, com a razão escrita ao lado: é a mesma
-              postura do aviso de conteúdo de demonstração e da declaração de
-              limites na tela de entrada. */}
+          {/* Na demonstração, o envio de arquivo aparece desligado, com o motivo. */}
           {modoServidor ? (
             <div className="area-envio">
               <label className="campo" style={{ marginBottom: 0 }}>
@@ -355,13 +337,6 @@ export function Enviar() {
               </span>
             </div>
 
-            {/* Os dois perfis abaixo são o recorte do trabalho aparecendo na
-                interface. Não são requisito, não são item de backlog e não
-                podem ser escolhidos: o escopo foi fechado em TEA, e TDAH e
-                dislexia constam apenas como extensão futura. Mostrá-los
-                desligados, com o motivo escrito, explica ao professor por que
-                a lista tem um item só — e mostra o caminho do produto sem
-                prometer data. */}
             {PERFIS_FUTUROS.map((perfil) => (
               <div key={perfil.sigla} className="opcao opcao--indisponivel" aria-disabled="true">
                 <span aria-hidden="true">○</span>

@@ -4,26 +4,12 @@ import { PainelPreferencias } from './PainelPreferencias.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
-/* =========================================================================
-   Esqueleto das telas do professor.
+/* Esqueleto das telas do professor: link de salto, barra superior com menu,
+   painel de exibição e rodapé.
 
-   Três coisas aqui não são decoração:
-
-   1. Links de salto com accesskey (1 conteúdo, 2 menu). O salto para o
-      conteúdo é o SC 2.4.1 da WCAG; os accesskeys nessa numeração são
-      exigência do e-MAG (recomendação 1.5), que a WCAG não faz.
-      A tecla 4 (rodapé) da mesma recomendação ainda NÃO está implementada: o
-      <footer> já tem id e tabIndex prontos para recebê-la, mas o accessKey
-      nunca foi ligado. As telas de Ajuda e Acessibilidade anunciam só as
-      teclas 1 e 2, então o sistema não promete o que não entrega — mas a
-      recomendação segue parcialmente atendida, e está registrada assim na
-      seção 6.3 do documento.
-   2. Foco e título por rota. Em aplicação de página única, trocar de rota não
-      recarrega o documento: quem usa leitor de tela não recebe aviso nenhum
-      e o foco fica onde estava. Por isso o <main> recebe o foco a cada troca
-      e o título da página é anunciado.
-   3. O painel de exibição fica no mesmo lugar em todas as telas (SC 3.2.6).
-   ========================================================================= */
+   A cada troca de rota o <main> recebe o foco e o título da página muda,
+   para que o leitor de tela perceba a nova tela. Atalhos: accesskey 1
+   (conteúdo) e 2 (menu). */
 
 /** Define o título do documento e anuncia a chegada na tela. */
 export function usarTituloDaPagina(titulo) {
@@ -135,8 +121,7 @@ export function Layout() {
   );
 }
 
-/** Layout sem menu do professor: telas públicas e a atividade do estudante,
- *  que por RN05 não tem conta, não tem painel e não coleta dado nenhum. */
+/** Layout sem o menu do professor: entrada e telas do estudante. */
 export function LayoutSimples() {
   const local = useLocation();
   const principal = useRef(null);

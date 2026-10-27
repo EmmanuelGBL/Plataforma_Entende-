@@ -33,8 +33,7 @@ def _adaptacao_atual(sessao: Session, material_id: uuid.UUID, professor: Profess
 
 @rotas.get("/regras", response_model=ConjuntoPublico, tags=["Regras"])
 def regras_vigentes(request: Request):
-    """Catálogo das regras do arquivo em vigor (tela de Ajuda). Público: são
-    critérios do projeto, não dado de ninguém."""
+    """Catálogo das regras do arquivo em vigor. Rota pública."""
     conjunto, _ = regras.carregar(request.app.state.configuracao.caminho_regras)
     return conjunto_do_arquivo(conjunto)
 

@@ -1,13 +1,6 @@
-/* =========================================================================
-   Cliente HTTP do servidor do Entende+ (pasta servidor/).
-
-   Só é usado quando o build recebe VITE_API_URL. Sem ela, o sistema roda no
-   modo de demonstração de api.js — que é o que o GitHub Pages e o arquivo
-   offline publicam, porque nenhum dos dois tem servidor por trás.
-
-   Os erros do servidor já vêm no formato do ErroDeNegocio (título, motivo,
-   saída, regra), e são repassados às telas sem tradução.
-   ========================================================================= */
+/* Cliente HTTP da API do Entende+. Só é usado quando o build recebe
+   VITE_API_URL. Os erros da API chegam no formato do ErroDeNegocio e são
+   repassados às telas. */
 
 import { ErroDeNegocio } from './api.js';
 
@@ -16,8 +9,7 @@ export const modoServidor = Boolean(URL_API);
 
 const CHAVE_TOKEN = 'entende.token';
 
-/* sessionStorage, e não localStorage: a sessão some quando a aba fecha. O
-   computador da sala dos professores é compartilhado. */
+/* sessionStorage: a sessão termina quando a aba fecha. */
 export function lerToken() {
   try {
     return window.sessionStorage.getItem(CHAVE_TOKEN);
@@ -36,8 +28,7 @@ export function guardarToken(token) {
 }
 
 let aoExpirar = () => {};
-/** O contexto da aplicação registra aqui o que fazer quando o servidor
- *  responde 401: limpar a sessão e voltar para a tela de entrada. */
+/** Função chamada quando a API responde 401 (sessão expirada). */
 export function quandoSessaoExpirar(funcao) {
   aoExpirar = funcao;
 }
@@ -121,11 +112,7 @@ export const servidor = {
   atividade: (codigo) => pedir(`/api/atividades/${encodeURIComponent(codigo)}`),
 };
 
-/* =========================================================================
-   Conversão: formato da API → formato que as telas já usavam com os dados
-   de demonstração. Fica aqui para que nenhuma tela precise saber de onde o
-   dado veio.
-   ========================================================================= */
+/* Conversão do formato da API para o formato usado pelas telas. */
 
 const ETAPA = '5º ano do ensino fundamental';
 
@@ -163,7 +150,6 @@ export function converterMaterial(m) {
     etapa: ETAPA,
     estado: ESTADO_MATERIAL[m.estado] ?? 'adaptado',
     versaoRegras: m.versao_regras ?? '—',
-    // Dado real: nunca é o conteúdo de demonstração (ver AvisoConteudoDemo).
     conteudoProprio: true,
     atividade: {
       estado: m.atividade.estado,

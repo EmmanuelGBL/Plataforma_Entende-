@@ -23,22 +23,11 @@ import {
   servidor,
 } from '../servicos/servidor.js';
 
-/* =========================================================================
-   Estado da aplicação e todas as operações sobre ele.
+/* Estado da aplicação e todas as operações sobre ele.
 
-   Dois modos, com a mesma interface para as telas:
-
-   - DEMONSTRAÇÃO (sem VITE_API_URL): tudo em memória, com os dados fixos de
-     dados/conteudo.js. Recarregar a página devolve o protótipo ao estado
-     inicial — o que é o que se quer entre uma sessão de teste de usabilidade
-     e a seguinte. É o modo publicado no GitHub Pages e no arquivo offline.
-   - SERVIDOR (com VITE_API_URL): conta real, envio de arquivo de verdade,
-     adaptação pelo motor, atividade publicada com link que funciona fora
-     deste navegador.
-
-   As telas não sabem em qual modo estão, salvo onde a interação é outra de
-   fato (escolher arquivo do computador × escolher exemplo da lista).
-   ========================================================================= */
+   Funciona em dois modos com a mesma interface para as telas:
+   - demonstração (sem VITE_API_URL): dados fixos de dados/conteudo.js, em memória;
+   - servidor (com VITE_API_URL): conta, envio, adaptação e atividade pela API. */
 
 const ContextoApp = createContext(null);
 
@@ -63,9 +52,8 @@ function adaptacaoDemo({ blocos, questoes }) {
   };
 }
 
-/** O servidor não informa progresso da adaptação: o pedido volta quando
- *  termina. A barra avança pelas etapas em ritmo estimado e só chega a 100%
- *  com a resposta — nunca diz que terminou antes de terminar (H1). */
+/** A API não informa progresso: a barra avança por etapas em ritmo estimado
+ *   *  e só chega a 100% quando a resposta volta. */
 async function comProgresso(promessa, aoProgredir) {
   let etapa = 0;
   aoProgredir?.(5, ETAPAS_PROCESSAMENTO[0]);
@@ -179,8 +167,7 @@ export function ProvedorAplicacao({ children }) {
     setCatalogo(converterConjunto(await servidor.regras()));
   }, [catalogo]);
 
-  /** Usado pelas telas do estudante no modo demonstração: acha o material
-   *  dono de um código de atividade publicada (RF18/RN06). */
+  /** Modo demonstração: acha o material dono de um código de atividade. */
   const materialPorCodigo = useCallback(
     (codigo) => materiais.find((m) => m.atividade?.codigo === codigo) ?? null,
     [materiais],
@@ -233,8 +220,7 @@ export function ProvedorAplicacao({ children }) {
     [atualizarMaterial, guardarAdaptacao, carregarMateriais],
   );
 
-  /** RF09. No modo servidor o texto vai como Markdown, que é o formato
-   *  guardado; no de demonstração, como blocos. */
+  /** RF09. No modo servidor o texto vai em Markdown; na demonstração, em blocos. */
   const salvarTexto = useCallback(
     async (id, { blocos, texto }) => {
       if (!modoServidor) {
@@ -248,7 +234,7 @@ export function ProvedorAplicacao({ children }) {
     [mudarDemo, guardarAdaptacao, carregarMateriais],
   );
 
-  /** RN02 — aprovar é o que libera a exportação e a publicação. */
+  /** RN02 — a aprovação libera a exportação e a publicação. */
   const aprovar = useCallback(
     async (id) => {
       if (!modoServidor) {
@@ -397,7 +383,7 @@ export function usarAdaptacao(id) {
   return { dados: adaptacao(id), ...estado };
 }
 
-/** Catálogo das regras vigentes (tela de Ajuda, passo 2 do envio). */
+/** Catálogo das regras vigentes. */
 export function usarCatalogo() {
   const { catalogo, carregarCatalogo } = usarApp();
   useEffect(() => {

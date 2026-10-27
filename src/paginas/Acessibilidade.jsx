@@ -1,19 +1,8 @@
 import { Aviso, Cartao } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 
-/* =========================================================================
-   Declaração de acessibilidade.
-
-   Não é página de enfeite: o e-MAG (recomendação 6.2) pede que o sítio
-   tenha uma página descrevendo os recursos de acessibilidade, os atalhos e
-   as limitações conhecidas. A WCAG não exige isso — é uma das diferenças
-   entre os dois modelos, e ter a página é o que permite afirmar no artigo
-   que o e-MAG foi aplicado, e não apenas citado.
-
-   O trecho das limitações conhecidas é deliberado. Declaração de
-   acessibilidade que afirma conformidade total costuma ser falsa, e a banca
-   pergunta. Registrar o que ainda não está conforme vale mais.
-   ========================================================================= */
+/* Declaração de acessibilidade: padrões adotados, recursos, atalhos e
+   limitações conhecidas. */
 
 export function Acessibilidade() {
   usarTituloDaPagina('Acessibilidade');

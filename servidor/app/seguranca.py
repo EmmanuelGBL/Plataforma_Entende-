@@ -1,13 +1,9 @@
 """Senha (RNF09) e token de acesso (RF01).
 
-Senha: Argon2id, o algoritmo recomendado pela OWASP para armazenar senha. O
-sal é aleatório por senha e fica embutido no próprio hash; a senha em texto
-claro não é gravada nem registrada em log em lugar nenhum.
+Senha: hash Argon2id com sal aleatório; a senha em texto claro não é
+gravada nem registrada em log.
 
-Token: JWT assinado (HS256), enviado no cabeçalho Authorization. Foi escolhido
-no lugar de cookie porque o front-end é servido pelo GitHub Pages, em outra
-origem que não a da API, e cookie entre origens exige SameSite=None e mais
-configuração de CORS para o mesmo resultado.
+Token: JWT assinado (HS256), enviado no cabeçalho Authorization.
 """
 
 import uuid
@@ -26,9 +22,8 @@ from .modelos import Professor
 
 _hasher = PasswordHasher()
 
-# Usado quando o e-mail não existe, para que a resposta leve o mesmo tempo que
-# a de senha errada. Sem isso, medir o tempo de resposta revelaria quais
-# e-mails têm conta.
+# Hash fictício usado quando o e-mail não existe, para a resposta levar o
+# mesmo tempo que a de senha errada.
 _HASH_FICTICIO = _hasher.hash("senha-ficticia-para-igualar-o-tempo")
 
 

@@ -1,27 +1,15 @@
 """ExtratorConteudo — RF03, com RN09 e RNF08.
 
-Recebe os bytes do arquivo e devolve o texto em blocos (título, parágrafo, item
-de lista, tabela), na ordem de leitura e com o nível de cada título. Não toca
-no banco: é função pura, testável sem servidor.
+Recebe os bytes do arquivo e devolve o texto em blocos (título, parágrafo,
+item de lista, tabela), na ordem de leitura e com o nível de cada título.
 
-Duas recusas são de propósito e não podem virar "melhor esforço":
+- RN09: se alguma página do PDF é só imagem, o material é recusado inteiro.
+- RNF08: acima de 20 páginas ou 15 MB, o material é recusado.
+- O formato é decidido pelo conteúdo do arquivo, e não pela extensão.
 
-- RN09: se alguma página do PDF é só imagem, o material é recusado inteiro, e
-  não adaptado sem aquela página. Adaptação de texto incompleto produz material
-  silenciosamente errado — pior que a recusa.
-- RNF08: acima de 20 páginas ou 15 MB, recusa com a saída sugerida (dividir).
-
-O formato é decidido pelo conteúdo do arquivo, e não pela extensão do nome:
-um .doc antigo renomeado para .docx, ou uma imagem renomeada para .pdf, é
-recusado com a explicação certa em vez de estourar um erro interno.
-
-Limites conhecidos, declarados:
-
-- PDF em duas colunas sai na ordem das linhas da página, misturando as colunas.
-- Tabela de PDF sai como texto corrido; tabela de DOCX sai como tabela.
-- Caixa de texto do Word não é lida.
-- A hierarquia de títulos do PDF é inferida pelo corpo da fonte e pelo negrito,
-  porque o PDF não guarda o que é título. O DOCX guarda, pelo estilo.
+Limites: PDF em duas colunas sai com as colunas misturadas; tabela de PDF
+sai como texto corrido; caixa de texto do Word não é lida; o nível dos
+títulos do PDF é inferido pelo tamanho da fonte e pelo negrito.
 """
 
 import io
@@ -41,12 +29,11 @@ from docx.text.paragraph import Paragraph
 from ..erros import ErroDeNegocio
 from ..modelos import FormatoArquivo
 
-# RN09 — abaixo disso não há material didático para adaptar. Corresponde a
-# pouco mais de três linhas de texto corrido.
+# RN09 — mínimo de letras para haver material a adaptar (pouco mais de
+# três linhas).
 MINIMO_LETRAS = 200
 
-# DOCX sem contagem de páginas gravada: estimativa por volume de texto,
-# próxima de uma página de livro didático do 5º ano.
+# DOCX sem contagem de páginas: estimativa por volume de texto.
 CARACTERES_POR_PAGINA = 2000
 
 NIVEL_MAXIMO = 3
@@ -178,8 +165,7 @@ def _linhas_da_pagina(pagina, numero: int) -> list[_Linha]:
                 texto=texto,
                 tamanho=tamanho,
                 negrito=em_negrito >= 0.8 * len(letras),
-                # topo e base relativos à página, para comparar páginas de
-                # tamanhos diferentes no mesmo arquivo
+                # topo e base relativos à altura da página
                 topo=float(bruta["top"]) / altura,
                 base=float(bruta["bottom"]) / altura,
                 x0=float(bruta["x0"]),
@@ -196,9 +182,9 @@ def _fonte_negrito(nome_fonte: str) -> bool:
 
 
 def _remover_cabecalho_e_rodape(linhas: list[_Linha], total_paginas: int) -> list[_Linha]:
-    """Tira número de página e o que se repete na margem de muitas páginas
-    (nome da coleção, nome da escola). Repetido no texto adaptado, isso seria
-    ruído que o estudante teria de ignorar a cada página."""
+    """Remove número de página e linhas que se repetem na margem de muitas
+        páginas (nome da coleção, nome da escola).
+    """
 
     def na_margem(l: _Linha) -> bool:
         return l.topo < 0.1 or l.base > 0.9
@@ -214,9 +200,8 @@ def _remover_cabecalho_e_rodape(linhas: list[_Linha], total_paginas: int) -> lis
     minimo = max(2, math.ceil(total_paginas / 2))
 
     def repetida(l: _Linha) -> bool:
-        # Só linha curta conta como cabeçalho: texto do corpo que começa no
-        # alto da página e se repete (exercício com o mesmo enunciado em cada
-        # página, por exemplo) não pode sumir da extração.
+        # Só linha curta conta como cabeçalho, para não remover texto do corpo
+        # que se repete.
         return len(l.texto) <= 80 and repeticoes[forma(l.texto)] >= minimo
 
     return [
@@ -248,8 +233,8 @@ def _montar_blocos_pdf(linhas: list[_Linha]) -> list[Bloco]:
             and not _MARCADOR_LISTA.match(l.texto)
         )
 
-    # Nível do título: o maior corpo é o nível 1, o seguinte o 2, e assim por
-    # diante. Título só em negrito, no corpo do texto, fica abaixo de todos.
+    # Nível do título: o maior tamanho é o nível 1, o seguinte o 2, e assim por
+    # diante. Título só em negrito fica abaixo de todos.
     tamanhos = sorted({round(l.tamanho) for l in linhas if titulo_por_tamanho(l)}, reverse=True)
     nivel_do_tamanho = {t: min(i + 1, NIVEL_MAXIMO) for i, t in enumerate(tamanhos)}
     nivel_negrito = min(len(tamanhos) + 1, NIVEL_MAXIMO)
@@ -333,9 +318,7 @@ def _quebra_de_paragrafo(
 
 def _juntar(texto: str, continuacao: str) -> str:
     # Hifenização de fim de linha ("fotossín-" + "tese"): junta sem o hífen
-    # quando a continuação começa em minúscula. Palavra composta partida
-    # exatamente no hífen ("guarda-" + "chuva") também cai aqui e perde o
-    # hífen — custo aceito, porque é bem mais rara que a hifenização silábica.
+    # quando a continuação começa em minúscula.
     if re.search(r"[A-Za-zÀ-ÿ]-$", texto):
         if continuacao[:1].islower():
             return texto[:-1] + continuacao
@@ -422,8 +405,7 @@ def _bloco_de_tabela(tabela: Table) -> Bloco | None:
 
 
 def _paginas_declaradas(conteudo: bytes) -> int | None:
-    """Contagem que o próprio Word grava em docProps/app.xml ao salvar.
-    Arquivo gerado por outro programa costuma não ter."""
+    """Contagem de páginas gravada pelo Word em docProps/app.xml."""
     try:
         with zipfile.ZipFile(io.BytesIO(conteudo)) as pacote:
             xml = pacote.read("docProps/app.xml").decode("utf-8", "ignore")

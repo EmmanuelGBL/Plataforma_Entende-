@@ -1,23 +1,15 @@
 """CalculadoraLegibilidade — RF07, sob RN10.
 
-Mede o texto original e o adaptado com as mesmas funções, e devolve as duas
-medidas sempre — inclusive quando a adaptação piora o número (RN10). O total
-de palavras, por exemplo, quase sempre sobe: explicar termo (TEA-05) e dividir
-período (TEA-01) alongam o texto.
+Mede o texto original e o adaptado com as mesmas funções e devolve as duas
+medidas, inclusive quando a adaptação piora o número (RN10).
 
-O índice de facilidade de leitura é o de Flesch adaptado para o português
-por Martins et al. (1996):
+Índice de facilidade de leitura de Flesch adaptado ao português
+(Martins et al., 1996):
 
     ILF = 248,835 − 1,015 × (palavras / frases) − 84,6 × (sílabas / palavras)
 
-com as faixas de escolaridade propostas pelos autores. A contagem de sílabas
-é heurística (grupos de vogais, com tratamento de hiato acentuado, de "qu" e
-"gu" e de hiato final como em "dia"): erra em palavras isoladas, e acerta o
-suficiente na média de um texto inteiro, que é o que o índice usa.
-
-Isto NÃO é o NILC-Metrix. O NILC-Metrix segue sendo o instrumento da
-verificação de RNF03 na validação do trabalho; a calculadora existe para dar
-ao professor a comparação na hora, dentro do sistema.
+A contagem de sílabas é aproximada (grupos de vogais, com tratamento de
+hiato acentuado, de "qu"/"gu" e de hiato final).
 """
 
 import re
@@ -86,8 +78,7 @@ def contar_silabas(palavra: str) -> int:
 
 
 def _frases_do_texto(texto: str) -> list[str]:
-    # Títulos e tabelas ficam de fora nos dois textos: título não é frase, e
-    # contá-lo como frase curta melhoraria o índice artificialmente.
+    # Títulos e tabelas ficam de fora: título não é frase.
     frases = []
     for bloco in md.ler(texto):
         if bloco.tipo in ("paragrafo", "item"):

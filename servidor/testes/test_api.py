@@ -1,6 +1,6 @@
-"""RF01, RF02, RF19, RF20 pela API; verificações de RNF09 e RNF12 como o
-requisitos.md as descreve ("inspeção do esquema do banco" e "teste de acesso
-cruzado entre duas contas")."""
+"""Conta, envio, histórico e exclusão pela API (RF01, RF02, RF19, RF20), hash
+da senha (RNF09) e acesso cruzado entre duas contas (RNF12).
+"""
 
 from sqlalchemy import select
 
@@ -156,5 +156,5 @@ def test_rnf12_professor_nao_ve_nem_exclui_material_de_outro(cliente):
     assert cliente.get("/api/materiais", headers=bruno).json() == []
     assert cliente.get(f"/api/materiais/{material_da_ana}", headers=bruno).status_code == 404
     assert cliente.delete(f"/api/materiais/{material_da_ana}", headers=bruno).status_code == 404
-    # e o material continua lá para a dona
+    # e o material continua lá para quem o enviou
     assert cliente.get(f"/api/materiais/{material_da_ana}", headers=ana).status_code == 200

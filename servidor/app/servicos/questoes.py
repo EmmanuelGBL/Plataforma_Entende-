@@ -1,10 +1,8 @@
 """GeradorQuestoes — RF13, sob RN04.
 
-As questões saem do texto adaptado (que, por RN01, tem o mesmo conteúdo do
-original, na linguagem que o estudante vai ler). RN04 é conferida, e não só
-pedida: cada questão traz o trecho do texto em que a resposta está, e a
-questão cujo trecho não é encontrado no texto é descartada. Questão sobre
-conteúdo de fora do material não passa.
+As questões saem do texto adaptado. Cada questão traz o trecho do texto em
+que está a resposta, e a questão cujo trecho não é encontrado no texto é
+descartada (RN04).
 """
 
 import logging
@@ -96,8 +94,8 @@ def _validar(item: dict, texto_normalizado: str) -> QuestaoGerada | None:
         log.info("Questão descartada por RN04 (trecho não está no texto): %s", enunciado)
         return None
 
-    # O modelo tende a pôr a correta sempre na mesma posição. Embaralhar na
-    # geração resolve; depois de gravada, a ordem não muda mais (G02).
+    # O modelo tende a pôr a correta sempre na mesma posição: as alternativas
+    # são embaralhadas na geração.
     resposta_certa = alternativas[correta]
     random.shuffle(alternativas)
     return QuestaoGerada(

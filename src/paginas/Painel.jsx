@@ -6,15 +6,8 @@ import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
-/* =========================================================================
-   UC19 — Consultar materiais processados (RF19)
-   UC20 — Excluir material e adaptações (RF20)
-
-   O cartão mostra perfil, etapa, data e versão do conjunto de regras sem
-   exigir clique: é a heurística H6 (reconhecer em vez de lembrar). Duas
-   adaptações do mesmo material com versões diferentes de regra precisam ser
-   distinguíveis de relance, senão o professor reabre o material errado.
-   ========================================================================= */
+/* Tela Meus materiais: lista os materiais do professor (RF19) e exclui
+   um material com tudo o que depende dele (RF20). */
 
 const ESTADOS = {
   enviado: { tom: 'neutra', rotulo: 'Enviado, ainda não adaptado' },

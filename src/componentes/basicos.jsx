@@ -1,12 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-/* =========================================================================
-   Componentes de base do design system.
-   Existem para que a heurística H4 (consistência) seja consequência do
-   código, e não de disciplina: se todo botão é <Botao>, não há como um
-   ecrã ter altura de alvo diferente do outro.
-   ========================================================================= */
+/* Componentes de base da interface (botão, campo, aviso, etiqueta, cartão,
+   trilha de navegação), usados por todas as telas. */
 
 export function Botao({ variante = 'principal', como = 'button', para, largo, children, ...resto }) {
   const classe = `botao botao--${variante}${largo ? ' botao--largo' : ''}`;
@@ -24,14 +20,8 @@ export function Botao({ variante = 'principal', como = 'button', para, largo, ch
   );
 }
 
-/**
- * Campo de formulário com rótulo sempre visível.
- *
- * Rótulo dentro do campo (placeholder como rótulo) reprova em SC 3.3.2 e
- * some no momento em que o usuário mais precisa dele — quando está digitando.
- * A mensagem de erro é ligada por aria-describedby e traz o que fazer, não só
- * o que está errado (SC 3.3.1 e 3.3.3).
- */
+/** Campo de formulário com rótulo sempre visível. Dica e mensagem de erro
+ *  são ligadas ao campo por aria-describedby. */
 export function Campo({
   rotulo,
   dica,
@@ -83,18 +73,10 @@ export function Campo({
   );
 }
 
-/**
- * Bloco de mensagem. O ícone é decorativo — quem lê por leitor de tela
- * recebe a natureza da mensagem pelo texto do título, nunca pela cor
- * (SC 1.4.1).
- */
-/**
- * `nivel` existe porque o título do aviso entra na estrutura de títulos da
- * página, e nível de título não pode pular degrau (SC 1.3.1). O padrão é h3,
- * que é o correto quando o aviso vem dentro de uma seção com h2. Numa tela em
- * que o aviso é o primeiro título depois do h1 — a de entrar, por exemplo —
- * passa-se `nivel={2}`.
- */
+/** Bloco de mensagem (informação, sucesso, atenção ou erro). O tipo é dito
+ *  no texto e no ícone, não só pela cor. */
+/** `nivel` define o nível do título do aviso, para não pular nível de título
+ *  na página. O padrão é h3. */
 export function Aviso({ tipo = 'info', titulo, children, papel, nivel = 3 }) {
   const icones = { info: 'ℹ', boa: '✓', atencao: '!', erro: '⚠' };
   const Titulo = `h${nivel}`;
@@ -111,18 +93,8 @@ export function Aviso({ tipo = 'info', titulo, children, papel, nivel = 3 }) {
   );
 }
 
-/**
- * Invólucro das tabelas largas.
- *
- * A tabela rola na horizontal quando não cabe. Região que rola precisa ser
- * alcançável por teclado, senão quem não usa mouse não chega ao conteúdo que
- * ficou fora da área visível (SC 2.1.1) — foi exatamente o defeito encontrado
- * nos painéis de comparação na auditoria de 11/09.
- *
- * O `tabindex` só é aplicado quando a tabela de fato transborda: parada de
- * tabulação que não leva a lugar nenhum é ruído para quem navega por teclado
- * (H7), e em tela larga a tabela cabe inteira.
- */
+/** Envolve tabelas largas. Quando a tabela transborda, ela rola na horizontal
+ *  e passa a receber foco pelo teclado. */
 export function TabelaEnvolvente({ rotulo, children }) {
   const caixa = useRef(null);
   const [transborda, setTransborda] = useState(false);
@@ -165,15 +137,8 @@ export function Cartao({ compacto, className = '', children, ...resto }) {
   );
 }
 
-/**
- * Aviso exibido quando o material aberto não é o de Ciências, o único desta
- * demonstração que tem texto adaptado escrito para ele.
- *
- * A alternativa seria deixar o cabeçalho dizer "História" com o texto de
- * fotossíntese embaixo, e torcer para ninguém abrir. Declarar o limite custa
- * uma faixa de aviso e vale mais que parecer um defeito — é a mesma postura
- * adotada no documento e na tela de entrada.
- */
+/** Aviso do modo demonstração para materiais que não têm texto adaptado
+ *  próprio (só o de Ciências tem). */
 export function AvisoConteudoDemo({ material }) {
   if (material?.conteudoProprio) return null;
   return (
@@ -187,8 +152,7 @@ export function AvisoConteudoDemo({ material }) {
   );
 }
 
-/** Trilha de navegação — apoia H6 (reconhecer em vez de lembrar) e dá o
- *  caminho de volta exigido por H3. */
+/** Trilha de navegação ("Meus materiais › ..."). */
 export function Migalhas({ itens }) {
   return (
     <nav className="migalhas" aria-label="Você está em">

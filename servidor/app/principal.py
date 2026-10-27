@@ -2,12 +2,11 @@
 
     uvicorn app.principal:app --reload --no-access-log
 
-`--no-access-log` não é detalhe: o registro de acesso padrão do uvicorn grava o
-IP de quem abre cada rota, inclusive a da atividade da criança. IP é dado
-pessoal (LGPD), e RN05 diz que o sistema não registra nada que identifique o
-estudante.
+`--no-access-log`: o registro de acesso padrão do uvicorn grava o IP de quem
+abre cada rota, inclusive a da atividade do estudante, e o sistema não
+registra dado que identifique o estudante (RN05).
 
-Documentação interativa em http://localhost:8000/docs enquanto o servidor roda.
+Documentação interativa em http://localhost:8000/docs.
 """
 
 import logging
@@ -25,9 +24,7 @@ from .servicos.cliente_llm import ClienteClaude, ClienteLLM
 
 
 def _configurar_registro() -> None:
-    # O uvicorn só configura os registros dele. Sem isto, as mensagens do
-    # sistema — como quantos blocos de cada adaptação foram ao modelo — não
-    # aparecem no terminal. Nenhuma delas leva dado de quem acessa (RN05).
+    # Liga as mensagens do sistema no terminal (o uvicorn só configura as dele).
     registro = logging.getLogger("entende")
     if not registro.handlers:
         saida = logging.StreamHandler()
@@ -44,8 +41,7 @@ def criar_app(configuracao: Configuracao | None = None, cliente_llm: ClienteLLM 
 
     @asynccontextmanager
     async def ciclo_de_vida(_: FastAPI):
-        # Cria as tabelas que faltam. Não altera tabela existente: quando o
-        # modelo mudar (semana 7 em diante), entra uma ferramenta de migração.
+        # Cria as tabelas que faltam. Não altera tabela existente.
         Base.metadata.create_all(motor)
         yield
         motor.dispose()

@@ -47,8 +47,7 @@ def cadastrar(dados: Cadastro, request: Request, sessao: Session = Depends(obter
 @rotas.post("/entrar", response_model=Sessao)
 def entrar(dados: Entrada, request: Request, sessao: Session = Depends(obter_sessao)):
     professor = sessao.scalar(select(Professor).where(Professor.email == dados.email.strip().lower()))
-    # Mesma mensagem para e-mail inexistente e senha errada, e mesmo tempo de
-    # resposta (ver conferir_senha): a tela de entrada não revela quem tem conta.
+    # Mesma mensagem para e-mail inexistente e senha errada.
     if not conferir_senha(dados.senha, professor.senha_hash if professor else None):
         raise ErroDeNegocio(
             "E-mail ou senha não conferem",

@@ -1,32 +1,13 @@
-/* =========================================================================
-   Entende+ — atividade gamificada (RF21, RN11)
+/* Atividade em forma de jogo (RF21, RN11).
 
-   Três coisas valem para o arquivo inteiro:
-
-   · **Nenhum estado é comunicado só por cor** (SC 1.4.1). Acerto e erro têm
-     sempre texto e símbolo junto da cor. Na cena, a posição da bola e a do
-     goleiro contam a história, e o texto ao lado conta a mesma história por
-     escrito.
-
-   · **A paleta é decisão de pesquisa, não de gosto** (RN11/G12). Tom frio, alta
-     luminosidade e alta saturação são o que atrai a atenção da criança autista,
-     na proporção aproximada de 7 frias para 3 quentes, com o acento saturado
-     fora do centro visual. Daí: campo verde, uniforme no teal da marca, e o
-     único quente da cena nas luvas do goleiro. **Amarelo não entra** — é a cor
-     mais rejeitada por essa população, atribuída a sobrecarga sensorial. Ele
-     aparece só no modo de alto contraste, que é o esquema do e-MAG e é escolha
-     explícita de quem liga.
-
-   · **Todo movimento é `transition` ou `animation` curta.** A raiz do documento
-     zera as duas quando a preferência de movimento está em "reduzido" ou quando
-     o sistema operacional pede movimento reduzido (ver base.css). Assim o jogo
-     obedece a G09 e ao SC 2.3.3 sem ter uma linha de código sobre o assunto:
-     com movimento reduzido, a bola simplesmente aparece no destino e o goleiro
-     para de balançar.
-   ========================================================================= */
+   - Acerto e erro têm sempre texto e símbolo junto da cor.
+   - Paleta de tons frios com um único acento quente, as luvas (G12); sem
+     amarelo, exceto no alto contraste.
+   - Todo movimento é transition ou animation curta, zeradas pelo base.css
+     quando o movimento reduzido está ligado (G09). */
 
 .jogo {
-  /* --- Frios: 7 partes ------------------------------------------------- */
+  /* --- Tons frios ---------------------------------------------------------- */
   --jogo-ceu: #e4f2f5;
   --jogo-gramado: #2f8f5c;
   --jogo-gramado-linha: rgba(255, 255, 255, 0.85);
@@ -38,10 +19,10 @@
   --jogo-camisa: #0e7c86;
   --jogo-camisa-escura: #0b5f67;
   --jogo-calcado: #10323a;
-  --jogo-alvo: #8fe6da; /* alto brilho e alta saturação: é o que a criança procura */
+  --jogo-alvo: #8fe6da; /* o mais brilhante e saturado da cena */
 
-  /* --- Quentes: 3 partes, e só onde são funcionais --------------------- */
-  --jogo-luva: #e0912b; /* nas mãos, fora do centro visual */
+  /* --- Tons quentes: só onde têm função ----------------------------------- */
+  --jogo-luva: #e0912b; /* nas mãos do goleiro, fora do centro */
   --jogo-pele: #e8b58c;
   --jogo-cabelo: #3a2a20;
 }
@@ -62,14 +43,8 @@
 .jogo__placar strong { font-size: 1.5rem; }
 
 /* --- Trilha de progresso -------------------------------------------------
-   O mesmo progresso que o texto "Cobrança 2 de 5" já dá, em forma não textual
-   (RN11/G14). Saber quanto falta antes de começar é a própria TEA-09 do
-   conjunto de regras — antecipação da estrutura reduz a ansiedade diante do
-   imprevisto — e uma instrução que não depende de leitura alcança também quem
-   está cansado de ler, que é metade do público desta tela.
-
-   A trilha mostra acerto e pendência. NÃO mostra erro: cobrança que ficou para
-   depois aparece igual à que ainda não chegou (G05).                        */
+      O progresso de "Rodada 2 de 5" em forma de bolinhas (G14). Mostra acerto
+      e pendência, nunca erro (G05). */
 .jogo__trilha {
   display: flex;
   gap: var(--e2);
@@ -88,7 +63,7 @@
   background: var(--cor-teal);
   border-color: var(--cor-teal-escuro);
 }
-/* A atual ganha anel externo, e não só outra cor: estado nunca por cor só. */
+/* A rodada atual ganha anel externo, não só outra cor. */
 .jogo__trilha li[data-estado='atual'] {
   border-color: var(--cor-teal-escuro);
   box-shadow: 0 0 0 3px var(--cor-info-fundo);
@@ -111,16 +86,13 @@
 }
 .jogo__ajustes-gatilho:hover { background: var(--cor-superficie-alt); }
 
-/* Os grupos moram dentro do diálogo, então não carregam borda nem fundo
-   próprios: a moldura é a do diálogo. */
+/* Os grupos ficam dentro do diálogo e usam a moldura dele. */
 .jogo__ajustes-grupos { margin-top: var(--e4); }
 .jogo__ajustes-grupos fieldset { border: none; padding: 0; margin: 0 0 var(--e4); }
 .jogo__ajustes-grupos legend { padding: 0; margin-bottom: var(--e2); font-size: 0.9375rem; }
 
 /* --- A cena --------------------------------------------------------------
-   Proporção fixa para a cena não pular de altura entre uma fase e outra do
-   turno: a tela mudar de tamanho sozinha quando a pergunta aparece seria o
-   oposto da previsibilidade que o resto do desenho persegue (G01).          */
+      Proporção fixa, para a cena não mudar de altura entre as fases (G01). */
 .jogo__cena {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -134,14 +106,8 @@
 .jogo__cena svg { width: 100%; height: 100%; display: block; }
 
 /* --- Aviso no meio da cena ----------------------------------------------
-   O que aconteceu aparece onde aconteceu, com a saída junto. Antes o
-   resultado do erro ficava num aviso abaixo da lista de alternativas: a
-   criança via a bola sair e tinha de procurar o texto no rodapé para saber o
-   que fazer.
-
-   O véu escuro por trás existe para o texto ter contraste sobre qualquer
-   parte da cena — rede escura, grama verde ou céu claro. Sem ele, a mesma
-   caixa branca reprovaria em SC 1.4.3 dependendo de onde a bola parou.       */
+      O resultado aparece sobre a cena, com o botão de seguir junto. O véu
+      escuro por trás garante o contraste do texto sobre qualquer parte da cena. */
 .jogo__aviso-cena {
   position: absolute;
   inset: 0;
@@ -161,20 +127,8 @@
   box-shadow: var(--sombra-alta);
 }
 
-/* O erro é vermelho, e isso não contradiz o desenho do jogo.
-   O que as diretrizes para TEA mandam evitar é **punição** — perder ponto,
-   acumular contador de erro, ser comparado com os outros. Nada disso acontece
-   aqui. Dizer com clareza que a resposta não foi aquela é informação, e negar
-   essa informação para "não desanimar" seria condescendência, não
-   acessibilidade.
-
-   Vale ainda a consistência (H4): a lista de perguntas e a própria tela do
-   professor já marcam erro com `--cor-erro`. O jogo tinha inventado um cartão
-   neutro, e a criança que passa de uma tela para a outra encontrava dois
-   vocabulários visuais para a mesma coisa.
-
-   `--cor-erro` é #a3161d, 7,07:1 sobre branco — acima do exigido tanto para
-   texto quanto para elemento gráfico.                                       */
+/* Erro em vermelho (--cor-erro, 7,07:1 sobre branco), como na lista de
+   perguntas. Informa o erro sem punição: não tira ponto. */
 .jogo__aviso-caixa--erro {
   border-color: var(--cor-erro);
   border-top-width: 8px;
@@ -182,11 +136,8 @@
 .jogo__aviso-caixa--erro .jogo__aviso-titulo { color: var(--cor-erro); }
 .jogo__aviso-caixa--erro .jogo__aviso-icone { background: var(--cor-erro); }
 
-/* O acerto tem o mesmo cartão, em verde. Mesma estrutura, mesma posição,
-   mesmo lugar do botão: a criança encontra a saída no mesmo ponto da tela
-   tenha acertado ou não, que é o que G01 pede.
-
-   `--cor-sucesso` é #1a6b3c, 5,86:1 sobre branco.                            */
+/* Acerto: o mesmo cartão em verde (--cor-sucesso, 5,86:1), com o botão no
+   mesmo lugar (G01). */
 .jogo__aviso-caixa--acerto {
   border-color: var(--cor-sucesso);
   border-top-width: 8px;
@@ -194,9 +145,8 @@
 .jogo__aviso-caixa--acerto .jogo__aviso-titulo { color: var(--cor-sucesso); }
 .jogo__aviso-caixa--acerto .jogo__aviso-icone { background: var(--cor-sucesso); }
 
-/* Entrada do cartão: 260 ms, uma vez, sem piscar. O tempo que ele espera para
-   entrar está em `esperaDoAviso`, no AtividadeJogo.jsx — no gol ele entra
-   depois da bola chegar na rede, para não tapar a comemoração. */
+/* Entrada do cartão: 260 ms. O atraso até ele aparecer está em
+   `esperaDoAviso`, no AtividadeJogo.jsx. */
 .jogo__aviso-caixa { animation: jogo-aviso-entra 260ms ease-out 1 both; }
 @keyframes jogo-aviso-entra {
   from { opacity: 0; transform: scale(0.9); }
@@ -243,10 +193,8 @@
   justify-content: center;
 }
 
-/* Em tela estreita e com o corpo do texto aumentado, a caixa não cabe nos
-   16/9 da cena. Deixar a cena crescer seria mudar a altura da tela no meio do
-   turno — o oposto de G01 —, então quem cresce é a caixa, que passa a rolar
-   dentro do quadro. */
+/* Em tela estreita com texto aumentado, a caixa rola dentro da cena em vez
+   de a cena crescer (G01). */
 @media (max-width: 30rem) {
   .jogo__aviso-cena { overflow-y: auto; align-content: center; }
   .jogo__aviso-caixa { padding: var(--e3); }
@@ -261,8 +209,7 @@
 .jogo__rede-lateral { fill: var(--jogo-rede-lado); }
 .jogo__rede-topo { fill: var(--jogo-rede-topo); }
 
-/* A malha é fina e de baixo contraste de propósito: ela precisa dizer "isto é
-   uma rede" e não pode competir com a bola nem com a marca de mira (G10). */
+/* Malha fina e de baixo contraste, para não competir com a bola (G10). */
 .jogo__malha {
   stroke: var(--jogo-malha);
   stroke-width: 0.8;
@@ -296,8 +243,7 @@
 .jogo__lugar-centro { fill: var(--jogo-alvo); opacity: 0.35; }
 
 /* --- Marca de mira -------------------------------------------------------
-   O elemento mais brilhante e mais saturado da cena, e no lugar exato onde a
-   criança precisa olhar. É a aplicação direta de G12.                       */
+      O elemento mais brilhante da cena, onde a criança precisa olhar (G12). */
 .jogo__mira circle {
   fill: none;
   stroke: var(--jogo-alvo);
@@ -312,8 +258,8 @@
 /* --- Goleiro ------------------------------------------------------------- */
 .jogo__guardiao { transition: transform 400ms ease-out; }
 
-/* A espera tem vida e não tem pressa: balanço lento, sem começo nem fim
-   marcados, que nada tem de cronômetro. Ver a regra 4 em CenaJogo.jsx. */
+/* Balanço lento do goleiro enquanto a criança lê. Ver a regra 4 em
+   CenaJogo.jsx. */
 .jogo__guardiao-espera {
   animation: jogo-espera 3400ms ease-in-out infinite alternate;
 }
@@ -349,13 +295,9 @@
 /* --- Bola ---------------------------------------------------------------- */
 .jogo__movel { transition: transform 540ms cubic-bezier(0.22, 0.61, 0.36, 1); }
 
-/* O couro NÃO leva `fill` aqui: ele vem do gradiente declarado no próprio SVG,
-   e regra CSS, mesmo de classe simples, vence atributo de apresentação — uma
-   linha `fill` nesta classe apagaria o brilho da esfera. O alto contraste
-   sobrescreve de propósito, mais abaixo.
-
-   As espessuras estão multiplicadas por ~2,2 porque a bola é desenhada com
-   raio 20 e reduzida por `scale(0.45)`: o traço encolhe junto. */
+/* O couro não leva `fill` aqui: ele vem do gradiente do SVG, e uma regra
+   CSS apagaria o brilho. As espessuras estão multiplicadas por ~2,2 porque a
+   bola é reduzida por `scale(0.45)`. */
 .jogo-b__gomo { fill: var(--jogo-calcado); }
 .jogo-b__costura {
   stroke: var(--jogo-calcado);
@@ -369,19 +311,13 @@
 }
 
 /* --- Balanço da rede no gol ---------------------------------------------
-   Reconhecimento visual do acerto: curto, silencioso, sem piscar e sem
-   estourar na tela. Vem LIGADO por padrão, e o porquê está em G08 — criança
-   autista responde melhor a recompensa em forma de animação que a contador
-   numérico, e até esta versão o jogo só oferecia o contador. O que segue
-   desligado por padrão é o som e o efeito intenso.
-
-   Nada aqui pisca mais de três vezes por segundo (SC 2.3.1).               */
+      Efeito visual do acerto (G08): curto, silencioso e sem piscar
+      (WCAG SC 2.3.1). */
 .jogo__balanco circle {
   fill: none;
   stroke: var(--jogo-alvo);
   stroke-width: 2.5;
-  /* O atraso é o tempo de voo da bola: a rede não pode balançar antes de a
-     bola chegar nela. Estava começando junto com o chute. */
+  /* O atraso é o tempo de voo da bola: a rede só balança quando a bola chega. */
   animation: jogo-balanco 620ms ease-out 520ms 1 both;
 }
 .jogo__balanco circle:last-child { animation-delay: 630ms; }
@@ -422,12 +358,8 @@
   color: var(--cor-texto-apoio);
 }
 
-/* Alternativa desabilitada enquanto o resultado está na tela. O fundo apagado
-   diz que clicar agora não faz nada.
-
-   Fundo apagado, e não `opacity`: opacidade sobre o texto derruba a relação de
-   contraste do rótulo, e não é aceitável numa tela deste projeto. O contraste
-   do texto fica intacto; o que muda é a superfície atrás dele.              */
+/* Alternativa desabilitada enquanto o resultado está na tela: muda o fundo,
+   não a opacidade, para manter o contraste do texto. */
 .jogo .atividade__opcao:disabled:not(.atividade__opcao--certa):not(.atividade__opcao--errada) {
   background: var(--cor-superficie-alt);
   border-color: var(--cor-borda);
@@ -443,18 +375,13 @@
 }
 .jogo__dica h3 { margin-bottom: var(--e2); }
 
-/* Pedir a dica ANTES de responder é o caminho principal, não um último
-   recurso — ver G11. Por isso o botão fica junto da pergunta, e não escondido
-   no rodapé. */
+/* Botão de dica junto da pergunta (G11). */
 .jogo__pedir-dica { margin-bottom: var(--e4); }
 
 .jogo__resumo { font-size: 1.25rem; }
 
 /* --- Alto contraste ------------------------------------------------------
-   O esquema preto/amarelo do e-MAG substitui a paleta inteira. Aqui o amarelo
-   é correto: quem liga o alto contraste está pedindo o esquema do governo
-   federal, e a recomendação de evitar amarelo vale para a paleta padrão, que é
-   a que a criança encontra sem pedir nada.                                  */
+      O esquema preto e amarelo do e-MAG substitui a paleta inteira. */
 :root[data-contraste='alto'] .jogo {
   --jogo-ceu: #000000;
   --jogo-gramado: #000000;
@@ -473,9 +400,8 @@
   --jogo-cabelo: #ffffff;
 }
 :root[data-contraste='alto'] .jogo__cena { border-color: #ffffff; }
-/* No esquema preto/amarelo não existe vermelho utilizável: `--cor-erro` vira
-   um rosa claro que não se distingue do branco no traço. O erro passa a ser
-   dito pela borda grossa e pelo símbolo, que é o que o e-MAG espera. */
+/* No alto contraste não há vermelho utilizável: o erro é dito pela borda
+   grossa e pelo símbolo. */
 :root[data-contraste='alto'] .jogo__aviso-caixa--erro { border-color: #ff8f8f; }
 :root[data-contraste='alto'] .jogo__aviso-caixa--erro .jogo__aviso-titulo { color: #ff8f8f; }
 :root[data-contraste='alto'] .jogo__aviso-caixa--acerto { border-color: #6cf58f; }
@@ -491,8 +417,7 @@
   color: #6cf58f;
   box-shadow: inset 0 0 0 2px #6cf58f;
 }
-/* No alto contraste o goleiro vira contorno: preenchimento preto sobre fundo
-   preto precisa de traço branco, senão o boneco desaparece. */
+/* No alto contraste o goleiro vira contorno branco. */
 :root[data-contraste='alto'] .jogo-g__camisa,
 :root[data-contraste='alto'] .jogo-g__camisa-faixa,
 :root[data-contraste='alto'] .jogo-g__camisa-gola,
