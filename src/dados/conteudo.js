@@ -14,7 +14,7 @@
 
 export const CONJUNTO_REGRAS = {
   identificador: 'TEA',
-  versao: '1.4',
+  versao: '1.5',
   publicadoEm: '15/10/2026',
   descricao:
     'Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. ' +
@@ -178,7 +178,7 @@ export const TEXTO_ADAPTADO = [
     regra: 'TEA-05',
     paragrafos: [
       'A fotossíntese acontece principalmente nas folhas.',
-      'Dentro das folhas existem os cloroplastos (partes muito pequenas da folha, que só aparecem no microscópio).',
+      'Dentro das folhas existem os cloroplastos (partes muito pequenas da folha, onde a planta produz o próprio alimento; só aparecem no microscópio).',
       'Dentro dos cloroplastos existe a clorofila (a substância verde que captura a luz do Sol). É a clorofila que dá a cor verde à folha.',
     ],
   },
@@ -188,8 +188,8 @@ export const TEXTO_ADAPTADO = [
     paragrafos: [
       'A planta precisa de três coisas: luz do Sol, água e gás carbônico.',
       'As raízes absorvem a água do solo. Depois, a água sobe pelo caule até as folhas.',
-      'O gás carbônico está no ar. Ele entra pelos estômatos (aberturas muito pequenas na superfície da folha).',
-      'Com esses três materiais, a planta produz duas coisas: glicose (o alimento da planta) e gás oxigênio.',
+      'O gás carbônico está no ar. Ele entra pelos estômatos (aberturas muito pequenas na superfície da folha, por onde entram e saem gases).',
+      'Com esses três materiais, a planta produz duas coisas: glicose (um tipo de açúcar que serve de energia para os seres vivos) e gás oxigênio.',
       'A planta libera o gás oxigênio no ar. É esse gás que nós respiramos.',
     ],
   },
@@ -390,7 +390,7 @@ export const ARQUIVOS_DEMO = [
 export const ETAPAS_PROCESSAMENTO = [
   'Lendo o arquivo enviado',
   'Extraindo o texto e a ordem de leitura',
-  'Aplicando o conjunto de regras TEA v1.4',
+  'Aplicando o conjunto de regras TEA v1.5',
   'Calculando as métricas de legibilidade',
   'Gerando as questões a partir do mesmo material',
 ];

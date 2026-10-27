@@ -1,6 +1,6 @@
 {
   "identificador": "TEA",
-  "versao": "1.4",
+  "versao": "1.5",
   "publicado_em": "2026-10-15",
   "descricao": "Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho Universal para a Aprendizagem (CAST, 2024). Desde a versão 1.4, cada regra de reescrita declara o gatilho que o código verifica antes de pedir a reescrita ao modelo de linguagem, e o vocabulário (TEA-05) é explicado pelo código a partir do glossário deste arquivo.",
   "regras": [
@@ -83,21 +83,21 @@
       "aplicacao": "glossario",
       "glossario": {
         "clorofila": "substância verde que captura a luz do Sol",
-        "cloroplasto": "parte muito pequena da folha, que só aparece no microscópio",
+        "cloroplasto": "parte muito pequena da folha, onde a planta produz o próprio alimento; só aparece no microscópio",
         "condensação": "passagem da água do estado de vapor para o estado líquido",
-        "decompositor": "ser vivo, como fungos e bactérias, que se alimenta de restos de seres vivos mortos e devolve substâncias ao solo",
+        "decompositor": "ser vivo, como fungos e bactérias, que se alimenta de restos de plantas e animais mortos e devolve substâncias ao solo",
         "ecossistema": "conjunto dos seres vivos de um lugar e do ambiente onde eles vivem",
-        "estômato": "abertura muito pequena na superfície da folha",
+        "estômato": "abertura muito pequena na superfície da folha, por onde entram e saem gases",
         "evaporação": "passagem da água do estado líquido para o estado de vapor",
         "fotossíntese": "processo em que a planta usa a luz do Sol, a água e o gás carbônico para produzir o próprio alimento",
-        "glicose": "o alimento da planta",
+        "glicose": "tipo de açúcar que serve de energia para os seres vivos",
         "gás carbônico": "gás que existe no ar e que os seres vivos soltam quando respiram",
         "habitat": "lugar onde um ser vivo costuma viver",
-        "invertebrado": "animal que não tem coluna vertebral",
-        "mamífero": "animal cuja fêmea produz leite para alimentar os filhotes",
-        "nutriente": "substância dos alimentos que o corpo usa para crescer e ter energia",
+        "invertebrado": "animal que não tem coluna vertebral, como a minhoca, o caracol e a formiga",
+        "mamífero": "animal em que a fêmea produz leite para alimentar os filhotes, como a vaca e o ser humano",
+        "nutriente": "substância de que os seres vivos precisam para crescer e se manter vivos",
         "precipitação": "queda da água das nuvens, como a chuva e o granizo",
-        "vertebrado": "animal que tem coluna vertebral"
+        "vertebrado": "animal que tem coluna vertebral, como o peixe, o sapo, a galinha e o cachorro"
       }
     },
     {
