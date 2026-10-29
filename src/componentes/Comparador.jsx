@@ -1,3 +1,4 @@
+import { FileText } from 'lucide-react';
 import { Etiqueta, TabelaEnvolvente } from './basicos.jsx';
 
 /* Comparação original × adaptado (RF08) e quadro de métricas (RF07). */
@@ -5,12 +6,19 @@ import { Etiqueta, TabelaEnvolvente } from './basicos.jsx';
 /** O painel do original mostra o material como ele chegou: justificado,
  *  entrelinha apertada e sem subtítulos, para a diferença ficar visível. */
 export function ComparadorTextos({ original, blocos, regras, acaoAdaptado }) {
+  const paragrafosOriginal = original.filter((trecho) => trecho.tipo !== 'titulo').length;
+  const paragrafosAdaptado = blocos.reduce((total, bloco) => total + bloco.paragrafos.length, 0);
+  const contagem = (n) => `${n} ${n === 1 ? 'parágrafo' : 'parágrafos'}`;
+
   return (
     <div className="comparador">
-      <article className="painel-texto" aria-labelledby="titulo-original">
+      <article className="painel-texto painel-texto--original" aria-labelledby="titulo-original">
         <header className="painel-texto__cabecalho">
-          <h3 id="titulo-original">Material original</h3>
-          <Etiqueta tom="neutra">como foi enviado</Etiqueta>
+          <h3 id="titulo-original">
+            <FileText aria-hidden="true" />
+            Texto original
+          </h3>
+          <Etiqueta tom="neutra">{contagem(paragrafosOriginal)}</Etiqueta>
         </header>
         {/* tabIndex=0: o painel rola e precisa ser alcançável pelo teclado. */}
         <div
@@ -35,12 +43,15 @@ export function ComparadorTextos({ original, blocos, regras, acaoAdaptado }) {
         </div>
       </article>
 
-      <article className="painel-texto" aria-labelledby="titulo-adaptado">
+      <article className="painel-texto painel-texto--adaptado" aria-labelledby="titulo-adaptado">
         {/* A ação de editar fica no cabeçalho do painel do adaptado, no lugar
-           da etiqueta. */}
+           da contagem. */}
         <header className="painel-texto__cabecalho">
-          <h3 id="titulo-adaptado">Material adaptado</h3>
-          {acaoAdaptado ?? <Etiqueta tom="info">perfil TEA · 5º ano</Etiqueta>}
+          <h3 id="titulo-adaptado">
+            <FileText aria-hidden="true" />
+            Texto adaptado
+          </h3>
+          {acaoAdaptado ?? <Etiqueta tom="boa">{contagem(paragrafosAdaptado)}</Etiqueta>}
         </header>
         <div
           className="painel-texto__corpo texto-adaptado"
@@ -96,7 +107,9 @@ const SITUACOES = {
 export function TabelaMetricas({ metricas }) {
   return (
     <section className="cartao" aria-labelledby="titulo-metricas">
-      <h2 id="titulo-metricas">Métricas de legibilidade</h2>
+      <h2 id="titulo-metricas" tabIndex={-1}>
+        Métricas de legibilidade
+      </h2>
       <p className="campo__dica">
         Comparação entre o texto original e o adaptado. As métricas aparecem sempre, inclusive
         quando o resultado é desfavorável — é o que permite conferir a adaptação em vez de

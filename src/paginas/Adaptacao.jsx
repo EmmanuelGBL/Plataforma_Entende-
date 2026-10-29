@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Aviso, AvisoConteudoDemo, Botao, Cartao, Etiqueta, Migalhas } from '../componentes/basicos.jsx';
+import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, ChartColumnBig, Check, FileText, Gamepad2, Pencil } from 'lucide-react';
+import { Aviso, AvisoConteudoDemo, Botao, Cartao, Etiqueta } from '../componentes/basicos.jsx';
 import { ComparadorTextos, TabelaMetricas } from '../componentes/Comparador.jsx';
 import { PainelRegras } from '../componentes/PainelRegras.jsx';
 import { Dialogo } from '../componentes/Dialogo.jsx';
@@ -35,9 +36,84 @@ function desserializar(texto, blocosOriginais) {
   });
 }
 
+/* Etapas da revisão. A etapa 3 acontece na tela da atividade. */
+const ETAPAS = [
+  ['Revisar adaptação', 'Compare o texto original e o adaptado.'],
+  ['Editar (opcional)', 'Faça ajustes se necessário.'],
+  ['Verificar atividade', 'Veja as perguntas geradas.'],
+  ['Aprovar e gerar PDF', 'Finalize para salvar o material.'],
+];
+
+function EtapasRevisao({ aprovado }) {
+  return (
+    <ol className="etapas" aria-label="Etapas da revisão">
+      {ETAPAS.map(([titulo, apoio], indice) => {
+        const estado = aprovado ? 'concluida' : indice === 0 ? 'atual' : 'pendente';
+        return (
+          <li key={titulo} data-estado={estado} aria-current={estado === 'atual' ? 'step' : undefined}>
+            <span className="etapas__numero" aria-hidden="true">
+              {estado === 'concluida' ? <Check /> : indice + 1}
+            </span>
+            <span>
+              <span className="apenas-leitor">
+                {`Etapa ${indice + 1} de ${ETAPAS.length}${
+                  estado === 'concluida' ? ', concluída' : estado === 'atual' ? ', etapa atual' : ''
+                }: `}
+              </span>
+              <span className="etapas__titulo">{titulo}</span>
+              <span className="etapas__apoio">{apoio}</span>
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/** Resumo das métricas na coluna lateral: o nível de leitura estimado
+ *  (índice de Flesch adaptado). O quadro completo fica abaixo da comparação. */
+function ResumoMetricas({ metricas }) {
+  const nivel = metricas.find((m) => m.nome === 'Nível de leitura estimado');
+  if (!nivel) return null;
+  return (
+    <section className="cartao cartao--compacto resumo-metricas" aria-labelledby="titulo-resumo-metricas">
+      <h2 id="titulo-resumo-metricas">Métricas de legibilidade</h2>
+      <dl>
+        <div className="resumo-metricas__item resumo-metricas__item--original">
+          <dt>Texto original</dt>
+          <dd>
+            <ChartColumnBig aria-hidden="true" />
+            {nivel.original}
+          </dd>
+        </div>
+        <div className="resumo-metricas__item resumo-metricas__item--adaptado">
+          <dt>Texto adaptado</dt>
+          <dd>
+            <ChartColumnBig aria-hidden="true" />
+            {nivel.adaptado}
+          </dd>
+        </div>
+      </dl>
+      <p className="campo__dica">
+        Nível de leitura estimado.{' '}
+        <button
+          type="button"
+          className="link-botao"
+          onClick={() => {
+            const titulo = document.getElementById('titulo-metricas');
+            titulo?.scrollIntoView({ block: 'start' });
+            titulo?.focus();
+          }}
+        >
+          Ver todas as métricas
+        </button>
+      </p>
+    </section>
+  );
+}
+
 export function Adaptacao() {
   const { id } = useParams();
-  const navegar = useNavigate();
   const { material, modoServidor, adaptarMaterial, salvarTexto, aprovar } = usarApp();
   const { dados: adaptacao, carregando, erro } = usarAdaptacao(id);
   const catalogo = usarCatalogo();
@@ -123,7 +199,7 @@ export function Adaptacao() {
     try {
       const resultado = await aprovar(id);
       setExportado(resultado);
-      anunciar('Material aprovado. O botão no topo da tela agora abre o PDF.');
+      anunciar('Material aprovado. O botão Abrir o material em PDF agora abre o arquivo.');
     } catch (problema) {
       mostrarFalha(problema);
     }
@@ -158,43 +234,46 @@ export function Adaptacao() {
     dados.versaoRegras !== `${vigente.identificador} v${vigente.versao}`;
   const naoAdaptado = !adaptacao && erro?.status === 404;
 
+  const aprovado = dados.estado === 'aprovado';
+
   return (
     <>
-      <Migalhas
-        itens={[
-          { rotulo: 'Meus materiais', para: '/painel' },
-          { rotulo: dados.nome },
-        ]}
-      />
+      <Link to="/painel" className="voltar">
+        <ArrowLeft aria-hidden="true" />
+        Voltar para Meus materiais
+      </Link>
 
       <div className="cabecalho-pagina cabecalho-acoes">
         <div>
-          <h1>{dados.nome}</h1>
-          <div className="linha" style={{ marginTop: 'var(--e2)' }}>
-            <Etiqueta tom="info">Perfil TEA</Etiqueta>
-            <Etiqueta tom="neutra">{dados.etapa}</Etiqueta>
-            <Etiqueta tom="neutra">{dados.versaoRegras}</Etiqueta>
-            {dados.estado === 'aprovado' && <Etiqueta tom="boa">Aprovado por você</Etiqueta>}
-            {adaptacao?.editada && <Etiqueta tom="neutra">Editado por você</Etiqueta>}
-          </div>
+          <h1>Adaptação do material</h1>
+          <p>
+            O Entende+ aplicou o conjunto de regras para TEA. Revise, edite se necessário e aprove
+            a versão.
+          </p>
         </div>
 
-        {/* RN02 — o botão do PDF só aparece depois da aprovação. */}
-        {adaptacao && (
-          <div className="linha">
-            {dados.estado === 'aprovado' ? (
-              <Botao como="link" para={`/materiais/${id}/impressao`}>
-                Abrir o material em PDF
-              </Botao>
-            ) : (
-              <Botao onClick={() => setConfirmando(true)}>Aprovar e exportar em PDF</Botao>
+        <div className="material-resumo">
+          <span className="material-resumo__icone" aria-hidden="true">
+            <FileText />
+          </span>
+          <div>
+            <p className="material-resumo__nome">{dados.nome}</p>
+            <p className="material-resumo__meta">
+              {[dados.disciplina, `Enviado em ${dados.enviadoEm}`, dados.versaoRegras]
+                .filter(Boolean)
+                .join(' • ')}
+            </p>
+            {(aprovado || adaptacao?.editada) && (
+              <div className="linha" style={{ marginTop: 'var(--e2)', gap: 'var(--e2)' }}>
+                {aprovado && <Etiqueta tom="boa">Aprovado por você</Etiqueta>}
+                {adaptacao?.editada && <Etiqueta tom="neutra">Editado por você</Etiqueta>}
+              </div>
             )}
-            <Botao variante="secundario" onClick={() => navegar(`/materiais/${id}/atividade`)}>
-              Ir para a atividade
-            </Botao>
           </div>
-        )}
+        </div>
       </div>
+
+      <EtapasRevisao aprovado={aprovado} />
 
       <AvisoConteudoDemo material={dados} />
 
@@ -213,8 +292,8 @@ export function Adaptacao() {
         <Aviso tipo="boa" titulo="Material aprovado" papel="status">
           <p>
             Aprovado em {exportado.aprovadoEm}. O material sai com fonte sem serifa, alinhamento à
-            esquerda, entrelinha 1,5 e linha de no máximo 80 caracteres. O botão no topo da tela
-            agora abre o PDF.
+            esquerda, entrelinha 1,5 e linha de no máximo 80 caracteres. O botão “Abrir o material
+            em PDF”, no alto da coluna da direita, agora abre o arquivo.
           </p>
         </Aviso>
       )}
@@ -271,31 +350,56 @@ export function Adaptacao() {
       )}
 
       {adaptacao && (
-        <div className="duas-colunas">
-          <div className="pilha-g">
-            <section aria-labelledby="titulo-comparacao">
-              <h2 id="titulo-comparacao" style={{ marginBottom: 'var(--e3)' }}>
-                Comparar original e adaptado
-              </h2>
+        <>
+          <div className="adaptacao-grade">
+            <div className="pilha-g">
+              <section aria-labelledby="titulo-comparacao">
+                <h2 id="titulo-comparacao" className="apenas-leitor">
+                  Comparar original e adaptado
+                </h2>
 
-              {/* A edição abre em diálogo, e a comparação continua visível atrás. */}
-              <ComparadorTextos
-                original={adaptacao.original}
-                blocos={adaptacao.blocos}
-                regras={adaptacao.regras}
-                acaoAdaptado={
-                  <Botao variante="secundario" onClick={abrirEdicao}>
-                    Editar o texto adaptado
+                {/* A edição abre em diálogo, e a comparação continua visível atrás. */}
+                <ComparadorTextos
+                  original={adaptacao.original}
+                  blocos={adaptacao.blocos}
+                  regras={adaptacao.regras}
+                  acaoAdaptado={
+                    <Botao variante="secundario" onClick={abrirEdicao}>
+                      <Pencil aria-hidden="true" />
+                      Editar texto
+                    </Botao>
+                  }
+                />
+              </section>
+
+              <TabelaMetricas metricas={adaptacao.metricas} />
+            </div>
+
+            <div className="adaptacao-lateral">
+              {/* RN02 — o PDF só existe depois da aprovação. */}
+              <div className="adaptacao-acoes">
+                {aprovado ? (
+                  <Botao como="link" para={`/materiais/${id}/impressao`} largo>
+                    <FileText aria-hidden="true" />
+                    Abrir o material em PDF
                   </Botao>
-                }
-              />
-            </section>
+                ) : (
+                  <Botao onClick={() => setConfirmando(true)} largo>
+                    <Check aria-hidden="true" />
+                    Aprovar e gerar PDF
+                  </Botao>
+                )}
+                <Botao como="link" para={`/materiais/${id}/atividade`} variante="secundario" largo>
+                  <Gamepad2 aria-hidden="true" />
+                  Ir para a atividade
+                </Botao>
+              </div>
 
-            <TabelaMetricas metricas={adaptacao.metricas} />
+              <PainelRegras conjunto={adaptacao.conjunto} regras={adaptacao.regras} />
+              <ResumoMetricas metricas={adaptacao.metricas} />
+            </div>
           </div>
-
-          <PainelRegras conjunto={adaptacao.conjunto} regras={adaptacao.regras} />
-        </div>
+        </>
       )}
 
       <Dialogo

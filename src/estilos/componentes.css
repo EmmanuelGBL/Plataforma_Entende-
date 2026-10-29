@@ -775,3 +775,135 @@ table.dados--estreita { max-width: 46rem; }
 .enviar-como li span span { color: var(--cor-texto-apoio); font-size: 0.9375rem; }
 :root[data-contraste='alto'] .enviar-lateral__bloco { background: #000; border: 2px solid #fff; }
 .enviar-secao h2 + .campo, .enviar-secao h2 + .enviar-fixos { margin-top: var(--e3); }
+
+/* --- Link de volta ------------------------------------------------------- */
+.voltar {
+  display: inline-flex; align-items: center; gap: var(--e2);
+  min-height: var(--alvo-minimo);
+  margin-bottom: var(--e2);
+  font-weight: 600; text-decoration: none;
+}
+.voltar svg { width: 1.25rem; height: 1.25rem; }
+.voltar:hover { text-decoration: underline; }
+
+/* --- Adaptação: resumo do material, etapas -------------------------------- */
+.material-resumo {
+  display: flex; gap: var(--e3); align-items: flex-start;
+  background: var(--cor-primaria-clara);
+  border-radius: var(--raio-g);
+  padding: var(--e3) var(--e4);
+  max-width: 30rem;
+}
+.material-resumo__icone {
+  flex: none; width: 3rem; height: 3rem; border-radius: 10px;
+  display: grid; place-items: center;
+  background: #cfe0fa; color: var(--cor-primaria-escura);
+}
+.material-resumo__icone svg { width: 1.5rem; height: 1.5rem; }
+.material-resumo__nome { font-weight: 700; overflow-wrap: anywhere; }
+.material-resumo__meta { font-size: 0.9375rem; color: var(--cor-texto-apoio); }
+
+.etapas {
+  list-style: none; padding: 0; margin: 0 0 var(--e5);
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+.etapas li {
+  display: flex; gap: var(--e3); align-items: center;
+  padding: var(--e3) var(--e4);
+  color: var(--cor-texto-apoio);
+}
+.etapas li + li { border-left: 1px solid var(--cor-borda); }
+.etapas li[data-estado='atual'] { background: var(--cor-primaria-clara); color: var(--cor-texto); }
+.etapas__numero {
+  flex: none; width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 700; background: var(--cor-superficie-alt); color: var(--cor-texto);
+}
+.etapas__numero svg { width: 1.25rem; height: 1.25rem; }
+.etapas li[data-estado='atual'] .etapas__numero { background: var(--cor-primaria); color: #fff; }
+.etapas li[data-estado='concluida'] .etapas__numero { background: var(--cor-sucesso); color: #fff; }
+.etapas__titulo { display: block; font-weight: 600; color: var(--cor-texto); }
+.etapas__apoio { display: block; font-size: 0.875rem; }
+@media (max-width: 62rem) {
+  .etapas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .etapas li:nth-child(3) { border-left: none; }
+  .etapas li:nth-child(n+3) { border-top: 1px solid var(--cor-borda); }
+}
+@media (max-width: 40rem) {
+  .etapas { grid-template-columns: minmax(0, 1fr); }
+  .etapas li + li { border-left: none; border-top: 1px solid var(--cor-borda); }
+}
+:root[data-contraste='alto'] .etapas li[data-estado='atual'] { outline: 2px solid #ffe600; outline-offset: -2px; }
+
+/* --- Adaptação: grade principal ----------------------------------------- */
+.adaptacao-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 21rem);
+  gap: var(--e4);
+  align-items: start;
+  margin-bottom: var(--e5);
+}
+@media (max-width: 75rem) { .adaptacao-grade { grid-template-columns: minmax(0, 1fr); } }
+.adaptacao-lateral { display: grid; gap: var(--e4); }
+.adaptacao-acoes { display: grid; gap: var(--e3); }
+.adaptacao-acoes .botao { min-height: 3.25rem; font-size: 1.0625rem; }
+
+.painel-texto { box-shadow: var(--sombra); }
+.painel-texto__cabecalho h3 { display: flex; align-items: center; gap: var(--e2); font-size: 1.1875rem; }
+.painel-texto__cabecalho h3 svg { width: 1.5rem; height: 1.5rem; }
+.painel-texto--original .painel-texto__cabecalho { background: #fdf0f0; }
+.painel-texto--original .painel-texto__cabecalho h3 svg { color: var(--cor-erro); }
+.painel-texto--adaptado .painel-texto__cabecalho { background: #ecf7f0; }
+.painel-texto--adaptado .painel-texto__cabecalho h3 svg { color: var(--cor-sucesso); }
+:root[data-contraste='alto'] .painel-texto__cabecalho { background: #000 !important; }
+
+/* --- Painel de regras (coluna lateral) ---------------------------------- */
+.painel-regras h2 { font-size: 1.125rem; margin-bottom: var(--e2); }
+.painel-regras__conjunto, .painel-regras__nota {
+  display: flex; gap: var(--e2); align-items: flex-start;
+  font-size: 0.875rem; color: var(--cor-texto-apoio);
+  margin-bottom: var(--e3);
+}
+.painel-regras__conjunto svg, .painel-regras__nota svg { width: 1rem; height: 1rem; flex: none; margin-top: 0.2em; }
+.painel-regras__nota { margin: var(--e3) 0 0; }
+.painel-regras__lista { list-style: none; padding: 0; margin: 0; }
+.regra { border: none; background: var(--cor-superficie-alt); }
+.regra__botao { gap: var(--e3); padding: var(--e2) var(--e3); font-weight: 400; }
+.regra__icone {
+  flex: none; width: 2.5rem; height: 2.5rem; border-radius: 10px;
+  display: grid; place-items: center;
+}
+.regra__icone svg { width: 1.375rem; height: 1.375rem; }
+.regra__icone--azul { background: #dbe8fb; color: var(--cor-primaria-escura); }
+.regra__icone--verde { background: #d8f0e2; color: var(--cor-sucesso); }
+.regra__icone--amarelo { background: #fdebc8; color: var(--cor-destaque-escuro); }
+.regra__icone--roxo { background: #ece3fb; color: #5b34a8; }
+.regra__texto { display: grid; min-width: 0; }
+.regra__nome { font-weight: 600; overflow-wrap: anywhere; }
+.regra__resumo { font-size: 0.8125rem; color: var(--cor-texto-apoio); }
+.regra__seta { width: 1.25rem; height: 1.25rem; color: var(--cor-texto-apoio); }
+:root[data-contraste='alto'] .regra { border: 1px solid #fff; }
+:root[data-contraste='alto'] .regra__icone { background: #000; color: #ffe600; border: 1px solid #ffe600; }
+
+/* --- Resumo das métricas ------------------------------------------------- */
+.resumo-metricas h2 { font-size: 1.125rem; margin-bottom: var(--e3); }
+.resumo-metricas dl { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e2); margin-bottom: var(--e2); }
+.resumo-metricas__item { background: var(--cor-superficie-alt); border-radius: var(--raio); padding: var(--e3); }
+.resumo-metricas__item dt { font-size: 0.8125rem; color: var(--cor-texto-apoio); }
+.resumo-metricas__item dd { margin: var(--e1) 0 0; display: flex; gap: var(--e2); align-items: flex-start; font-weight: 700; font-size: 0.9375rem; line-height: 1.3; }
+.resumo-metricas__item dd svg { width: 1.375rem; height: 1.375rem; flex: none; }
+.resumo-metricas__item--original dd svg { color: var(--cor-erro); }
+.resumo-metricas__item--adaptado dd svg { color: var(--cor-sucesso); }
+
+/* Botão com aparência de link, para ações na mesma página. */
+.link-botao {
+  background: none; border: none; padding: 0;
+  color: var(--cor-primaria-escura); text-decoration: underline; text-underline-offset: 0.18em;
+  font: inherit; cursor: pointer;
+}
+.link-botao:hover { text-decoration-thickness: 2px; }
