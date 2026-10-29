@@ -104,3 +104,30 @@ def test_json_invalido_responde_indisponivel():
     with pytest.raises(ErroDeNegocio) as erro:
         cliente.gerar_json("questoes", "regras", "texto", ESQUEMA)
     assert erro.value.status == 503
+
+
+def test_registra_tokens_e_tempo_de_cada_chamada_quando_pedido():
+    resposta = _mensagem(_texto('{"questoes": []}'))
+    resposta.usage = SimpleNamespace(
+        input_tokens=1200,
+        input_tokens_details=SimpleNamespace(cached_tokens=200),
+        output_tokens=800,
+        output_tokens_details=SimpleNamespace(reasoning_tokens=300),
+    )
+    cliente, _ = _gpt(resposta)
+    cliente.gerar_json("questoes", "regras", "texto", ESQUEMA)
+    assert cliente.consumo is None  # o servidor não acumula nada
+
+    cliente.consumo = []
+    cliente.gerar_json("questoes", "regras", "texto", ESQUEMA)
+    (consumo,) = cliente.consumo
+    assert (consumo.tarefa, consumo.entrada, consumo.entrada_em_cache) == ("questoes", 1200, 200)
+    assert (consumo.saida, consumo.raciocinio) == (800, 300)
+    assert consumo.segundos >= 0
+
+
+def test_resposta_sem_uso_informado_registra_zero():
+    cliente, _ = _gpt(_mensagem(_texto('{"questoes": []}')))
+    cliente.consumo = []
+    cliente.gerar_json("questoes", "regras", "texto", ESQUEMA)
+    assert cliente.consumo[0].entrada == cliente.consumo[0].saida == 0

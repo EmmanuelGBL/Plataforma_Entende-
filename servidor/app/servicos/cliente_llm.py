@@ -13,6 +13,8 @@ quais regras aplicou em cada trecho (RF06).
 import json
 import logging
 import os
+import time
+from dataclasses import dataclass
 from typing import Protocol
 
 import anthropic
@@ -145,6 +147,32 @@ _CORTADA = ErroDeNegocio(
 )
 
 
+@dataclass
+class Consumo:
+    """Tokens e tempo de uma chamada ao modelo. Não guarda nada do material."""
+
+    tarefa: str
+    entrada: int
+    entrada_em_cache: int
+    saida: int
+    # Parte da saída gasta em raciocínio, que é cobrada como saída.
+    raciocinio: int
+    segundos: float
+
+
+def _consumo(tarefa: str, uso, segundos: float) -> Consumo:
+    detalhes_entrada = getattr(uso, "input_tokens_details", None)
+    detalhes_saida = getattr(uso, "output_tokens_details", None)
+    return Consumo(
+        tarefa=tarefa,
+        entrada=getattr(uso, "input_tokens", 0) or 0,
+        entrada_em_cache=getattr(detalhes_entrada, "cached_tokens", 0) or 0,
+        saida=getattr(uso, "output_tokens", 0) or 0,
+        raciocinio=getattr(detalhes_saida, "reasoning_tokens", 0) or 0,
+        segundos=segundos,
+    )
+
+
 class ClienteGPT:
     """Modelo da OpenAI pela Responses API, com saída estruturada estrita: a
     resposta obedece ao esquema JSON do motor e do gerador de questões (os dois
@@ -166,10 +194,14 @@ class ClienteGPT:
             self._cliente = openai.OpenAI(api_key=chave or None, timeout=self.TEMPO_LIMITE)
         else:
             self._cliente = None
+        # Com uma lista aqui, cada chamada registra o seu Consumo (medir.py).
+        # O servidor deixa None: o consumo só vai para o log.
+        self.consumo: list[Consumo] | None = None
 
     def gerar_json(self, tarefa: str, sistema: str, conteudo: str, esquema: dict) -> dict:
         if self._cliente is None:
             raise _sem_configuracao("OPENAI_API_KEY")
+        inicio = time.perf_counter()
         try:
             resposta = self._cliente.responses.create(
                 model=self.modelo,
@@ -197,6 +229,14 @@ class ClienteGPT:
         except openai.OpenAIError as erro:
             log.error("Modelo de linguagem não configurado em %s: %s", tarefa, erro)
             raise _sem_configuracao("OPENAI_API_KEY") from None
+
+        consumo = _consumo(tarefa, getattr(resposta, "usage", None), time.perf_counter() - inicio)
+        log.info(
+            "Consumo em %s: %d tokens de entrada (%d em cache), %d de saída, %.1f s",
+            tarefa, consumo.entrada, consumo.entrada_em_cache, consumo.saida, consumo.segundos,
+        )
+        if self.consumo is not None:
+            self.consumo.append(consumo)
 
         if getattr(resposta, "status", None) == "incomplete":
             motivo = getattr(getattr(resposta, "incomplete_details", None), "reason", None)
