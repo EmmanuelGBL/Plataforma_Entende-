@@ -868,13 +868,13 @@ table.dados--estreita { max-width: 46rem; }
 }
 .etapas li {
   display: flex; gap: var(--e3); align-items: center;
-  padding: var(--e3) var(--e4);
+  padding: var(--e2) var(--e4);
   color: var(--cor-texto-apoio);
 }
 .etapas li + li { border-left: 1px solid var(--cor-borda); }
 .etapas li[data-estado='atual'] { background: var(--cor-primaria-clara); color: var(--cor-texto); }
 .etapas__numero {
-  flex: none; width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%;
   display: grid; place-items: center;
   font-weight: 700; background: var(--cor-superficie-alt); color: var(--cor-texto);
 }
@@ -902,9 +902,21 @@ table.dados--estreita { max-width: 46rem; }
   align-items: start;
   margin-bottom: var(--e5);
 }
-@media (max-width: 75rem) { .adaptacao-grade { grid-template-columns: minmax(0, 1fr); } }
+/* Abaixo de 96rem (1536 px), três colunas espremem os textos: a comparação
+   ocupa a largura toda, e regras e métricas descem para baixo dela. */
+@media (max-width: 96rem) {
+  .adaptacao-grade { grid-template-columns: minmax(0, 1fr); }
+  .adaptacao-lateral { grid-template-columns: minmax(0, 1fr) minmax(0, 22rem); align-items: start; }
+}
+@media (max-width: 62rem) { .adaptacao-lateral { grid-template-columns: minmax(0, 1fr); } }
 .adaptacao-lateral { display: grid; gap: var(--e4); }
-.adaptacao-acoes { display: grid; gap: var(--e3); }
+.adaptacao-acoes { display: grid; gap: var(--e2); flex: 0 0 19rem; }
+/* No cabeçalho, o resumo do material é uma linha discreta, sem cartão. */
+.cabecalho-pagina .material-resumo { margin-top: var(--e3); padding: 0; background: none; align-items: center; gap: var(--e2); max-width: none; }
+.cabecalho-pagina .material-resumo__icone { width: 2.25rem; height: 2.25rem; border-radius: 8px; }
+.cabecalho-pagina .material-resumo__icone svg { width: 1.25rem; height: 1.25rem; }
+.cabecalho-pagina .material-resumo > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--e3); }
+.cabecalho-pagina .material-resumo .linha { margin-top: 0 !important; }
 .adaptacao-acoes .botao { min-height: 3.25rem; font-size: 1.0625rem; }
 
 .painel-texto { box-shadow: var(--sombra); }

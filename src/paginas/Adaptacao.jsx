@@ -250,27 +250,47 @@ export function Adaptacao() {
             O Entende+ aplicou o conjunto de regras para TEA. Revise, edite se necessário e aprove
             a versão.
           </p>
-        </div>
-
-        <div className="material-resumo">
-          <span className="material-resumo__icone" aria-hidden="true">
-            <FileText />
-          </span>
-          <div>
-            <p className="material-resumo__nome">{dados.nome}</p>
-            <p className="material-resumo__meta">
-              {[dados.disciplina, `Enviado em ${dados.enviadoEm}`, dados.versaoRegras]
-                .filter(Boolean)
-                .join(' • ')}
-            </p>
-            {(aprovado || adaptacao?.editada) && (
-              <div className="linha" style={{ marginTop: 'var(--e2)', gap: 'var(--e2)' }}>
-                {aprovado && <Etiqueta tom="boa">Aprovado por você</Etiqueta>}
-                {adaptacao?.editada && <Etiqueta tom="neutra">Editado por você</Etiqueta>}
-              </div>
-            )}
+          <div className="material-resumo">
+            <span className="material-resumo__icone" aria-hidden="true">
+              <FileText />
+            </span>
+            <div>
+              <p className="material-resumo__nome">{dados.nome}</p>
+              <p className="material-resumo__meta">
+                {[dados.disciplina, `Enviado em ${dados.enviadoEm}`, dados.versaoRegras]
+                  .filter(Boolean)
+                  .join(' • ')}
+              </p>
+              {(aprovado || adaptacao?.editada) && (
+                <div className="linha" style={{ marginTop: 'var(--e2)', gap: 'var(--e2)' }}>
+                  {aprovado && <Etiqueta tom="boa">Aprovado por você</Etiqueta>}
+                  {adaptacao?.editada && <Etiqueta tom="neutra">Editado por você</Etiqueta>}
+                </div>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* RN02 — o PDF só existe depois da aprovação. */}
+        {adaptacao && (
+          <div className="adaptacao-acoes">
+            {aprovado ? (
+              <Botao como="link" para={`/materiais/${id}/impressao`} largo>
+                <FileText aria-hidden="true" />
+                Abrir o material em PDF
+              </Botao>
+            ) : (
+              <Botao onClick={() => setConfirmando(true)} largo>
+                <Check aria-hidden="true" />
+                Aprovar e gerar PDF
+              </Botao>
+            )}
+            <Botao como="link" para={`/materiais/${id}/atividade`} variante="secundario" largo>
+              <Gamepad2 aria-hidden="true" />
+              Ir para a atividade
+            </Botao>
+          </div>
+        )}
       </div>
 
       <EtapasRevisao aprovado={aprovado} />
@@ -293,7 +313,7 @@ export function Adaptacao() {
           <p>
             Aprovado em {exportado.aprovadoEm}. O material sai com fonte sem serifa, alinhamento à
             esquerda, entrelinha 1,5 e linha de no máximo 80 caracteres. O botão “Abrir o material
-            em PDF”, no alto da coluna da direita, agora abre o arquivo.
+            em PDF”, ao lado do título, agora abre o arquivo.
           </p>
         </Aviso>
       )}
@@ -376,25 +396,6 @@ export function Adaptacao() {
             </div>
 
             <div className="adaptacao-lateral">
-              {/* RN02 — o PDF só existe depois da aprovação. */}
-              <div className="adaptacao-acoes">
-                {aprovado ? (
-                  <Botao como="link" para={`/materiais/${id}/impressao`} largo>
-                    <FileText aria-hidden="true" />
-                    Abrir o material em PDF
-                  </Botao>
-                ) : (
-                  <Botao onClick={() => setConfirmando(true)} largo>
-                    <Check aria-hidden="true" />
-                    Aprovar e gerar PDF
-                  </Botao>
-                )}
-                <Botao como="link" para={`/materiais/${id}/atividade`} variante="secundario" largo>
-                  <Gamepad2 aria-hidden="true" />
-                  Ir para a atividade
-                </Botao>
-              </div>
-
               <PainelRegras conjunto={adaptacao.conjunto} regras={adaptacao.regras} />
               <ResumoMetricas metricas={adaptacao.metricas} />
             </div>
