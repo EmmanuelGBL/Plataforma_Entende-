@@ -1,16 +1,28 @@
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Aviso, Cartao } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
+import { usarApp } from '../contextos/Aplicacao.jsx';
 
 /* Declaração de acessibilidade: padrões adotados, recursos, atalhos e
    limitações conhecidas. */
 
 export function Acessibilidade() {
-  usarTituloDaPagina('Acessibilidade');
+  // "Declaração", e não só "Acessibilidade": o botão da barra com esse nome
+  // abre o painel de exibição, que é outra coisa.
+  usarTituloDaPagina('Declaração de acessibilidade');
+  // A declaração também abre da tela de entrada, sem sessão.
+  const { autenticado } = usarApp();
 
   return (
     <div className="pagina-leitura">
+      <Link to={autenticado ? '/painel' : '/'} className="voltar">
+        <ArrowLeft aria-hidden="true" />
+        {autenticado ? 'Voltar para Meus materiais' : 'Voltar para a entrada'}
+      </Link>
+
       <div className="cabecalho-pagina">
-        <h1>Acessibilidade no Entende+</h1>
+        <h1>Declaração de acessibilidade</h1>
         <p>
           Como este sistema foi construído para ser usado por todo mundo, o que já está pronto e o
           que ainda não está.
