@@ -20,8 +20,16 @@ export class ErroDeNegocio extends Error {
 }
 
 /** Validação antes do envio. Devolve null quando o arquivo é aceito. */
+/** "1,8 MB" → 1.8; "740 KB" → 0.72. Sem a unidade, 740 KB passava por 740 MB. */
+function emMegabytes(tamanho) {
+  const [, numero = '0', unidade = 'MB'] = String(tamanho).match(/([\d.,]+)\s*(KB|MB|GB)?/i) ?? [];
+  const valor = Number(numero.replace(/\./g, '').replace(',', '.'));
+  const fator = { KB: 1 / 1024, MB: 1, GB: 1024 }[unidade.toUpperCase()];
+  return valor * fator;
+}
+
 export function validarArquivo(arquivo) {
-  const mb = Number(String(arquivo.tamanho).replace(/[^\d,]/g, '').replace(',', '.'));
+  const mb = emMegabytes(arquivo.tamanho);
   if (arquivo.paginas > LIMITE_PAGINAS || mb > LIMITE_MB) {
     return new ErroDeNegocio(
       'Este material está acima do limite aceito',

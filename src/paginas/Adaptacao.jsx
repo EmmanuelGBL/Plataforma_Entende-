@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ChartColumnBig, Check, FileText, Gamepad2, Pencil } from 'lucide-react';
+import { ArrowLeft, Check, FileText, Gamepad2, ListChecks, Pencil } from 'lucide-react';
 import { Aviso, Botao, Cartao, Etiqueta } from '../componentes/basicos.jsx';
 import { ComparadorTextos, TabelaMetricas } from '../componentes/Comparador.jsx';
 import { PainelRegras } from '../componentes/PainelRegras.jsx';
-import { Dialogo } from '../componentes/Dialogo.jsx';
+import { Dialogo, Janela } from '../componentes/Dialogo.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarAdaptacao, usarApp, usarCatalogo } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
@@ -36,48 +36,6 @@ function desserializar(texto, blocosOriginais) {
   });
 }
 
-/** Resumo das métricas na coluna lateral: o nível de leitura estimado
- *  (índice de Flesch adaptado). O quadro completo fica abaixo da comparação. */
-function ResumoMetricas({ metricas }) {
-  const nivel = metricas.find((m) => m.nome === 'Nível de leitura estimado');
-  if (!nivel) return null;
-  return (
-    <section className="cartao cartao--compacto resumo-metricas" aria-labelledby="titulo-resumo-metricas">
-      <h2 id="titulo-resumo-metricas">Métricas de legibilidade</h2>
-      <dl>
-        <div className="resumo-metricas__item resumo-metricas__item--original">
-          <dt>Texto original</dt>
-          <dd>
-            <ChartColumnBig aria-hidden="true" />
-            {nivel.original}
-          </dd>
-        </div>
-        <div className="resumo-metricas__item resumo-metricas__item--adaptado">
-          <dt>Texto adaptado</dt>
-          <dd>
-            <ChartColumnBig aria-hidden="true" />
-            {nivel.adaptado}
-          </dd>
-        </div>
-      </dl>
-      <p className="campo__dica">
-        Nível de leitura estimado.{' '}
-        <button
-          type="button"
-          className="link-botao"
-          onClick={() => {
-            const titulo = document.getElementById('titulo-metricas');
-            titulo?.scrollIntoView({ block: 'start' });
-            titulo?.focus();
-          }}
-        >
-          Ver todas as métricas
-        </button>
-      </p>
-    </section>
-  );
-}
-
 export function Adaptacao() {
   const { id } = useParams();
   const { material, modoServidor, adaptarMaterial, salvarTexto, aprovar } = usarApp();
@@ -90,6 +48,7 @@ export function Adaptacao() {
   usarTituloDaPagina(dados ? `Adaptação — ${dados.nome}` : 'Material não encontrado');
 
   const [editando, setEditando] = useState(false);
+  const [vendoRegras, setVendoRegras] = useState(false);
   const [rascunho, setRascunho] = useState('');
   const [confirmando, setConfirmando] = useState(false);
   const [processando, setProcessando] = useState(false);
@@ -319,35 +278,46 @@ export function Adaptacao() {
 
       {adaptacao && (
         <>
-          <div className="adaptacao-grade">
-            <div className="pilha-g">
-              <section aria-labelledby="titulo-comparacao">
-                <h2 id="titulo-comparacao" className="apenas-leitor">
-                  Comparar original e adaptado
-                </h2>
+          {/* As regras aplicadas abrem em janela: na tela ficam só os dois
+              textos, com a largura toda para a comparação. */}
+          <div className="pilha-g">
+            <section aria-labelledby="titulo-comparacao">
+              <h2 id="titulo-comparacao" className="apenas-leitor">
+                Comparar original e adaptado
+              </h2>
 
-                {/* A edição abre em diálogo, e a comparação continua visível atrás. */}
-                <ComparadorTextos
-                  original={adaptacao.original}
-                  blocos={adaptacao.blocos}
-                  regras={adaptacao.regras}
-                  acaoAdaptado={
+              {/* A edição abre em diálogo, e a comparação continua visível atrás. */}
+              <ComparadorTextos
+                original={adaptacao.original}
+                blocos={adaptacao.blocos}
+                regras={adaptacao.regras}
+                acaoAdaptado={
+                  <div className="painel-texto__acoes">
+                    <Botao variante="secundario" onClick={() => setVendoRegras(true)}>
+                      <ListChecks aria-hidden="true" />
+                      Regras aplicadas
+                    </Botao>
                     <Botao variante="secundario" onClick={abrirEdicao}>
                       <Pencil aria-hidden="true" />
                       Editar texto
                     </Botao>
-                  }
-                />
-              </section>
+                  </div>
+                }
+              />
+            </section>
 
-              <TabelaMetricas metricas={adaptacao.metricas} />
-            </div>
-
-            <div className="adaptacao-lateral">
-              <PainelRegras conjunto={adaptacao.conjunto} regras={adaptacao.regras} />
-              <ResumoMetricas metricas={adaptacao.metricas} />
-            </div>
+            <TabelaMetricas metricas={adaptacao.metricas} />
           </div>
+
+          <Janela
+            aberto={vendoRegras}
+            titulo="Regras aplicadas"
+            aoFechar={() => setVendoRegras(false)}
+            classe="janela-regras"
+            botaoFechar
+          >
+            <PainelRegras conjunto={adaptacao.conjunto} regras={adaptacao.regras} emJanela />
+          </Janela>
         </>
       )}
 

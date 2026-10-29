@@ -112,7 +112,6 @@ teste e a seguinte.
 | `#/painel?enviar=1` | Enviar material, em janela sobre Meus materiais (`#/enviar` leva até ela) |
 | `#/atividades` | Todas as atividades, por situação do link |
 | `#/regras` | Regras de adaptação do perfil TEA (RF10) |
-| `#/configuracoes` | Conta, exibição e perfil de adaptação |
 | `#/materiais/m-102/adaptacao` | Revisar a adaptação — **a tela núcleo** |
 | `#/materiais/m-102/impressao` | Material adaptado em PDF (botão Salvar como PDF) |
 | `#/materiais/m-102/atividade` | Revisar e publicar a atividade |

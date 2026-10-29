@@ -183,8 +183,9 @@ kbd {
 :root[data-contraste='alto'] .barra { border-bottom: 2px solid #ffe600; }
 
 .barra-interna {
+  min-height: var(--altura-barra);
   margin-inline: auto;
-  padding: var(--e3) var(--respiro-lateral);
+  padding: var(--e2) var(--respiro-lateral);
   display: flex;
   align-items: center;
   gap: var(--e4);
@@ -232,18 +233,48 @@ kbd {
 
 /* --- Corpo com menu lateral ---------------------------------------------- */
 .corpo { flex: 1; display: flex; flex-direction: column; }
-.corpo--com-menu { flex-direction: row; align-items: stretch; }
-.corpo--com-menu > .conteudo { min-width: 0; margin-inline: 0; }
+
+/* Com sessão: o menu ocupa a altura toda à esquerda, e a barra e o conteúdo
+   ficam à direita dele. */
+.app--com-menu { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr; }
+.app--com-menu > .barra, .app--com-menu > .corpo { grid-column: 2; }
+.app--com-menu .conteudo { min-width: 0; margin-inline: 0; }
 
 .menu-lateral {
-  flex: none;
+  grid-column: 1; grid-row: 1 / -1;
+  position: sticky; top: 0; align-self: start;
+  height: 100vh; overflow-y: auto;
   width: 15rem;
-  padding: var(--e5) var(--e3);
+  padding: 0 var(--e3) var(--e5);
   background: var(--cor-superficie);
   border-right: 1px solid var(--cor-borda);
+  transition: width var(--duracao) ease;
 }
-.menu-lateral ul { list-style: none; padding: 0; display: grid; gap: var(--e1); }
-.menu-lateral a {
+/* Topo do menu: logo e botão de recolher, na mesma altura da barra. */
+.menu-lateral__topo {
+  /* + 1px: a borda de baixo, que na barra fica fora da altura. */
+  height: calc(var(--altura-barra) + 1px);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--e2);
+  margin: 0 calc(-1 * var(--e3)) var(--e4);
+  padding-inline: var(--e3) var(--e2);
+  border-bottom: 1px solid var(--cor-borda);
+}
+.menu-lateral__topo .marca__logo { height: 2rem; }
+.menu-lateral__alternar {
+  flex: none;
+  display: grid; place-items: center;
+  width: var(--alvo-minimo); height: var(--alvo-minimo);
+  border: 2px solid transparent; border-radius: var(--raio);
+  background: transparent; color: var(--cor-texto-apoio);
+  cursor: pointer;
+}
+.menu-lateral__alternar:hover { background: var(--cor-superficie-alt); color: var(--cor-texto); }
+.menu-lateral__alternar svg { width: 1.5rem; height: 1.5rem; }
+.menu-lateral__alternar--simbolo { width: 3rem; height: 3rem; margin-inline: auto; }
+.menu-lateral__alternar--simbolo .menu-lateral__simbolo { width: 2.5rem; height: 2.5rem; }
+:root[data-contraste='alto'] .menu-lateral__alternar { border-color: #ffe600; color: #ffe600; }
+.menu-lateral__itens ul { list-style: none; padding: 0; display: grid; gap: var(--e1); }
+.menu-lateral__itens a {
   display: flex; align-items: center; gap: var(--e3);
   min-height: 3rem;
   padding: var(--e2) var(--e3);
@@ -253,16 +284,16 @@ kbd {
   font-size: 1.0625rem;
   border: 2px solid transparent;
 }
-.menu-lateral a svg { width: 1.5rem; height: 1.5rem; flex: none; }
-.menu-lateral a:hover { background: var(--cor-superficie-alt); text-decoration: underline; }
-.menu-lateral a[aria-current='page'] {
+.menu-lateral__itens a svg { width: 1.5rem; height: 1.5rem; flex: none; }
+.menu-lateral__itens a:hover { background: var(--cor-superficie-alt); text-decoration: underline; }
+.menu-lateral__itens a[aria-current='page'] {
   background: var(--cor-primaria-clara);
   color: var(--cor-primaria-escura);
   font-weight: 600;
 }
-.menu-lateral a[aria-current='page'] svg { color: var(--cor-primaria); }
-:root[data-contraste='alto'] .menu-lateral a[aria-current='page'] { border-color: #ffe600; color: #ffe600; }
-:root[data-contraste='alto'] .menu-lateral a[aria-current='page'] svg { color: #ffe600; }
+.menu-lateral__itens a[aria-current='page'] svg { color: var(--cor-primaria); }
+:root[data-contraste='alto'] .menu-lateral__itens a[aria-current='page'] { border-color: #ffe600; color: #ffe600; }
+:root[data-contraste='alto'] .menu-lateral__itens a[aria-current='page'] svg { color: #ffe600; }
 
 .menu-lateral__grupo {
   margin: var(--e5) var(--e3) var(--e2);
@@ -278,34 +309,35 @@ kbd {
   overflow-wrap: anywhere;
 }
 
-/* Tela estreita: o menu lateral vira uma faixa horizontal acima do conteúdo. */
+/* Menu fechado em tela larga: coluna estreita só com os ícones. O texto sai
+   da tela, mas continua sendo o nome do link para o leitor de tela. */
+.app--menu-fechado .menu-lateral { width: 4.5rem; padding-inline: var(--e2); }
+.app--menu-fechado .menu-lateral__topo { margin-inline: calc(-1 * var(--e2)); padding-inline: 0; }
+.app--menu-fechado .menu-lateral__itens a { justify-content: center; padding-inline: 0; }
+.app--menu-fechado .menu-lateral__rotulo {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.app--menu-fechado .menu-lateral__grupo { font-size: 0; margin-inline: var(--e2); padding-top: 0; }
+.app--menu-fechado .menu-lateral__material { display: none; }
+
+/* Tela estreita: o menu vira uma faixa acima da barra, com o logo e, aberto,
+   os itens lado a lado; fechado, fica só o símbolo. */
 @media (max-width: 62rem) {
-  .corpo--com-menu { flex-direction: column; }
-  .menu-lateral { width: auto; padding: var(--e2) var(--respiro-lateral); border-right: none; border-bottom: 1px solid var(--cor-borda); }
-  .menu-lateral ul { display: flex; flex-wrap: wrap; }
+  .app--com-menu { display: flex; flex-direction: column; }
+  .menu-lateral {
+    position: static; height: auto; width: auto;
+    padding: 0 var(--respiro-lateral) var(--e2);
+    border-right: none; border-bottom: 1px solid var(--cor-borda);
+  }
+  .menu-lateral__topo { margin: 0 calc(-1 * var(--respiro-lateral)) var(--e2); padding-inline: var(--respiro-lateral) var(--e2); }
+  .menu-lateral__itens ul { display: flex; flex-wrap: wrap; }
   .menu-lateral__grupo { display: none; }
+  .app--menu-fechado .menu-lateral { width: auto; padding-bottom: 0; }
+  .app--menu-fechado .menu-lateral__topo { margin-bottom: 0; border-bottom: 0; justify-content: flex-start; padding-inline: var(--respiro-lateral); }
+  .app--menu-fechado .menu-lateral__alternar--simbolo { margin-inline: 0; }
+  .app--menu-fechado .menu-lateral__itens { display: none; }
 }
-
-/* --- Rodapé -------------------------------------------------------------- */
-.rodape {
-  background: var(--cor-superficie-alt);
-  border-top: 1px solid var(--cor-borda);
-  padding: var(--e5) var(--respiro-lateral);
-  font-size: 0.9375rem;
-  color: var(--cor-texto-apoio);
-}
-.rodape-interno {
-  max-width: var(--largura-conteudo);
-  margin-inline: auto;
-  display: flex;
-  gap: var(--e4);
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-.rodape ul { display: flex; gap: var(--e4); flex-wrap: wrap; list-style: none; padding: 0; }
-
-/* O crédito do rodapé ocupa uma linha só; em tela estreita, quebra normalmente. */
-.rodape-interno p { max-width: none; }
 
 /* --- Utilitários de layout ----------------------------------------------- */
 .pilha > * + * { margin-top: var(--e4); }

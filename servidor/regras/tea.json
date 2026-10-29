@@ -1,8 +1,8 @@
 {
   "identificador": "TEA",
-  "versao": "1.6",
+  "versao": "1.7",
   "publicado_em": "2026-10-29",
-  "descricao": "Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho Universal para a Aprendizagem (CAST, 2024). Desde a versão 1.4, cada regra de reescrita declara o gatilho que o código verifica antes de pedir a reescrita ao modelo de linguagem, e o vocabulário (TEA-05) é explicado pelo código a partir do glossário deste arquivo.",
+  "descricao": "Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho Universal para a Aprendizagem (CAST, 2024).",
   "regras": [
     {
       "codigo": "TEA-01",

@@ -14,7 +14,6 @@ import { QuestionarioImpresso } from './paginas/QuestionarioImpresso.jsx';
 import { Ajuda } from './paginas/Ajuda.jsx';
 import { Regras } from './paginas/Regras.jsx';
 import { Atividades } from './paginas/Atividades.jsx';
-import { Configuracoes } from './paginas/Configuracoes.jsx';
 import { Acessibilidade } from './paginas/Acessibilidade.jsx';
 import { NaoEncontrada } from './paginas/NaoEncontrada.jsx';
 
@@ -106,14 +105,9 @@ export default function App() {
             </ExigeSessao>
           }
         />
-        <Route
-          path="/configuracoes"
-          element={
-            <ExigeSessao>
-              <Configuracoes />
-            </ExigeSessao>
-          }
-        />
+        {/* A tela Configurações saiu em 29/10/2026: tudo o que ela mostrava já
+            está no menu do professor e no painel Acessibilidade. */}
+        <Route path="/configuracoes" element={<Navigate to="/painel" replace />} />
         <Route
           path="/materiais/:id/adaptacao"
           element={

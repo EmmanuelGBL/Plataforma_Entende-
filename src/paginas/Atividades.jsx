@@ -98,7 +98,7 @@ export function Atividades() {
                 {itens.length === 0 ? (
                   <p className="campo__dica">{grupo.vazio}</p>
                 ) : (
-                  <ul className="lista-materiais">
+                  <ul className="lista-materiais lista-materiais--grupos">
                     {itens.map((material) => {
                       const titulo = nomeSemExtensao(material.nome);
                       const codigo = material.atividade?.codigo;

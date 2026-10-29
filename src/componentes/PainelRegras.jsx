@@ -40,8 +40,9 @@ export function aparenciaDaRegra(codigo) {
 }
 
 /** `conjunto` e `regras` são os da versão usada nesta adaptação, e não os
- *  da versão vigente. */
-export function PainelRegras({ conjunto, regras, destacada, aoDestacar }) {
+ *  da versão vigente. Com `emJanela`, sai sem cartão e sem título: quem dá o
+ *  título é a janela "Regras aplicadas" da tela de Adaptação. */
+export function PainelRegras({ conjunto, regras, destacada, aoDestacar, emJanela }) {
   const [abertas, setAbertas] = useState(() => new Set());
 
   function alternar(codigo) {
@@ -55,8 +56,11 @@ export function PainelRegras({ conjunto, regras, destacada, aoDestacar }) {
   }
 
   return (
-    <section className="cartao cartao--compacto painel-regras" aria-labelledby="titulo-regras">
-      <h2 id="titulo-regras">Regras aplicadas</h2>
+    <section
+      className={emJanela ? 'painel-regras' : 'cartao cartao--compacto painel-regras'}
+      aria-labelledby={emJanela ? 'titulo-dialogo' : 'titulo-regras'}
+    >
+      {!emJanela && <h2 id="titulo-regras">Regras aplicadas</h2>}
 
       <p className="painel-regras__conjunto">
         <Lock aria-hidden="true" />

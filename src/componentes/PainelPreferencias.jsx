@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { PersonStanding } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { FileText, PersonStanding } from 'lucide-react';
 import { usarPreferencias } from '../contextos/Preferencias.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
@@ -32,8 +33,7 @@ const NOMES = {
   movimento: 'Animações',
 };
 
-/** Os grupos de opções e o "Restaurar o padrão". Aparece no painel da barra
- *  superior e na tela Configurações. */
+/** Os grupos de opções e o "Restaurar o padrão", no painel da barra superior. */
 export function OpcoesPreferencias() {
   const { preferencias, definir, restaurar, ehPadrao } = usarPreferencias();
   const { anunciar } = usarAnuncios();
@@ -123,6 +123,15 @@ export function PainelPreferencias() {
         <div className="preferencias__painel" id="painel-preferencias">
           <h2 className="apenas-leitor">Preferências de exibição</h2>
           <OpcoesPreferencias />
+          {/* A declaração ficava no rodapé, que saiu em 29/10/2026. */}
+          <Link
+            to="/acessibilidade"
+            className="preferencias__declaracao"
+            onClick={() => setAberto(false)}
+          >
+            <FileText aria-hidden="true" />
+            Ver a declaração de acessibilidade
+          </Link>
         </div>
       )}
     </div>

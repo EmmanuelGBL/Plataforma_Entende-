@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CircleCheck, CloudUpload, FileText, Lightbulb, Sparkles } from 'lucide-react';
+import {
+  ChevronDown,
+  CircleCheck,
+  CircleHelp,
+  CloudUpload,
+  FileText,
+  Sparkles,
+} from 'lucide-react';
 import { Aviso, Botao } from './basicos.jsx';
 import { BarraProgresso } from './Passos.jsx';
 import { Janela } from './Dialogo.jsx';
@@ -68,38 +75,39 @@ const DICAS = [
   'Quanto mais claro o material original, melhor a adaptação.',
 ];
 
-function Lateral() {
+/** "Como funciona" e as dicas, fechados por padrão: quem já conhece o fluxo
+ *  vai direto ao arquivo. */
+function AjudaEnvio() {
   return (
-    <aside className="enviar-lateral" aria-label="Sobre o envio">
-      <section className="enviar-lateral__bloco enviar-lateral__bloco--como">
-        <h3>Como funciona</h3>
-        <ol className="enviar-como">
-          {COMO_FUNCIONA.map(([titulo, texto], i) => (
-            <li key={titulo}>
-              <span className="enviar-como__numero" aria-hidden="true">
-                {i + 1}
-              </span>
-              <span>
-                <strong>{titulo}</strong>
-                <span>{texto}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="enviar-lateral__bloco enviar-lateral__bloco--dicas">
-        <h3>
-          <Lightbulb aria-hidden="true" />
-          Dicas para um bom resultado
-        </h3>
-        <ul>
-          {DICAS.map((dica) => (
-            <li key={dica}>{dica}</li>
-          ))}
-        </ul>
-      </section>
-    </aside>
+    <details className="faq enviar-ajuda">
+      <summary>
+        <span>
+          <CircleHelp aria-hidden="true" />
+          Ajuda para o envio
+        </span>
+        <ChevronDown aria-hidden="true" className="faq__seta" />
+      </summary>
+      <div className="enviar-ajuda__corpo">
+        <section aria-labelledby="ajuda-como">
+          <h4 id="ajuda-como">Como funciona</h4>
+          <ol>
+            {COMO_FUNCIONA.map(([titulo, texto]) => (
+              <li key={titulo}>
+                <strong>{titulo}.</strong> {texto}
+              </li>
+            ))}
+          </ol>
+        </section>
+        <section aria-labelledby="ajuda-dicas">
+          <h4 id="ajuda-dicas">Dicas para um bom resultado</h4>
+          <ul>
+            {DICAS.map((dica) => (
+              <li key={dica}>{dica}</li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </details>
   );
 }
 
@@ -239,7 +247,7 @@ export function JanelaEnviar({ aoFechar }) {
       classe="janela-enviar"
       botaoFechar
     >
-      <div className="enviar-grade">
+      <div>
         <div>
           {problema && (
             <div ref={areaProblema} tabIndex={-1}>
@@ -270,6 +278,25 @@ export function JanelaEnviar({ aoFechar }) {
             </div>
           ) : (
             <form className="enviar-formulario" onSubmit={enviarEAdaptar} noValidate>
+              {/* Fixos nesta versão (RF04): valem para todo envio, por isso ficam
+                  no topo, e não entre os campos a preencher. */}
+              <dl className="enviar-resumo" aria-label="Adaptação aplicada a este envio">
+                <div>
+                  <dt>Perfil</dt>
+                  <dd>TEA — Transtorno do Espectro Autista</dd>
+                </div>
+                <div>
+                  <dt>Etapa</dt>
+                  <dd>5º ano do ensino fundamental</dd>
+                </div>
+                <div>
+                  <dt>Regras</dt>
+                  <dd>
+                    {conjuntoVigente.identificador} v{conjuntoVigente.versao}
+                  </dd>
+                </div>
+              </dl>
+
               <section className="enviar-secao" aria-labelledby="secao-arquivo">
                 <span className="enviar-secao__numero" aria-hidden="true">
                   1
@@ -363,49 +390,34 @@ export function JanelaEnviar({ aoFechar }) {
                 </div>
               </section>
 
-              <section className="enviar-secao" aria-labelledby="secao-informacoes">
-                <span className="enviar-secao__numero" aria-hidden="true">
-                  2
-                </span>
-                <div>
-                  <h3 id="secao-informacoes">Informações do material</h3>
+              {!modoServidor && (
+                <section className="enviar-secao" aria-labelledby="secao-disciplina">
+                  <span className="enviar-secao__numero" aria-hidden="true">
+                    2
+                  </span>
+                  <fieldset>
+                    <legend>
+                      <h3 id="secao-disciplina">Disciplina</h3>
+                    </legend>
+                    <div className="opcoes-chip">
+                      {DISCIPLINAS.map((d) => (
+                        <label key={d}>
+                          <input
+                            type="radio"
+                            name="disciplina"
+                            value={d}
+                            checked={disciplina === d}
+                            onChange={() => setDisciplina(d)}
+                          />
+                          <span>{d}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                </section>
+              )}
 
-                  {!modoServidor && (
-                    <div className="campo">
-                      <label className="campo__rotulo" htmlFor="disciplina">
-                        Disciplina
-                      </label>
-                      <select
-                        id="disciplina"
-                        className="selecao"
-                        value={disciplina}
-                        onChange={(e) => setDisciplina(e.target.value)}
-                      >
-                        {DISCIPLINAS.map((d) => (
-                          <option key={d}>{d}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  <dl className="enviar-fixos">
-                    <div>
-                      <dt>Perfil de adaptação</dt>
-                      <dd>TEA — Transtorno do Espectro Autista</dd>
-                    </div>
-                    <div>
-                      <dt>Etapa escolar</dt>
-                      <dd>5º ano do ensino fundamental</dd>
-                    </div>
-                    <div>
-                      <dt>Conjunto de regras</dt>
-                      <dd>
-                        {conjuntoVigente.identificador} v{conjuntoVigente.versao}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              </section>
+              <AjudaEnvio />
 
               <div className="enviar-formulario__acoes">
                 <Botao variante="secundario" onClick={fechar}>
@@ -419,8 +431,6 @@ export function JanelaEnviar({ aoFechar }) {
             </form>
           )}
         </div>
-
-        {!processando && <Lateral />}
       </div>
     </Janela>
   );

@@ -1,26 +1,28 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ListChecks } from 'lucide-react';
-import { Botao, Cartao, TabelaEnvolvente } from '../componentes/basicos.jsx';
+import { ArrowLeft, ChevronDown } from 'lucide-react';
+import { Cartao, TabelaEnvolvente } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 
-/* Tela de Ajuda: perguntas frequentes, o caminho para as regras de adaptação
-   e os atalhos de teclado. */
+/* Tela de Ajuda: perguntas frequentes e atalhos de teclado. As regras de
+   adaptação têm item próprio no menu. */
 
+/* Na ordem do caminho do professor: para quem é, o que muda, o envio, o
+   resultado, a revisão e a atividade dos estudantes. */
 const PERGUNTAS = [
+  {
+    pergunta: 'Para quem este material adaptado foi pensado?',
+    resposta:
+      'Para estudantes com Transtorno do Espectro Autista do 5º ano do ensino fundamental. É o ' +
+      'único perfil e a única etapa desta versão. As regras foram derivadas de diretrizes de ' +
+      'acessibilidade cognitiva e revisadas com professores e especialistas.',
+  },
   {
     pergunta: 'O Entende+ muda o conteúdo da minha aula?',
     resposta:
       'Não. O sistema muda a forma do texto: divide períodos longos, explica termos difíceis, ' +
       'organiza o material em blocos com subtítulo. Nenhum conceito é acrescentado nem retirado. ' +
       'A responsabilidade pedagógica continua sendo sua, e nada é exportado sem a sua aprovação.',
-  },
-  {
-    pergunta: 'Por que o texto adaptado ficou maior que o original?',
-    resposta:
-      'Explicar um termo entre parênteses e dividir um período longo em três frases curtas ' +
-      'aumenta a quantidade de palavras. É o custo conhecido da adaptação. O quadro de métricas ' +
-      'mostra esse número sempre, inclusive quando ele é desfavorável.',
   },
   {
     pergunta: 'Que arquivos posso enviar?',
@@ -30,10 +32,11 @@ const PERGUNTAS = [
       'explica o motivo — adaptar um material lido pela metade sairia errado sem avisar você.',
   },
   {
-    pergunta: 'Os estudantes precisam de conta para responder a atividade?',
+    pergunta: 'Por que o texto adaptado ficou maior que o original?',
     resposta:
-      'Não. Eles entram pelo link, sem cadastro e sem senha. O sistema não guarda nome, e-mail, ' +
-      'nota nem qualquer dado que identifique a criança. Você pode revogar o link quando quiser.',
+      'Explicar um termo entre parênteses e dividir um período longo em três frases curtas ' +
+      'aumenta a quantidade de palavras. É o custo conhecido da adaptação. O quadro de métricas ' +
+      'mostra esse número sempre, inclusive quando ele é desfavorável.',
   },
   {
     pergunta: 'Posso corrigir o texto que o sistema adaptou?',
@@ -42,11 +45,10 @@ const PERGUNTAS = [
       'Enquanto você não salvar, dá para descartar tudo e voltar ao texto como estava.',
   },
   {
-    pergunta: 'Para quem este material adaptado foi pensado?',
+    pergunta: 'Os estudantes precisam de conta para responder a atividade?',
     resposta:
-      'Para estudantes com Transtorno do Espectro Autista do 5º ano do ensino fundamental. É o ' +
-      'único perfil e a única etapa desta versão. As regras foram derivadas de diretrizes de ' +
-      'acessibilidade cognitiva e revisadas com professores e especialistas.',
+      'Não. Eles entram pelo link, sem cadastro e sem senha. O sistema não guarda nome, e-mail, ' +
+      'nota nem qualquer dado que identifique a criança. Você pode revogar o link quando quiser.',
   },
 ];
 
@@ -73,27 +75,19 @@ export function Ajuda() {
       <div className="pilha-g">
         <Cartao>
           <h2>Perguntas frequentes</h2>
-          <dl className="perguntas">
+          {/* <details> abre e fecha com Enter e Espaço, e o leitor de tela
+              anuncia se a pergunta está expandida, sem script. */}
+          <div className="perguntas">
             {PERGUNTAS.map((item) => (
-              <div key={item.pergunta}>
-                <dt style={{ fontWeight: 600, fontSize: '1.0625rem' }}>{item.pergunta}</dt>
-                <dd style={{ margin: 'var(--e1) 0 0', maxWidth: 'var(--medida-leitura)' }}>
-                  {item.resposta}
-                </dd>
-              </div>
+              <details key={item.pergunta} className="faq">
+                <summary>
+                  <span>{item.pergunta}</span>
+                  <ChevronDown aria-hidden="true" className="faq__seta" />
+                </summary>
+                <p>{item.resposta}</p>
+              </details>
             ))}
-          </dl>
-        </Cartao>
-
-        <Cartao className="cartao--acao">
-          <h2>Regras de adaptação</h2>
-          <p style={{ marginBottom: 'var(--e4)' }}>
-            O que cada regra do perfil TEA faz no texto, por que existe e em que se baseia.
-          </p>
-          <Botao como="link" para="/regras" variante="secundario">
-            <ListChecks aria-hidden="true" />
-            Ver as regras de adaptação
-          </Botao>
+          </div>
         </Cartao>
 
         <Cartao className="cartao--acao">

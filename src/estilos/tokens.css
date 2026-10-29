@@ -73,10 +73,13 @@
 
   /* --- Largura ------------------------------------------------------------
           --largura-conteudo é a largura da página e acompanha o monitor até 120rem.
-          --medida-leitura é o comprimento da linha do texto corrido: 68ch, abaixo
-          do teto de 80 caracteres (RNF02, WCAG SC 1.4.8). */
+          --medida-leitura é o comprimento da linha do texto corrido: 80ch, o
+          teto da WCAG SC 1.4.8 (RNF02). Era 68ch até 29/10/2026; quebrava
+          as descrições no meio dos cartões largos. */
   --largura-conteudo: 120rem;
-  --medida-leitura: 68ch;
+  --medida-leitura: 80ch;
+  /* Altura da barra superior; o topo do menu lateral acompanha. */
+  --altura-barra: 4.5rem;
 
   /* Margem lateral do container, proporcional à tela, com mínimo e máximo. */
   --respiro-lateral: clamp(1rem, 3.5vw, 4rem);

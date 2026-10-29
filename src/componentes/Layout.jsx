@@ -17,7 +17,7 @@ import {
   Gamepad2,
   ListChecks,
   LogOut,
-  Settings,
+  PanelLeftClose,
 } from 'lucide-react';
 import { PainelPreferencias } from './PainelPreferencias.jsx';
 import { JanelaEnviar } from './JanelaEnviar.jsx';
@@ -25,8 +25,9 @@ import { ALTURA, LARGURA, MAIS, PALAVRA, SIMBOLO } from './marcaVetorial.js';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
-/* Esqueleto das telas: link de salto, barra superior, menu lateral (só nas
-   telas do professor), conteúdo e rodapé.
+/* Esqueleto das telas: link de salto, menu lateral com o logo (só nas telas
+   do professor), barra superior e conteúdo. O rodapé saiu em 29/10/2026; a
+   Declaração de acessibilidade abre pelo painel Acessibilidade.
 
    A cada troca de rota o <main> recebe o foco e o título da página muda,
    para que o leitor de tela perceba a nova tela. Atalhos: accesskey 1
@@ -53,8 +54,18 @@ function LinksDeSalto() {
 
 /** Logotipo em SVG embutido, com os traçados de Logo/gerar-logo.py. A palavra
  *  usa a cor do texto e o "+" a cor da marca, e os dois acompanham o alto
- *  contraste. Decorativo: quem o usa dá o nome acessível. */
-export function LogoEntende({ className }) {
+ *  contraste. Decorativo: quem o usa dá o nome acessível. Com `simbolo`, só
+ *  o livro, que ocupa o quadrado 64 × 64 do início do desenho. */
+export function LogoEntende({ className, simbolo }) {
+  if (simbolo) {
+    return (
+      <svg viewBox={`0 0 ${ALTURA} ${ALTURA}`} className={className} aria-hidden="true" focusable="false">
+        {SIMBOLO.map((elemento) => (
+          <path key={elemento.d} {...elemento} />
+        ))}
+      </svg>
+    );
+  }
   return (
     <svg
       viewBox={`0 0 ${LARGURA} ${ALTURA}`}
@@ -149,14 +160,6 @@ function MenuProfessor() {
         <div className="menu-professor__painel" id="menu-professor">
           <p className="menu-professor__nome">{professor.nome}</p>
           {professor.email && <p className="menu-professor__email">{professor.email}</p>}
-          <Link
-            to="/configuracoes"
-            className="botao botao--discreto botao--largo"
-            onClick={() => setAberto(false)}
-          >
-            <Settings aria-hidden="true" />
-            Configurações
-          </Link>
           <button
             type="button"
             className="botao botao--secundario botao--largo"
@@ -180,75 +183,107 @@ const ITENS_MENU = [
   ['/painel', FolderOpen, 'Meus materiais'],
   ['/atividades', Gamepad2, 'Atividades'],
   ['/regras', ListChecks, 'Regras de adaptação'],
-  ['/configuracoes', Settings, 'Configurações'],
   ['/ajuda', CircleHelp, 'Ajuda'],
 ];
 
-/** Menu lateral. Adaptação e Atividade dependem do material, então só
- *  aparecem quando um material está aberto. */
-function MenuLateral() {
+/** Menu lateral, com o logo no topo. Adaptação e Atividade dependem do
+ *  material, então só aparecem quando um material está aberto.
+ *
+ *  Fechado, o topo mostra só o símbolo do livro, que é também o botão de
+ *  abrir; em tela larga os itens ficam só com o ícone (o nome aparece ao
+ *  passar o mouse e continua para o leitor de tela), e em tela estreita
+ *  somem. */
+function MenuLateral({ fechado, aoAlternar }) {
   const rotaMaterial = useMatch('/materiais/:id/*');
   const { material } = usarApp();
   const id = rotaMaterial?.params.id;
   const aberto = id ? material(id) : null;
 
+  // O botão de abrir e o de recolher são elementos diferentes: depois de
+  // alternar, o foco passa para o que apareceu, e não se perde.
+  const botao = useRef(null);
+  const alternou = useRef(false);
+  useEffect(() => {
+    if (!alternou.current) return;
+    alternou.current = false;
+    botao.current?.focus();
+  }, [fechado]);
+  function alternar() {
+    alternou.current = true;
+    aoAlternar();
+  }
+
   return (
     <nav className="menu-lateral" id="menu" aria-label="Navegação principal" accessKey="2">
-      <ul>
-        {ITENS_MENU.map(([caminho, Icone, rotulo]) => (
-          <li key={caminho}>
-            <NavLink to={caminho}>
-              <Icone aria-hidden="true" />
-              {rotulo}
-            </NavLink>
-          </li>
-        ))}
-      </ul>
-
-      {aberto && (
-        <>
-          <p className="menu-lateral__grupo" id="menu-material">
-            Material aberto
-            <span className="menu-lateral__material">{aberto.nome}</span>
-          </p>
-          <ul aria-labelledby="menu-material">
-            <li>
-              <NavLink to={`/materiais/${id}/adaptacao`}>
-                <FileText aria-hidden="true" />
-                Adaptação
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to={`/materiais/${id}/atividade`}>
-                <Gamepad2 aria-hidden="true" />
-                Atividade
-              </NavLink>
-            </li>
-          </ul>
-        </>
-      )}
-    </nav>
-  );
-}
-
-function Rodape() {
-  return (
-    <footer className="rodape" id="rodape" tabIndex={-1}>
-      <div className="rodape-interno">
-        <p>
-          Entende+, protótipo acadêmico. Trabalho de Conclusão de Curso em Sistemas de Informação,
-          CEUNI FAMETRO.
-        </p>
-        <ul>
-          <li>
-            <Link to="/acessibilidade">Declaração de acessibilidade</Link>
-          </li>
-          <li>
-            <Link to="/ajuda">Ajuda</Link>
-          </li>
-        </ul>
+      <div className="menu-lateral__topo">
+        {fechado ? (
+          <button
+            type="button"
+            ref={botao}
+            className="menu-lateral__alternar menu-lateral__alternar--simbolo"
+            aria-expanded="false"
+            aria-controls="menu-itens"
+            title="Abrir o menu"
+            onClick={alternar}
+          >
+            <LogoEntende simbolo className="menu-lateral__simbolo" />
+            <span className="apenas-leitor">Menu</span>
+          </button>
+        ) : (
+          <>
+            <Marca para="/painel" />
+            <button
+              type="button"
+              ref={botao}
+              className="menu-lateral__alternar"
+              aria-expanded="true"
+              aria-controls="menu-itens"
+              title="Recolher o menu"
+              onClick={alternar}
+            >
+              <PanelLeftClose aria-hidden="true" />
+              <span className="apenas-leitor">Menu</span>
+            </button>
+          </>
+        )}
       </div>
-    </footer>
+
+      <div className="menu-lateral__itens" id="menu-itens">
+        <ul>
+          {ITENS_MENU.map(([caminho, Icone, rotulo]) => (
+            <li key={caminho}>
+              <NavLink to={caminho} title={fechado ? rotulo : undefined}>
+                <Icone aria-hidden="true" />
+                <span className="menu-lateral__rotulo">{rotulo}</span>
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+
+        {aberto && (
+          <>
+            <p className="menu-lateral__grupo" id="menu-material">
+              Material aberto
+              <span className="menu-lateral__material">{aberto.nome}</span>
+            </p>
+            <ul aria-labelledby="menu-material">
+              <li>
+                <NavLink to={`/materiais/${id}/adaptacao`} title={fechado ? 'Adaptação' : undefined}>
+                  <FileText aria-hidden="true" />
+                  <span className="menu-lateral__rotulo">Adaptação</span>
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to={`/materiais/${id}/atividade`} title={fechado ? 'Atividade' : undefined}>
+                  <Gamepad2 aria-hidden="true" />
+                  <span className="menu-lateral__rotulo">Atividade</span>
+                </NavLink>
+              </li>
+            </ul>
+          </>
+        )}
+      </div>
+    </nav>
   );
 }
 
@@ -286,19 +321,52 @@ function usarJanelaEnvio() {
   return { aberta, fechar };
 }
 
+const CHAVE_MENU = 'entende-menu-fechado';
+
+/** Menu lateral aberto ou fechado. A escolha fica neste navegador; se o
+ *  armazenamento estiver bloqueado, o menu só começa aberto. */
+function usarMenuFechado() {
+  const [fechado, setFechado] = useState(() => {
+    try {
+      return localStorage.getItem(CHAVE_MENU) === 'sim';
+    } catch {
+      return false;
+    }
+  });
+  function alternar() {
+    setFechado((atual) => {
+      try {
+        localStorage.setItem(CHAVE_MENU, atual ? 'nao' : 'sim');
+      } catch {
+        /* sem armazenamento: vale só nesta visita */
+      }
+      return !atual;
+    });
+  }
+  return [fechado, alternar];
+}
+
 export function Layout() {
   const { professor } = usarApp();
   const principal = useRef(null);
   const envio = usarJanelaEnvio();
+  const [menuFechado, alternarMenu] = usarMenuFechado();
   usarFocoNaTroca(principal, false);
 
+  const classeApp = professor
+    ? `app app--com-menu${menuFechado ? ' app--menu-fechado' : ''}`
+    : 'app';
+
   return (
-    <div className="app">
+    <div className={classeApp}>
       <LinksDeSalto />
+
+      {professor && <MenuLateral fechado={menuFechado} aoAlternar={alternarMenu} />}
 
       <header className="barra">
         <div className="barra-interna">
-          <Marca para="/painel" />
+          {/* Com sessão, o logo fica no topo do menu lateral. */}
+          {!professor && <Marca />}
           <div className="barra__acoes">
             {/* Com sessão, a Ajuda está no menu lateral. */}
             {!professor && <LinkAjuda />}
@@ -309,14 +377,11 @@ export function Layout() {
       </header>
 
       {/* Ajuda e Acessibilidade também abrem sem sessão: aí não há menu lateral. */}
-      <div className={professor ? 'corpo corpo--com-menu' : 'corpo'}>
-        {professor && <MenuLateral />}
+      <div className="corpo">
         <main className="conteudo" id="conteudo" ref={principal} tabIndex={-1}>
           <Outlet />
         </main>
       </div>
-
-      <Rodape />
 
       {professor && envio.aberta && <JanelaEnviar aoFechar={envio.fechar} />}
     </div>
@@ -344,8 +409,6 @@ export function LayoutSimples() {
       <main className="conteudo" id="conteudo" ref={principal} tabIndex={-1}>
         <Outlet />
       </main>
-      {/* A entrada ocupa a tela inteira; o link da declaração fica sob o cartão. */}
-      {!naEntrada && <Rodape />}
     </div>
   );
 }

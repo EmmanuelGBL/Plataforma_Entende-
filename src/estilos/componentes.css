@@ -474,6 +474,14 @@ table.dados--estreita { max-width: 46rem; }
 }
 .preferencias__painel fieldset { border: none; padding: 0; margin: 0 0 var(--e4); }
 .preferencias__painel legend { padding: 0; margin-bottom: var(--e2); font-size: 0.9375rem; }
+/* Link da declaração no fim do painel (o rodapé saiu em 29/10/2026). */
+.preferencias__declaracao {
+  display: flex; align-items: center; gap: var(--e2);
+  margin-top: var(--e4); padding-top: var(--e3);
+  border-top: 1px solid var(--cor-borda);
+  font-weight: 600;
+}
+.preferencias__declaracao svg { width: 1.25rem; height: 1.25rem; flex: none; }
 .grupo-botoes { display: flex; gap: var(--e2); flex-wrap: wrap; }
 .grupo-botoes button {
   min-height: var(--alvo-minimo); flex: 1 1 5rem;
@@ -495,15 +503,24 @@ table.dados--estreita { max-width: 46rem; }
 .vazio p { margin-inline: auto; }
 
 /* --- Perguntas frequentes ------------------------------------------------
-      Duas perguntas por linha em tela larga, uma quando não couber. */
-.perguntas {
-  display: grid;
-  /* `min(...)` deixa a coluna encolher abaixo de 26rem em tela de 360px. */
-  grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr));
-  gap: var(--e5) var(--e6);
-  align-items: start;
-  margin-top: var(--e4);
+      Uma faixa por pergunta, na largura do cartão; a resposta abre embaixo. */
+.perguntas { display: grid; gap: var(--e2); margin-top: var(--e4); }
+/* Mesmo desenho das questões em Atividade (.pergunta), com <details>. */
+.faq { border: 1px solid var(--cor-borda); border-radius: var(--raio-g); background: var(--cor-superficie); }
+.faq > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--e3);
+  padding: var(--e3) var(--e4);
+  min-height: 3rem;
+  font-weight: 600; font-size: 1.0625rem;
+  cursor: pointer; list-style: none;
+  border-radius: var(--raio-g);
 }
+.faq > summary::-webkit-details-marker { display: none; }
+.faq > summary:hover { background: var(--cor-superficie-alt); }
+.faq[open] > summary { color: var(--cor-primaria-escura); }
+.faq__seta { flex: none; width: 1.25rem; height: 1.25rem; transition: transform var(--duracao) ease; }
+.faq[open] .faq__seta { transform: rotate(180deg); }
+.faq > p { padding: 0 var(--e4) var(--e4); }
 
 /* --- Lista de definições em blocos -------------------------------------- */
 .blocos { display: grid; gap: var(--e3); grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
@@ -647,10 +664,20 @@ table.dados--estreita { max-width: 46rem; }
 
 /* --- Meus materiais: lista ----------------------------------------------- */
 .lista-materiais { list-style: none; padding: 0; display: grid; gap: var(--e3); margin-bottom: var(--e5); }
+/* Em tela larga, as linhas dividem as colunas da lista (subgrid): a etiqueta
+   de situação e os botões ficam na mesma coluna de um material para o outro,
+   mesmo com "Revisar" mais estreito que "Ver material". */
+@media (min-width: 75.0625rem) {
+  .lista-materiais { grid-template-columns: auto minmax(0, 1fr) max-content max-content; column-gap: var(--e5); }
+  .lista-materiais > li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+  .lista-materiais .item-material { grid-column: 1 / -1; grid-template-columns: subgrid; }
+  /* Atividades: cada grupo é uma lista à parte, então o subgrid não alinha um
+     grupo com o outro. Larguras fixas, medidas na maior etiqueta ("Material
+     em revisão") e nos maiores botões ("Copiar link" + "Abrir"). */
+  .lista-materiais--grupos { grid-template-columns: auto minmax(0, 1fr) 11rem 16.5rem; }
+}
 .item-material {
   display: grid;
-  /* A coluna da situação tem largura fixa: as etiquetas e os botões ficam
-     alinhados de um material para o outro. */
   grid-template-columns: auto minmax(0, 1fr) 13.5rem auto;
   gap: var(--e3) var(--e5);
   align-items: center;
@@ -716,20 +743,6 @@ table.dados--estreita { max-width: 46rem; }
 .cartao-regra dt { font-weight: 700; color: var(--cor-texto); margin-top: var(--e2); }
 .cartao-regra dd { margin: 0; color: var(--cor-texto-apoio); }
 
-/* --- Configurações ------------------------------------------------------- */
-.grade-configuracoes {
-  display: grid; gap: var(--e4); align-items: start;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-}
-.enviar-fixos.enviar-fixos--coluna { grid-template-columns: minmax(0, 1fr); margin-bottom: var(--e4); }
-.enviar-fixos dd { overflow-wrap: anywhere; }
-/* Exibição ocupa a coluna da direita inteira; conta e adaptação, a da esquerda. */
-@media (min-width: 62rem) {
-  .grade-configuracoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .configuracoes-exibicao { grid-column: 2; grid-row: 1 / span 2; }
-}
-.configuracoes-exibicao fieldset { border: none; padding: 0; margin: 0 0 var(--e4); }
-.configuracoes-exibicao legend { padding: 0; margin-bottom: var(--e2); font-weight: 600; font-size: 0.9375rem; }
 
 /* --- Menu ⋮ --------------------------------------------------------------- */
 .menu-acoes { position: relative; }
@@ -766,21 +779,16 @@ table.dados--estreita { max-width: 46rem; }
 :root[data-contraste='alto'] .etiqueta { border-color: currentColor !important; }
 
 /* --- Enviar material ----------------------------------------------------- */
-.janela-enviar { max-width: 64rem; position: relative; }
+.janela-enviar { max-width: 46rem; position: relative; }
 .janela-enviar > h2 { font-size: 1.5rem; margin-bottom: var(--e5); padding-right: var(--e6); }
-.enviar-grade {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 19rem);
-  gap: var(--e5);
-  align-items: start;
-}
-.enviar-grade:has(.enviar-processando) { grid-template-columns: minmax(0, 1fr); }
-/* Abaixo de 62rem a coluna de apoio sai: na janela ela empurraria o
-   formulário para baixo da dobra. */
-@media (max-width: 62rem) {
-  .enviar-grade { grid-template-columns: minmax(0, 1fr); }
-  .enviar-lateral { display: none; }
-}
+/* "Ajuda para o envio": fechada por padrão, acima dos botões. */
+.enviar-ajuda { margin-top: var(--e5); }
+.enviar-ajuda summary > span { display: inline-flex; align-items: center; gap: var(--e2); font-size: 1rem; }
+.enviar-ajuda summary > span svg { width: 1.25rem; height: 1.25rem; color: var(--cor-primaria); }
+.enviar-ajuda__corpo { display: grid; gap: var(--e4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); padding: 0 var(--e4) var(--e4); }
+.enviar-ajuda__corpo h4 { font-size: 0.9375rem; margin-bottom: var(--e2); }
+.enviar-ajuda__corpo :is(ol, ul) { padding-left: 1.25rem; display: grid; gap: var(--e2); font-size: 0.9375rem; color: var(--cor-texto-apoio); }
+.enviar-ajuda__corpo strong { color: var(--cor-texto); }
 .enviar-processando p { max-width: var(--medida-leitura); }
 @media (max-width: 40rem) {
   .janela-enviar { padding: var(--e4); }
@@ -802,8 +810,7 @@ table.dados--estreita { max-width: 46rem; }
 .enviar-secao + .enviar-secao { margin-top: var(--e5); padding-top: var(--e5); border-top: 1px solid var(--cor-borda); }
 .enviar-secao h3 { font-size: 1.25rem; }
 .enviar-secao__apoio { color: var(--cor-texto-apoio); margin: var(--e1) 0 var(--e4); }
-.enviar-secao__numero,
-.enviar-como__numero {
+.enviar-secao__numero {
   width: 2.5rem; height: 2.5rem; border-radius: 50%;
   display: grid; place-items: center;
   font-weight: 700; font-size: 1.125rem;
@@ -831,10 +838,32 @@ table.dados--estreita { max-width: 46rem; }
 /* A entrada de arquivo fica escondida; o foco aparece no botão (o rótulo). */
 .area-envio__entrada:focus-visible + label { outline: var(--contorno-foco); outline-offset: var(--deslocamento-foco); }
 
-.enviar-fixos { display: grid; gap: var(--e3); grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); margin: var(--e2) 0 var(--e3); }
-.enviar-fixos > div { background: var(--cor-superficie-alt); border-radius: var(--raio); padding: var(--e3); }
-.enviar-fixos dt { font-size: 0.875rem; font-weight: 600; color: var(--cor-texto-apoio); }
-.enviar-fixos dd { margin: var(--e1) 0 0; font-weight: 600; }
+/* Resumo fixo no topo do envio: perfil, etapa e regras. */
+.enviar-resumo { display: flex; flex-wrap: wrap; gap: var(--e2); margin: 0 0 var(--e5); }
+.enviar-resumo > div {
+  display: flex; gap: var(--e2); align-items: baseline;
+  background: var(--cor-superficie-alt); border-radius: 999px;
+  padding: var(--e1) var(--e3);
+}
+.enviar-resumo dt { font-size: 0.875rem; color: var(--cor-texto-apoio); }
+.enviar-resumo dd { margin: 0; font-weight: 600; font-size: 0.9375rem; }
+:root[data-contraste='alto'] .enviar-resumo > div { background: #000; border: 1px solid #fff; }
+
+/* Escolha única com um clique: o rádio fica escondido e o rótulo vira botão. */
+.opcoes-chip { display: flex; flex-wrap: wrap; gap: var(--e2); margin-top: var(--e3); }
+.opcoes-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.opcoes-chip span {
+  display: inline-flex; align-items: center;
+  min-height: var(--alvo-minimo); padding: var(--e2) var(--e4);
+  border: 2px solid var(--cor-borda-forte); border-radius: 999px;
+  background: var(--cor-superficie); color: var(--cor-texto);
+  font-weight: 600; cursor: pointer;
+}
+.opcoes-chip span:hover { background: var(--cor-superficie-alt); }
+.opcoes-chip input:checked + span { background: var(--cor-primaria); color: #ffffff; border-color: var(--cor-primaria-escura); }
+.opcoes-chip input:checked + span::before { content: '✓'; margin-right: var(--e1); }
+.opcoes-chip input:focus-visible + span { outline: var(--contorno-foco); outline-offset: var(--deslocamento-foco); }
+:root[data-contraste='alto'] .opcoes-chip input:checked + span { background: #000; color: #ffe600; border-color: #ffe600; }
 
 .enviar-formulario__acoes {
   display: flex; justify-content: flex-end; gap: var(--e3); flex-wrap: wrap;
@@ -842,21 +871,6 @@ table.dados--estreita { max-width: 46rem; }
 }
 .enviar-formulario__acoes .botao { min-width: 10rem; min-height: 3rem; }
 
-.enviar-lateral { display: grid; gap: var(--e4); }
-.enviar-lateral__bloco { border-radius: var(--raio-g); padding: var(--e4); }
-.enviar-lateral__bloco h3 { font-size: 1.125rem; display: flex; align-items: center; gap: var(--e2); margin-bottom: var(--e3); }
-.enviar-lateral__bloco h3 svg { width: 1.5rem; height: 1.5rem; color: var(--cor-destaque-escuro); }
-.enviar-lateral__bloco--como { background: #eaf2fd; }
-.enviar-lateral__bloco--dicas { background: #fdf6e7; }
-.enviar-lateral__bloco--dicas ul { padding-left: 1.25rem; display: grid; gap: var(--e2); }
-.enviar-lateral__bloco--dicas li::marker { color: var(--cor-destaque); }
-.enviar-como { list-style: none; padding: 0; display: grid; gap: var(--e4); }
-.enviar-como li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--e3); }
-.enviar-como__numero { background: #cfe0fa; color: var(--cor-primaria-escura); }
-.enviar-como strong { display: block; }
-.enviar-como li span span { color: var(--cor-texto-apoio); font-size: 0.9375rem; }
-:root[data-contraste='alto'] .enviar-lateral__bloco { background: #000; border: 2px solid #fff; }
-.enviar-secao h3 + .campo, .enviar-secao h3 + .enviar-fixos { margin-top: var(--e3); }
 
 /* --- Link de volta ------------------------------------------------------- */
 .voltar {
@@ -886,22 +900,12 @@ table.dados--estreita { max-width: 46rem; }
 .material-resumo__meta { font-size: 0.9375rem; color: var(--cor-texto-apoio); }
 
 
-/* --- Adaptação: grade principal ----------------------------------------- */
-.adaptacao-grade {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 21rem);
-  gap: var(--e4);
-  align-items: start;
-  margin-bottom: var(--e5);
-}
-/* Abaixo de 96rem (1536 px), três colunas espremem os textos: a comparação
-   ocupa a largura toda, e regras e métricas descem para baixo dela. */
-@media (max-width: 96rem) {
-  .adaptacao-grade { grid-template-columns: minmax(0, 1fr); }
-  .adaptacao-lateral { grid-template-columns: minmax(0, 1fr) minmax(0, 22rem); align-items: start; }
-}
-@media (max-width: 62rem) { .adaptacao-lateral { grid-template-columns: minmax(0, 1fr); } }
-.adaptacao-lateral { display: grid; gap: var(--e4); }
+/* --- Adaptação ---------------------------------------------------------- */
+/* Botões no cabeçalho do texto adaptado: Regras aplicadas e Editar texto. */
+.painel-texto__acoes { display: flex; flex-wrap: wrap; gap: var(--e2); justify-content: flex-end; }
+/* Janela das regras aplicadas: estreita, com a lista rolando dentro. */
+.janela-regras { max-width: 34rem; position: relative; }
+.janela-regras > h2 { padding-right: var(--e6); margin-bottom: var(--e2); }
 .adaptacao-acoes { display: grid; gap: var(--e2); flex: 0 0 19rem; }
 /* No cabeçalho, o resumo do material é uma linha discreta, sem cartão. */
 .cabecalho-pagina .material-resumo { margin-top: var(--e3); padding: 0; background: none; align-items: center; gap: var(--e2); max-width: none; }
@@ -947,16 +951,6 @@ table.dados--estreita { max-width: 46rem; }
 .regra__seta { width: 1.25rem; height: 1.25rem; color: var(--cor-texto-apoio); }
 :root[data-contraste='alto'] .regra { border: 1px solid #fff; }
 :root[data-contraste='alto'] .regra__icone { background: #000; color: #ffe600; border: 1px solid #ffe600; }
-
-/* --- Resumo das métricas ------------------------------------------------- */
-.resumo-metricas h2 { font-size: 1.125rem; margin-bottom: var(--e3); }
-.resumo-metricas dl { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e2); margin-bottom: var(--e2); }
-.resumo-metricas__item { background: var(--cor-superficie-alt); border-radius: var(--raio); padding: var(--e3); }
-.resumo-metricas__item dt { font-size: 0.8125rem; color: var(--cor-texto-apoio); }
-.resumo-metricas__item dd { margin: var(--e1) 0 0; display: flex; gap: var(--e2); align-items: flex-start; font-weight: 700; font-size: 0.9375rem; line-height: 1.3; }
-.resumo-metricas__item dd svg { width: 1.375rem; height: 1.375rem; flex: none; }
-.resumo-metricas__item--original dd svg { color: var(--cor-erro); }
-.resumo-metricas__item--adaptado dd svg { color: var(--cor-sucesso); }
 
 /* Botão com aparência de link, para ações na mesma página. */
 .link-botao {
@@ -1231,7 +1225,6 @@ table.dados--estreita { max-width: 46rem; }
 :root[data-contraste='alto'] .item-material__arquivo,
 :root[data-contraste='alto'] .material-resumo__icone,
 :root[data-contraste='alto'] .entrada-destaques__icone,
-:root[data-contraste='alto'] .enviar-como__numero,
 :root[data-contraste='alto'] .pergunta__numero,
 :root[data-contraste='alto'] .atividade__letra,
 :root[data-contraste='alto'] .escolha__figura {
@@ -1240,7 +1233,6 @@ table.dados--estreita { max-width: 46rem; }
   border: 2px solid #ffe600 !important;
 }
 :root[data-contraste='alto'] .escolha__opcao--futebol .escolha__figura svg circle { fill: #000000; }
-:root[data-contraste='alto'] .resumo-metricas__item { background: #000000; border: 1px solid #ffffff; }
 
 .enviar-secao fieldset { border: none; padding: 0; margin: 0 0 var(--e3); }
 

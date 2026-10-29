@@ -51,7 +51,7 @@ def test_adaptacao_registra_regras_versao_modelo_e_metricas(cliente):
 
     assert adaptacao["status"] == "GERADA"
     assert adaptacao["modelo"] == ClienteFalso.modelo
-    assert adaptacao["conjunto"]["versao"] == "1.6"
+    assert adaptacao["conjunto"]["versao"] == "1.7"
     assert len(adaptacao["conjunto"]["regras"]) == 10
     # RF06: a regra de cada trecho, e o trecho de origem
     assert adaptacao["ocorrencias"]["TEA-01"] > 0
@@ -168,7 +168,7 @@ def test_ciclo_da_atividade(cliente):
 
     painel = cliente.get("/api/materiais", headers=cabecalho).json()[0]
     assert painel["estado"] == "aprovada"
-    assert painel["versao_regras"] == "TEA v1.6"
+    assert painel["versao_regras"] == "TEA v1.7"
     assert painel["atividade"]["codigo"] == codigo
 
     # RF18 / RN06
@@ -217,13 +217,13 @@ def test_rnf13_alterar_regra_e_reprocessar_sem_reiniciar(cliente):
 
     arquivo = cliente.app.state.configuracao.caminho_regras
     dados = json.loads(arquivo.read_text(encoding="utf-8"))
-    dados["versao"] = "1.7"
+    dados["versao"] = "1.8"
     dados["regras"][0]["instrucao"] = "Frases de no máximo 10 palavras."
     arquivo.write_text(json.dumps(dados, ensure_ascii=False), encoding="utf-8")
 
     segunda = cliente.post(f"/api/materiais/{material_id}/adaptacoes", headers=cabecalho).json()
-    assert primeira["conjunto"]["versao"] == "1.6"
-    assert segunda["conjunto"]["versao"] == "1.7"
+    assert primeira["conjunto"]["versao"] == "1.7"
+    assert segunda["conjunto"]["versao"] == "1.8"
     assert "Frases de no máximo 10 palavras." in cliente.app.state.cliente_llm.chamadas[-1]["sistema"]
     # RF12: as questões que o professor já tinha não são apagadas
     assert cliente.get(f"/api/materiais/{material_id}/questoes", headers=cabecalho).json() == questoes_antes
@@ -246,7 +246,7 @@ def test_rn08_regra_alterada_sem_trocar_versao_e_recusada(cliente):
 
 def test_regras_vigentes_sao_publicas(cliente):
     regras = cliente.get("/api/regras").json()
-    assert regras["versao"] == "1.6"
+    assert regras["versao"] == "1.7"
     assert regras["regras"][7]["aplicacao"] == "apresentacao"
 
 
