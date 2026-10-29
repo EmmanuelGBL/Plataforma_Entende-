@@ -30,7 +30,7 @@ export function Atividade() {
   const { material, modoServidor, salvarQuestoes, gerarQuestoes, publicar: publicarNoSistema, revogar: revogarNoSistema } =
     usarApp();
   const { dados: adaptacao, carregando, erro: erroCarga } = usarAdaptacao(id);
-  const { anunciar } = usarAnuncios();
+  const { anunciar, avisar } = usarAnuncios();
 
   const dados = material(id);
   const questoes = adaptacao?.questoes ?? [];
@@ -72,16 +72,17 @@ export function Atividade() {
     ? `${window.location.origin}${window.location.pathname}#/atividade/${atividade.codigo}`
     : null;
 
-  /** Executa uma operação e, se falhar, mostra o erro do servidor na tela. */
-  async function tentar(operacao, aviso) {
+  /** Executa uma operação e avisa o resultado: verde se deu certo (ou
+   *  vermelho, quando a ação desfaz algo), vermelho com o erro se falhou. */
+  async function tentar(operacao, aviso, tipo = 'boa') {
     setFalha(null);
     try {
       await operacao();
-      if (aviso) anunciar(aviso);
+      if (aviso) avisar(tipo, ...aviso);
       return true;
     } catch (problema) {
       setFalha(problema);
-      anunciar(`Erro: ${problema.titulo}`);
+      avisar('erro', problema.titulo, problema.saida);
       return false;
     }
   }
@@ -89,7 +90,7 @@ export function Atividade() {
   async function salvarQuestao(questaoEditada) {
     const salvou = await tentar(
       () => salvarQuestoes(id, questoes.map((q) => (q.id === questaoEditada.id ? questaoEditada : q))),
-      'Questão salva.',
+      ['Questão salva'],
     );
     if (salvou) setEmEdicao(null);
   }
@@ -99,13 +100,14 @@ export function Atividade() {
     setAExcluir(null);
     await tentar(
       () => salvarQuestoes(id, questoes.filter((q) => q.id !== alvo.id)),
-      'Questão excluída da atividade.',
+      ['Questão excluída', 'Ela não aparece mais na atividade.'],
+      'erro',
     );
   }
 
   async function gerar() {
     setGerando(true);
-    await tentar(() => gerarQuestoes(id), 'Questões geradas a partir do material.');
+    await tentar(() => gerarQuestoes(id), ['Questões geradas', 'Confira cada uma antes de publicar.']);
     setGerando(false);
   }
 
@@ -115,14 +117,18 @@ export function Atividade() {
     const publicou = await tentar(async () => {
       codigo = (await publicarNoSistema(id)).codigo;
     });
-    if (publicou) anunciar(`Atividade publicada. O código de acesso é ${codigo.split('').join(' ')}.`);
+    if (publicou) {
+      avisar('boa', 'Atividade publicada', 'Compartilhe o link ou o QR code com a turma.');
+      anunciar(`Atividade publicada. O código de acesso é ${codigo.split('').join(' ')}.`);
+    }
   }
 
   async function revogar() {
     setConfirmandoRevogacao(false);
     await tentar(
       () => revogarNoSistema(id),
-      'Link revogado. A atividade não pode mais ser acessada pelos estudantes.',
+      ['Link revogado', 'Os estudantes não conseguem mais abrir a atividade.'],
+      'erro',
     );
   }
 
@@ -130,10 +136,10 @@ export function Atividade() {
     try {
       await navigator.clipboard.writeText(endereco);
       setCopiado(true);
-      anunciar('Link copiado.');
+      avisar('boa', 'Link copiado');
       window.setTimeout(() => setCopiado(false), 4000);
     } catch {
-      anunciar('Não foi possível copiar automaticamente. Selecione o link e copie manualmente.');
+      avisar('erro', 'Não foi possível copiar', 'Selecione o link e copie manualmente.');
     }
   }
 

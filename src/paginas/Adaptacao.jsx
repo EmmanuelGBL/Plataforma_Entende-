@@ -83,7 +83,7 @@ export function Adaptacao() {
   const { material, modoServidor, adaptarMaterial, salvarTexto, aprovar } = usarApp();
   const { dados: adaptacao, carregando, erro } = usarAdaptacao(id);
   const catalogo = usarCatalogo();
-  const { anunciar } = usarAnuncios();
+  const { anunciar, avisar } = usarAnuncios();
 
   const dados = material(id);
 
@@ -92,7 +92,6 @@ export function Adaptacao() {
   const [editando, setEditando] = useState(false);
   const [rascunho, setRascunho] = useState('');
   const [confirmando, setConfirmando] = useState(false);
-  const [exportado, setExportado] = useState(null);
   const [processando, setProcessando] = useState(false);
   const [progresso, setProgresso] = useState(0);
   const [etapaAtual, setEtapaAtual] = useState('');
@@ -120,7 +119,7 @@ export function Adaptacao() {
 
   function mostrarFalha(problema) {
     setFalha(problema);
-    anunciar(`Erro: ${problema.titulo}`);
+    avisar('erro', problema.titulo, problema.saida);
   }
 
   function abrirEdicao() {
@@ -137,11 +136,10 @@ export function Adaptacao() {
         modoServidor ? { texto: rascunho } : { blocos: desserializar(rascunho, adaptacao.blocos) },
       );
       setEditando(false);
-      setExportado(null);
-      anunciar(
-        modoServidor
-          ? 'Alterações salvas. As métricas foram recalculadas, e o material precisa ser aprovado de novo.'
-          : 'Alterações salvas no texto adaptado.',
+      avisar(
+        'boa',
+        'Alterações salvas',
+        modoServidor ? 'As métricas foram recalculadas. Aprove o material de novo.' : undefined,
       );
     } catch (problema) {
       setEditando(false);
@@ -153,22 +151,23 @@ export function Adaptacao() {
     const tinhaMudanca = houveMudanca;
     setRascunho(textoSalvo);
     setEditando(false);
-    anunciar(
-      tinhaMudanca
-        ? 'Alterações descartadas. O texto voltou como estava.'
-        : 'Edição fechada. Nada foi alterado.',
-    );
+    if (tinhaMudanca) avisar('erro', 'Alterações descartadas', 'O texto voltou como estava.');
+    else anunciar('Edição fechada. Nada foi alterado.');
   }
 
   async function confirmarExportacao() {
     setConfirmando(false);
     try {
-      const resultado = await aprovar(id);
-      setExportado(resultado);
-      anunciar('Material aprovado. O botão Abrir o material em PDF agora abre o arquivo.');
+      await aprovar(id);
+      avisar('boa', 'Material aprovado', 'O PDF já pode ser aberto, e a atividade, publicada.');
     } catch (problema) {
       mostrarFalha(problema);
     }
+  }
+
+  function cancelarAprovacao() {
+    setConfirmando(false);
+    avisar('erro', 'Aprovação cancelada', 'O material continua aguardando a sua revisão.');
   }
 
   /** Adaptar pela primeira vez, ou reprocessar com a versão atual (RF12). */
@@ -186,7 +185,7 @@ export function Adaptacao() {
         },
         { cancelado: false },
       );
-      anunciar('Material processado com a versão atual do conjunto de regras.');
+      avisar('boa', 'Material processado', 'A adaptação usa agora a versão atual das regras.');
     } catch (problema) {
       mostrarFalha(problema);
     } finally {
@@ -267,16 +266,6 @@ export function Adaptacao() {
               <strong>O que fazer:</strong> {falha.saida}
             </p>
           )}
-        </Aviso>
-      )}
-
-      {exportado && (
-        <Aviso tipo="boa" titulo="Material aprovado" papel="status">
-          <p>
-            Aprovado em {exportado.aprovadoEm}. O material sai com fonte sem serifa, alinhamento à
-            esquerda, entrelinha 1,5 e linha de no máximo 80 caracteres. O botão “Abrir o material
-            em PDF”, ao lado do título, agora abre o arquivo.
-          </p>
         </Aviso>
       )}
 
@@ -402,7 +391,7 @@ export function Adaptacao() {
         aberto={confirmando}
         titulo="Aprovar este material?"
         rotuloConfirmar="Aprovar e exportar"
-        aoCancelar={() => setConfirmando(false)}
+        aoCancelar={cancelarAprovacao}
         aoConfirmar={confirmarExportacao}
       >
         <p>

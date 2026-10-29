@@ -1149,3 +1149,49 @@ table.dados--estreita { max-width: 46rem; }
   .progresso-perguntas { flex: 1 1 0; min-width: 0; padding: var(--e2) var(--e3); gap: var(--e2); }
   .progresso-perguntas__texto { font-size: 0.9375rem; }
 }
+
+/* --- Avisos flutuantes (toast) -------------------------------------------
+   Verde com ✓ quando deu certo; vermelho com ✕ quando deu errado ou foi
+   cancelado. A faixa colorida à esquerda e o ícone dizem o tipo junto com
+   a cor. Acima do diálogo (z-index 50), para o aviso de "cancelado" aparecer
+   enquanto ele fecha. */
+.toasts {
+  position: fixed; z-index: 60;
+  top: calc(var(--e5) + 3.5rem); right: var(--e4);
+  display: flex; flex-direction: column; gap: var(--e2);
+  width: min(24rem, calc(100vw - 2rem));
+}
+.toast {
+  display: flex; gap: var(--e3); align-items: flex-start;
+  padding: var(--e3) var(--e3) var(--e3) var(--e4);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-left: 6px solid;
+  border-radius: var(--raio);
+  box-shadow: var(--sombra-alta);
+  animation: toast-entra 220ms ease-out;
+}
+.toast--boa { border-left-color: var(--cor-sucesso); background: var(--cor-sucesso-fundo); }
+.toast--erro { border-left-color: var(--cor-erro); background: var(--cor-erro-fundo); }
+.toast__icone { flex: none; width: 1.5rem; height: 1.5rem; margin-top: 0.05rem; }
+.toast--boa .toast__icone { color: var(--cor-sucesso); }
+.toast--erro .toast__icone { color: var(--cor-erro); }
+.toast__texto { flex: 1; min-width: 0; }
+.toast__texto p { font-size: 0.9375rem; color: var(--cor-texto); }
+.toast__titulo { font-weight: 700; }
+.toast__fechar {
+  flex: none; display: grid; place-items: center;
+  width: 2rem; height: 2rem; margin: -0.25rem -0.25rem 0 0;
+  border: 0; border-radius: var(--raio); background: transparent;
+  color: var(--cor-texto-apoio); cursor: pointer;
+}
+.toast__fechar:hover { background: rgba(15, 31, 61, 0.08); color: var(--cor-texto); }
+.toast__fechar svg { width: 1.125rem; height: 1.125rem; }
+@keyframes toast-entra {
+  from { opacity: 0; transform: translateY(-0.5rem); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 40rem) {
+  .toasts { top: auto; bottom: var(--e3); right: 50%; transform: translateX(50%); }
+}
+:root[data-contraste='alto'] .toast { border: 2px solid #ffe600; border-left-width: 6px; }

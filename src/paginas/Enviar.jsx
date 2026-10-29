@@ -107,7 +107,7 @@ export function Enviar() {
   const { acrescentarMaterial, modoServidor, enviarArquivo, adaptarMaterial, excluir } = usarApp();
   const catalogo = usarCatalogo();
   const conjuntoVigente = catalogo?.conjunto ?? CONJUNTO_REGRAS;
-  const { anunciar } = usarAnuncios();
+  const { anunciar, avisar } = usarAnuncios();
   const [arquivoReal, setArquivoReal] = useState(null);
   const [enviado, setEnviado] = useState(null);
   const [arrastando, setArrastando] = useState(false);
@@ -126,7 +126,7 @@ export function Enviar() {
 
   function mostrarProblema(erro) {
     setProblema(erro);
-    anunciar(`Erro: ${erro.titulo}`);
+    avisar('erro', erro.titulo, erro.saida);
   }
 
   // O foco vai para a mensagem depois que ela aparece: o botão que disparou
@@ -168,7 +168,7 @@ export function Enviar() {
           },
           cancelamento.current,
         );
-        anunciar('Adaptação concluída. Abrindo a revisão do material.');
+        avisar('boa', 'Material adaptado', 'Revise a versão adaptada antes de aprovar.');
         navegar(`/materiais/${material.id}/adaptacao`);
       } catch (erro) {
         setProcessando(false);
@@ -176,7 +176,7 @@ export function Enviar() {
           // Cancelar descarta também o material já enviado.
           if (material) await excluir(material.id).catch(() => {});
           setEnviado(null);
-          anunciar('Processamento cancelado. Nenhum material foi salvo.');
+          avisar('erro', 'Envio cancelado', 'Nenhum material foi salvo.');
           return;
         }
         // Se o envio deu certo e só a adaptação falhou, o material continua
@@ -208,12 +208,12 @@ export function Enviar() {
         conteudoProprio: arquivo.id === 'ok',
         atividade: { estado: 'rascunho', codigo: null },
       });
-      anunciar('Adaptação concluída. Abrindo a revisão do material.');
+      avisar('boa', 'Material adaptado', 'Revise a versão adaptada antes de aprovar.');
       navegar(`/materiais/${id}/adaptacao`);
     } catch (erro) {
       setProcessando(false);
       if (cancelamento.current.cancelado) {
-        anunciar('Processamento cancelado. Nenhum material foi salvo.');
+        avisar('erro', 'Envio cancelado', 'Nenhum material foi salvo.');
         return;
       }
       mostrarProblema(erro);

@@ -110,7 +110,7 @@ function MenuAcoes({ material, aoExcluir }) {
 export function Painel() {
   usarTituloDaPagina('Meus materiais');
   const { professor, materiais, excluir } = usarApp();
-  const { anunciar } = usarAnuncios();
+  const { anunciar, avisar } = usarAnuncios();
   const [aExcluir, setAExcluir] = useState(null);
   const [falha, setFalha] = useState(null);
   const [busca, setBusca] = useState('');
@@ -123,10 +123,10 @@ export function Painel() {
     setFalha(null);
     try {
       await excluir(alvo.id);
-      anunciar(`Material ${alvo.nome} e todas as suas adaptações foram excluídos.`);
+      avisar('erro', 'Material excluído', `${alvo.nome} e a atividade dele foram apagados.`);
     } catch (erro) {
       setFalha(erro);
-      anunciar(`Erro: ${erro.titulo}`);
+      avisar('erro', erro.titulo, erro.saida);
     }
   }
 
