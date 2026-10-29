@@ -1,6 +1,8 @@
-import { Cartao, Migalhas, TabelaEnvolvente } from '../componentes/basicos.jsx';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { Cartao, TabelaEnvolvente } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
-import { usarCatalogo } from '../contextos/Aplicacao.jsx';
+import { usarApp, usarCatalogo } from '../contextos/Aplicacao.jsx';
 import { CONJUNTO_REGRAS, REGRAS } from '../dados/conteudo.js';
 
 /* Tela de Ajuda: perguntas frequentes e catálogo das regras do conjunto
@@ -56,10 +58,15 @@ export function Ajuda() {
   const catalogo = usarCatalogo();
   const conjunto = catalogo?.conjunto ?? CONJUNTO_REGRAS;
   const regras = catalogo?.regras ?? REGRAS;
+  // A Ajuda também abre da tela de entrada, sem sessão.
+  const { autenticado } = usarApp();
 
   return (
     <>
-      <Migalhas itens={[{ rotulo: 'Meus materiais', para: '/painel' }, { rotulo: 'Ajuda' }]} />
+      <Link to={autenticado ? '/painel' : '/'} className="voltar">
+        <ArrowLeft aria-hidden="true" />
+        {autenticado ? 'Voltar para Meus materiais' : 'Voltar para a entrada'}
+      </Link>
 
       <div className="cabecalho-pagina">
         <h1>Ajuda</h1>

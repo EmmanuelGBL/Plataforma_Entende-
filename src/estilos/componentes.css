@@ -519,10 +519,6 @@ table.dados--estreita { max-width: 46rem; }
 :root[data-contraste='alto'] .grupo-botoes button[aria-pressed='true'] { background: #000; color: #ffe600; border-color: #ffe600; }
 .grupo-botoes button[aria-pressed='true']::before { content: '✓ '; }
 
-/* --- Migalhas ------------------------------------------------------------ */
-.migalhas { font-size: 0.9375rem; margin-bottom: var(--e4); }
-.migalhas ol { display: flex; flex-wrap: wrap; gap: var(--e2); list-style: none; padding: 0; }
-.migalhas li + li::before { content: '›'; margin-right: var(--e2); color: var(--cor-texto-apoio); }
 
 /* --- Estado vazio -------------------------------------------------------- */
 /* Estado vazio e página de erro: cartão estreito. */

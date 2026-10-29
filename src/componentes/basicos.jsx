@@ -175,22 +175,3 @@ export function AvisoConteudoDemo({ material }) {
     </Aviso>
   );
 }
-
-/** Trilha de navegação ("Meus materiais › ..."). */
-export function Migalhas({ itens }) {
-  return (
-    <nav className="migalhas" aria-label="Você está em">
-      <ol>
-        {itens.map((item, indice) => (
-          <li key={item.rotulo}>
-            {item.para && indice < itens.length - 1 ? (
-              <Link to={item.para}>{item.rotulo}</Link>
-            ) : (
-              <span aria-current="page">{item.rotulo}</span>
-            )}
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
-}
