@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CircleCheck, CloudUpload, FileText, Lightbulb, Sparkles } from 'lucide-react';
-import { Aviso, Botao, Cartao, Etiqueta } from '../componentes/basicos.jsx';
+import { CircleCheck, CloudUpload, FileText, Info, Lightbulb, Sparkles } from 'lucide-react';
+import { Aviso, Botao, Cartao } from '../componentes/basicos.jsx';
 import { BarraProgresso } from '../componentes/Passos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp, usarCatalogo } from '../contextos/Aplicacao.jsx';
@@ -320,19 +320,18 @@ export function Enviar() {
                     </div>
                   ) : (
                     <>
-                      {/* Na demonstração, o envio de arquivo aparece desligado, com o motivo. */}
-                      <div className="area-envio area-envio--desligada">
-                        <CloudUpload aria-hidden="true" className="area-envio__icone" />
-                        <p className="area-envio__titulo">Arraste e solte o arquivo aqui</p>
-                        <Etiqueta tom="neutra">Indisponível nesta demonstração</Etiqueta>
-                        <p className="area-envio__apoio">
-                          O protótipo roda inteiro no navegador, sem servidor, e por isso não lê
-                          arquivo do seu computador. Escolha um dos materiais de exemplo abaixo.
-                        </p>
-                      </div>
+                      {/* Na demonstração não há servidor para ler arquivo: a escolha é entre
+                         os materiais de exemplo, e a tela diz isso em uma linha. */}
+                      <p className="enviar-demo">
+                        <Info aria-hidden="true" />
+                        <span>
+                          Nesta demonstração o Entende+ roda sem servidor e não lê arquivo do seu
+                          computador. Escolha um dos materiais de exemplo:
+                        </span>
+                      </p>
 
                       <fieldset>
-                        <legend>Arquivos disponíveis nesta demonstração</legend>
+                        <legend className="apenas-leitor">Materiais de exemplo</legend>
                         {ARQUIVOS_DEMO.map((item) => {
                           const marcado = arquivo.id === item.id;
                           return (
