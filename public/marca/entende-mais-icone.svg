@@ -1,25 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Entende+">
   <title>Entende+</title>
-  <defs>
-    <linearGradient id="pagina" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#7cc0ff"/>
-      <stop offset="1" stop-color="#2f86eb"/>
-    </linearGradient>
-  </defs>
-  <g stroke="#f5a524" stroke-width="3.6" stroke-linecap="round">
-    <line x1="32" y1="4" x2="32" y2="11"/>
-    <line x1="21.5" y1="7" x2="25" y2="13"/>
-    <line x1="42.5" y1="7" x2="39" y2="13"/>
-  </g>
-  <g fill="url(#pagina)" stroke="#0a4fb5" stroke-width="3" stroke-linejoin="round">
-    <path d="M32 21 C26 16.5 16 15.5 7 17.5 V51 C16 49 26 50 32 54.5 Z"/>
-    <path d="M32 21 C38 16.5 48 15.5 57 17.5 V51 C48 49 38 50 32 54.5 Z"/>
-  </g>
-  <path d="M4 25 V56 C14 53.5 25 54.5 32 59 C39 54.5 50 53.5 60 56 V25" fill="none" stroke="#0a4fb5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <g stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity="0.85">
-    <path d="M13 27 C18 26 23 26.5 27 28" fill="none"/>
-    <path d="M13 34 C18 33 23 33.5 27 35" fill="none"/>
-    <path d="M37 28 C41 26.5 46 26 51 27" fill="none"/>
-    <path d="M37 35 C41 33.5 46 33 51 34" fill="none"/>
-  </g>
+  <path d="M27.4 12.4 L23.6 4.4" stroke="#F5A524" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M36.6 12.4 L40.4 4.4" stroke="#F5A524" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M30.4 23.4 C24.4 18.7 16 17.4 11 17.9 Q8.2 18.2 8.2 21 V49.4 C15.4 48.4 24.2 49.4 30.4 53.6 Z" fill="#1F86E5"/>
+  <path d="M33.6 23.4 C39.6 18.7 48 17.4 53 17.9 Q55.8 18.2 55.8 21 V49.4 C48.6 48.4 39.8 49.4 33.6 53.6 Z" fill="#1F86E5"/>
+  <path d="M30.4 24.4 C25.4 20.6 19 19.6 14.6 20 Q12.4 20.2 12.4 22.4 V47.2 C18.4 46.8 25.2 47.8 30.4 51.2 Z" fill="#4BB1F6"/>
+  <path d="M33.6 24.4 C38.6 20.6 45 19.6 49.4 20 Q51.6 20.2 51.6 22.4 V47.2 C45.6 46.8 38.8 47.8 33.6 51.2 Z" fill="#4BB1F6"/>
+  <path d="M4.2 25.4 V51.6 C13.6 50.4 24.4 51.4 32 57.4 C39.6 51.4 50.4 50.4 59.8 51.6 V25.4" fill="none" stroke="#1E7FE0" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

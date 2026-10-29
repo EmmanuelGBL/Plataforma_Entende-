@@ -192,10 +192,7 @@ kbd {
 }
 
 .marca { display: flex; align-items: center; gap: var(--e2); text-decoration: none; color: inherit; }
-.marca img { width: 44px; height: 44px; }
-.marca__nome { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
-.marca .mais { color: var(--cor-primaria); }
-:root[data-contraste='alto'] .marca .mais { color: #ffe600; }
+.marca__logo { height: 2.75rem; width: auto; color: var(--cor-tinta); }
 
 .barra__acoes { margin-left: auto; display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap; }
 
@@ -335,8 +332,7 @@ kbd {
    continua lá para o leitor de tela. */
 @media (max-width: 40rem) {
   .barra-interna { flex-wrap: nowrap; gap: var(--e2); padding-inline: var(--e3); }
-  .marca img { width: 36px; height: 36px; }
-  .marca__nome { font-size: 1.375rem; }
+  .marca__logo { height: 2.25rem; }
   .barra__acoes { gap: 0; flex-wrap: nowrap; }
   .barra__acao { padding-inline: var(--e2); }
   .barra__rotulo {

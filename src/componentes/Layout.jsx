@@ -11,6 +11,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { PainelPreferencias } from './PainelPreferencias.jsx';
+import { ALTURA, LARGURA, MAIS, PALAVRA, SIMBOLO } from './marcaVetorial.js';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
@@ -40,14 +41,36 @@ function LinksDeSalto() {
   );
 }
 
+/** Logotipo em SVG embutido, com os traçados de Logo/gerar-logo.py. A palavra
+ *  usa a cor do texto e o "+" a cor da marca, e os dois acompanham o alto
+ *  contraste. Decorativo: quem o usa dá o nome acessível. */
+export function LogoEntende({ className }) {
+  return (
+    <svg
+      viewBox={`0 0 ${LARGURA} ${ALTURA}`}
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      {SIMBOLO.map((elemento) => (
+        <path key={elemento.d} {...elemento} />
+      ))}
+      <path d={PALAVRA} fill="currentColor" />
+      <g fill="var(--cor-marca-mais)">
+        {MAIS.map(([x, y, largura, altura]) => (
+          <rect key={`${x}-${y}`} x={x} y={y} width={largura} height={altura} rx="2.4" />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
 /** Logotipo. Com `para`, vira link (telas do professor); sem, é só a marca. */
 export function Marca({ para }) {
   const conteudo = (
     <>
-      <img src="./marca/entende-mais-icone.svg" alt="" />
-      <span className="marca__nome">
-        Entende<span className="mais">+</span>
-      </span>
+      <LogoEntende className="marca__logo" />
+      <span className="apenas-leitor">Entende+</span>
     </>
   );
   if (!para) return <span className="marca">{conteudo}</span>;

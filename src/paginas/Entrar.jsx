@@ -13,7 +13,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { Aviso, Botao, Campo } from '../componentes/basicos.jsx';
-import { usarTituloDaPagina } from '../componentes/Layout.jsx';
+import { LogoEntende, usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 
 /* Tela de entrada e criação de conta (RF01): apresentação à esquerda e
@@ -111,12 +111,7 @@ export function Entrar() {
     <div className="entrada-tela">
       <div className="entrada-formulario">
         <section className="cartao entrada-cartao" aria-labelledby="titulo-entrada">
-          <div className="entrada-cartao__marca" aria-hidden="true">
-            <img src="./marca/entende-mais-icone.svg" alt="" />
-            <span>
-              Entende<span className="mais">+</span>
-            </span>
-          </div>
+          <LogoEntende className="entrada-cartao__logo" />
           <h1 id="titulo-entrada">{criando ? 'Crie sua conta de professor' : 'Acesse sua conta de professor'}</h1>
 
           {listaErros.length > 0 && (

@@ -11,6 +11,7 @@
   --cor-destaque: #f5a524;        /*  2,04:1 sobre branco — só no logotipo e em
                                       acentos decorativos; nunca texto          */
   --cor-destaque-escuro: #8a5410; /*  6,26:1 sobre branco — texto de alerta       */
+  --cor-marca-mais: #1e7fe0;      /* o "+" do logotipo (Logo/gerar-logo.py)       */
 
   /* --- Neutros ----------------------------------------------------------- */
   --cor-fundo: #f5f8fc;
@@ -113,6 +114,7 @@
   --cor-primaria-clara: #000000;
   --cor-destaque: #ffe600;
   --cor-destaque-escuro: #ffe600;
+  --cor-marca-mais: #ffe600;
   --cor-sucesso: #6cf58f;
   --cor-sucesso-fundo: #000000;
   --cor-erro: #ff8f8f;
