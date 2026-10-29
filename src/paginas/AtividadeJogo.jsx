@@ -384,181 +384,190 @@ export function AtividadeJogo() {
         />
       </div>
 
-      <AjustesDoJogo
-        aberto={ajustesAbertos}
-        aoAbrir={() => setAjustesAbertos(true)}
-        aoFechar={() => setAjustesAbertos(false)}
-        ajustes={ajustes}
-        aoDefinir={(chave, valor, rotulo) => {
-          definirAjuste(chave, valor);
-          anunciar(`${OPCOES_AJUSTES[chave].nome}: ${rotulo}.`);
-        }}
-      />
+      {/* Em tela larga, cena à esquerda e pergunta à direita: a pergunta e as
+         alternativas ficam sempre à vista, sem rolar (G10). A cena não muda
+         de tamanho entre as fases (G01). */}
+      <div className="jogo__palco">
+        <div className="jogo__visao">
+          <AjustesDoJogo
+            aberto={ajustesAbertos}
+            aoAbrir={() => setAjustesAbertos(true)}
+            aoFechar={() => setAjustesAbertos(false)}
+            ajustes={ajustes}
+            aoDefinir={(chave, valor, rotulo) => {
+              definirAjuste(chave, valor);
+              anunciar(`${OPCOES_AJUSTES[chave].nome}: ${rotulo}.`);
+            }}
+          />
 
-      <CenaJogo
-        tema={ajustes.tema}
-        canto={canto}
-        fase={fase}
-        resultado={resultado}
-        comemorar={ajustes.comemoracao === 'ligada'}
-        sobreposicao={
-          avisoVisivel ? (
-            <div
-              className={`jogo__aviso-caixa jogo__aviso-caixa--${
-                resultado === 'acerto' ? 'acerto' : 'erro'
-              }`}
-              role="status"
-            >
-              {/* Ícone junto da cor: o resultado não depende só da cor. */}
-              <span className="jogo__aviso-icone" aria-hidden="true">
-                {resultado === 'acerto' ? '✓' : '✕'}
-              </span>
-              <p className="jogo__aviso-titulo">
-                {resultado === 'acerto' ? tema.tituloAcerto : tema.tituloErro}
-              </p>
-              <p className="jogo__aviso-texto">
-                {resultado === 'acerto' ? tema.textoAcerto : tema.textoErro}
+          <CenaJogo
+            tema={ajustes.tema}
+            canto={canto}
+            fase={fase}
+            resultado={resultado}
+            comemorar={ajustes.comemoracao === 'ligada'}
+            sobreposicao={
+              avisoVisivel ? (
+                <div
+                  className={`jogo__aviso-caixa jogo__aviso-caixa--${
+                    resultado === 'acerto' ? 'acerto' : 'erro'
+                  }`}
+                  role="status"
+                >
+                  {/* Ícone junto da cor: o resultado não depende só da cor. */}
+                  <span className="jogo__aviso-icone" aria-hidden="true">
+                    {resultado === 'acerto' ? '✓' : '✕'}
+                  </span>
+                  <p className="jogo__aviso-titulo">
+                    {resultado === 'acerto' ? tema.tituloAcerto : tema.tituloErro}
+                  </p>
+                  <p className="jogo__aviso-texto">
+                    {resultado === 'acerto' ? tema.textoAcerto : tema.textoErro}
+                  </p>
+
+                  <div className="jogo__aviso-acoes">
+                    {resultado === 'acerto' ? (
+                      <Botao ref={botaoAviso} onClick={() => avancar()}>
+                        {ultima ? tema.terminar : tema.proxima}
+                      </Botao>
+                    ) : (
+                      <>
+                        <Botao ref={botaoAviso} onClick={tentarDeNovo}>
+                          {tema.repetir}
+                        </Botao>
+                        {/* G04 — a opção de seguir para a próxima fica visível junto. */}
+                        <Botao variante="secundario" onClick={() => avancar({ semAcerto: true })}>
+                          {ultima ? tema.terminar : tema.proxima}
+                        </Botao>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : null
+            }
+          />
+        </div>
+
+        <div className="jogo__interacao">
+          {fase === 'mirar' && (
+            <section aria-labelledby="titulo-mirar">
+              <h2 id="titulo-mirar" className="jogo__passo">
+                {tema.instrucaoMirar}
+              </h2>
+              <ul className="jogo__cantos">
+                {tema.cantos.map((rotulo, posicao) => (
+                  <li key={rotulo}>
+                    <button type="button" className="jogo__canto" onClick={() => mirar(posicao)}>
+                      {rotulo}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {(fase === 'responder' || fase === 'resultado') && (
+            <section aria-labelledby="titulo-pergunta">
+              <p className="jogo__mirou">
+                Você mirou: <strong>{tema.cantos[canto]}</strong>
               </p>
 
-              <div className="jogo__aviso-acoes">
-                {resultado === 'acerto' ? (
-                  <Botao ref={botaoAviso} onClick={() => avancar()}>
-                    {ultima ? tema.terminar : tema.proxima}
+              <h2 id="titulo-pergunta" className="atividade__pergunta">
+                {questao.enunciado}
+              </h2>
+
+              {/* G11 — a dica está disponível antes da resposta. */}
+              {fase === 'responder' && !dicaAberta && (
+                <div className="jogo__pedir-dica">
+                  <Botao variante="secundario" onClick={pedirDica}>
+                    Ver uma dica antes de responder
                   </Botao>
-                ) : (
-                  <>
-                    <Botao ref={botaoAviso} onClick={tentarDeNovo}>
-                      {tema.repetir}
-                    </Botao>
-                    {/* G04 — a opção de seguir para a próxima fica visível junto. */}
-                    <Botao variante="secundario" onClick={() => avancar({ semAcerto: true })}>
-                      {ultima ? tema.terminar : tema.proxima}
-                    </Botao>
-                  </>
-                )}
+                </div>
+              )}
+
+              {dicaAberta && fase === 'responder' && (
+                <div className="jogo__dica" style={{ marginTop: 0, marginBottom: 'var(--e4)' }}>
+                  <h3>Dica</h3>
+                  {/* A dica aponta onde procurar sem entregar a resposta. */}
+                  <p>
+                    {questao.dica ? (
+                      questao.dica
+                    ) : (
+                      <>
+                        A resposta está neste trecho do material: <strong>{questao.trecho}</strong>.
+                      </>
+                    )}
+                  </p>
+                </div>
+              )}
+
+              {/* Na nova tentativa a lista volta inteira e na mesma ordem; a marcação de
+                 erro só aparece enquanto o resultado está na tela. */}
+              <ul className="atividade__opcoes atividade__opcoes--grade">
+                {questao.alternativas.map((alternativa, posicao) => {
+                  const respondido = fase === 'resultado';
+                  const foiEscolhida = posicao === escolhida;
+                  const estaCerta = posicao === questao.correta;
+
+                  let classe = 'atividade__opcao';
+                  if (respondido && foiEscolhida && estaCerta) classe += ' atividade__opcao--certa';
+                  if (respondido && foiEscolhida && !estaCerta) classe += ' atividade__opcao--errada';
+
+                  return (
+                    <li key={alternativa}>
+                      <button
+                        type="button"
+                        className={classe}
+                        disabled={respondido}
+                        onClick={() => responder(posicao)}
+                      >
+                        <span className="atividade__letra" aria-hidden="true">
+                          {String.fromCharCode(65 + posicao)}
+                        </span>
+                        <span>{alternativa}</span>
+                        {respondido && foiEscolhida && estaCerta && (
+                          <span className="atividade__marca">
+                            <span aria-hidden="true">✓</span>
+                            <span className="apenas-leitor">resposta correta</span>
+                          </span>
+                        )}
+                        {respondido && foiEscolhida && !estaCerta && (
+                          <span className="atividade__marca">
+                            <span aria-hidden="true">✕</span>
+                            <span className="apenas-leitor">sua resposta, incorreta</span>
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
+          {/* G04 — depois do erro, a dica aparece abaixo da cena. */}
+          {fase === 'resultado' && resultado === 'erro' && (
+            <div className="atividade__retorno">
+              <div className="jogo__dica">
+                <h3>Dica</h3>
+                <p>
+                  {questao.dica ? (
+                    questao.dica
+                  ) : (
+                    <>
+                      A resposta está neste trecho do material: <strong>{questao.trecho}</strong>.
+                    </>
+                  )}
+                </p>
+                <p>
+                  A pergunta e as alternativas continuam as mesmas: o que muda é você ter lido onde
+                  procurar a resposta.
+                </p>
               </div>
             </div>
-          ) : null
-        }
-      />
-
-      {fase === 'mirar' && (
-        <section aria-labelledby="titulo-mirar">
-          <h2 id="titulo-mirar" className="jogo__passo">
-            {tema.instrucaoMirar}
-          </h2>
-          <ul className="jogo__cantos">
-            {tema.cantos.map((rotulo, posicao) => (
-              <li key={rotulo}>
-                <button type="button" className="jogo__canto" onClick={() => mirar(posicao)}>
-                  {rotulo}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {(fase === 'responder' || fase === 'resultado') && (
-        <section aria-labelledby="titulo-pergunta">
-          <p className="jogo__mirou">
-            Você mirou: <strong>{tema.cantos[canto]}</strong>
-          </p>
-
-          <h2 id="titulo-pergunta" className="atividade__pergunta">
-            {questao.enunciado}
-          </h2>
-
-          {/* G11 — a dica está disponível antes da resposta. */}
-          {fase === 'responder' && !dicaAberta && (
-            <div className="jogo__pedir-dica">
-              <Botao variante="secundario" onClick={pedirDica}>
-                Ver uma dica antes de responder
-              </Botao>
-            </div>
           )}
-
-          {dicaAberta && fase === 'responder' && (
-            <div className="jogo__dica" style={{ marginTop: 0, marginBottom: 'var(--e4)' }}>
-              <h3>Dica</h3>
-              {/* A dica aponta onde procurar sem entregar a resposta. */}
-              <p>
-                {questao.dica ? (
-                  questao.dica
-                ) : (
-                  <>
-                    A resposta está neste trecho do material: <strong>{questao.trecho}</strong>.
-                  </>
-                )}
-              </p>
-            </div>
-          )}
-
-          {/* Na nova tentativa a lista volta inteira e na mesma ordem; a marcação de
-             erro só aparece enquanto o resultado está na tela. */}
-          <ul className="atividade__opcoes atividade__opcoes--grade">
-            {questao.alternativas.map((alternativa, posicao) => {
-              const respondido = fase === 'resultado';
-              const foiEscolhida = posicao === escolhida;
-              const estaCerta = posicao === questao.correta;
-
-              let classe = 'atividade__opcao';
-              if (respondido && foiEscolhida && estaCerta) classe += ' atividade__opcao--certa';
-              if (respondido && foiEscolhida && !estaCerta) classe += ' atividade__opcao--errada';
-
-              return (
-                <li key={alternativa}>
-                  <button
-                    type="button"
-                    className={classe}
-                    disabled={respondido}
-                    onClick={() => responder(posicao)}
-                  >
-                    <span className="atividade__letra" aria-hidden="true">
-                      {String.fromCharCode(65 + posicao)}
-                    </span>
-                    <span>{alternativa}</span>
-                    {respondido && foiEscolhida && estaCerta && (
-                      <span className="atividade__marca">
-                        <span aria-hidden="true">✓</span>
-                        <span className="apenas-leitor">resposta correta</span>
-                      </span>
-                    )}
-                    {respondido && foiEscolhida && !estaCerta && (
-                      <span className="atividade__marca">
-                        <span aria-hidden="true">✕</span>
-                        <span className="apenas-leitor">sua resposta, incorreta</span>
-                      </span>
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-
-      {/* G04 — depois do erro, a dica aparece abaixo da cena. */}
-      {fase === 'resultado' && resultado === 'erro' && (
-        <div className="atividade__retorno">
-          <div className="jogo__dica">
-            <h3>Dica</h3>
-            <p>
-              {questao.dica ? (
-                questao.dica
-              ) : (
-                <>
-                  A resposta está neste trecho do material: <strong>{questao.trecho}</strong>.
-                </>
-              )}
-            </p>
-            <p>
-              A pergunta e as alternativas continuam as mesmas: o que muda é você ter lido onde
-              procurar a resposta.
-            </p>
-          </div>
         </div>
-      )}
+      </div>
 
       <p className="campo__dica atividade__troca">
         Prefere sem jogo?{' '}

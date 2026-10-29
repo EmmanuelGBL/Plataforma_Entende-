@@ -1171,3 +1171,15 @@ table.dados--estreita { max-width: 46rem; }
 .escolha__opcao--futebol .escolha__figura svg circle { fill: #ffffff; }
 /* A cena não passa de 44rem, para a pergunta aparecer junto (G10). */
 .jogo .jogo__cena { max-width: 44rem; margin-inline: auto; }
+
+/* --- Jogo: palco lado a lado ----------------------------------------------
+      Em tela larga, cena e pergunta dividem a linha, e as alternativas ficam
+      à vista sem rolar (G10). Em tela estreita, uma embaixo da outra. */
+.atividade.jogo { max-width: 80rem; }
+.jogo__palco { display: grid; gap: var(--e5); }
+@media (min-width: 64rem) {
+  .jogo__palco { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .jogo .jogo__cena { max-width: none; margin-bottom: 0; }
+  .jogo__interacao .atividade__pergunta { text-align: left; font-size: 1.5rem; margin-bottom: var(--e4); }
+  .jogo__interacao .jogo__passo { margin-top: 0; }
+}
