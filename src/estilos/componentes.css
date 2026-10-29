@@ -1220,3 +1220,13 @@ table.dados--estreita { max-width: 46rem; }
 .enviar-demo { display: flex; gap: var(--e2); align-items: flex-start; max-width: none; margin-bottom: var(--e3); padding: var(--e3) var(--e4); background: var(--cor-info-fundo); border-radius: var(--raio); font-size: 0.9375rem; }
 .enviar-demo svg { width: 1.25rem; height: 1.25rem; flex: none; margin-top: 0.15em; color: var(--cor-primaria-escura); }
 .enviar-secao fieldset { border: none; padding: 0; margin: 0 0 var(--e3); }
+
+/* Celular: pontos e progresso numa linha só. */
+@media (max-width: 40rem) {
+  .jogo__topo { flex-wrap: nowrap; gap: var(--e2); }
+  .pontos { padding: var(--e1) var(--e3) var(--e1) var(--e2); gap: var(--e2); flex: none; }
+  .pontos__estrela { width: 1.75rem; height: 1.75rem; }
+  .pontos__texto strong { font-size: 1.25rem; }
+  .progresso-perguntas { flex: 1 1 0; min-width: 0; padding: var(--e2) var(--e3); gap: var(--e2); }
+  .progresso-perguntas__texto { font-size: 0.9375rem; }
+}
