@@ -35,8 +35,13 @@ class Configuracao(BaseSettings):
 
     # Motor de adaptação. O arquivo de regras é lido a cada adaptação (RNF13).
     caminho_regras: Path = PASTA_SERVIDOR / "regras" / "tea.json"
-    modelo: str = "claude-opus-5"
-    # Lida com o nome padrão do SDK, sem o prefixo ENTENDE_.
+    # Provedor do modelo de linguagem: "openai" (padrão desde 29/10/2026) ou
+    # "anthropic". Sem ENTENDE_MODELO, usa o modelo padrão do provedor
+    # (cliente_llm.MODELO_PADRAO). O modelo fica registrado em cada adaptação.
+    provedor: str = "openai"
+    modelo: str = ""
+    # Chaves lidas com o nome padrão de cada SDK, sem o prefixo ENTENDE_.
+    chave_openai: str = Field(default="", validation_alias="OPENAI_API_KEY")
     chave_api: str = Field(default="", validation_alias="ANTHROPIC_API_KEY")
 
     @property

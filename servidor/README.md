@@ -14,7 +14,7 @@ Python 3.11 ou mais recente. No PowerShell, dentro desta pasta:
 ```
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements-dev.txt
-copy .env.exemplo .env          # preencha ENTENDE_SEGREDO_TOKEN e ANTHROPIC_API_KEY
+copy .env.exemplo .env          # preencha ENTENDE_SEGREDO_TOKEN e OPENAI_API_KEY
 
 .venv\Scripts\python -m uvicorn app.principal:app --reload --no-access-log
 ```
@@ -37,19 +37,21 @@ $env:VITE_API_URL = "http://localhost:8000"; npm run dev
 Sem `VITE_API_URL`, a interface roda no **modo de demonstração**, em memória e com dados fixos —
 que é o que o GitHub Pages e o arquivo offline publicam, porque nenhum dos dois tem servidor.
 
-### Chave da API do Claude
+### Chave da API do modelo de linguagem
 
-O motor de adaptação e o gerador de questões usam o modelo **Claude Opus 5** (`claude-opus-5`)
-pela API da Anthropic. Sem `ANTHROPIC_API_KEY` no `.env`, conta, envio e extração funcionam, e
+Desde 29/10/2026 o motor de adaptação e o gerador de questões usam o **GPT-6.1 Sol**
+(`gpt-6.1-sol`) pela API da OpenAI, com saída estruturada estrita (Responses API). O Claude Opus 5
+continua disponível com `ENTENDE_PROVEDOR=anthropic` e `ANTHROPIC_API_KEY`. Sem a chave do provedor
+escolhido (`OPENAI_API_KEY` no padrão), conta, envio e extração funcionam, e
 adaptar responde 503 com a explicação. O motor é híbrido (ver abaixo): cada adaptação faz uma
 chamada por seção **que tem algo a reescrever** — seção sem nada marcado pelo código não gera
 chamada —, e mais uma para as questões. O terminal do servidor mostra, a cada adaptação, quantos
 blocos foram ao modelo e em quantos pedidos. O modelo usado fica registrado em cada adaptação (RN08); para trocar,
 `ENTENDE_MODELO` no `.env`.
 
-Os pedidos usam o **fallback do lado do servidor** da Anthropic (`fallbacks="default"`): se o
-modelo principal recusar um trecho, o próprio serviço tenta o modelo reserva recomendado para
-aquele motivo.
+Com a Anthropic, os pedidos usam o **fallback do lado do servidor** (`fallbacks="default"`): se o
+modelo principal recusar um trecho, o próprio serviço tenta o modelo reserva. Com a OpenAI, a
+recusa vira erro explicado ao professor (422), como a resposta cortada por tamanho.
 
 ### Banco
 
@@ -59,7 +61,7 @@ apontar a variável para ele; as tabelas são criadas na primeira partida.
 ### Testes e ferramentas
 
 ```
-.venv\Scripts\python -m pytest                 # 119 testes, sem rede e sem custo
+.venv\Scripts\python -m pytest                 # 128 testes, sem rede e sem custo
 .venv\Scripts\python extrair.py material.pdf   # ver a extração de um arquivo real
 ```
 
@@ -99,7 +101,7 @@ resposta sem traduzir nada:
 regras/tea.json           Conjunto de regras TEA v1.5, com gatilhos e glossário — RNF13
 app/
   principal.py            Monta a aplicação (criar_app)
-  config.py               Variáveis ENTENDE_* e ANTHROPIC_API_KEY
+  config.py               Variáveis ENTENDE_*, OPENAI_API_KEY e ANTHROPIC_API_KEY
   modelos.py              As classes do diagrama 02, em SQLAlchemy
   esquemas.py, apresentacao.py   Formato das respostas
   seguranca.py            Argon2id (RNF09) e token

@@ -21,7 +21,7 @@ from .config import Configuracao
 from .erros import ErroDeNegocio, tratar_erro_de_negocio, tratar_erro_de_validacao
 from .rotas import adaptacoes, atividades, autenticacao, materiais
 from .seguranca import LimiteDeTentativas
-from .servicos.cliente_llm import ClienteClaude, ClienteLLM
+from .servicos.cliente_llm import ClienteLLM, criar_cliente
 
 
 def _configurar_registro() -> None:
@@ -55,7 +55,9 @@ def criar_app(configuracao: Configuracao | None = None, cliente_llm: ClienteLLM 
     )
     app.state.configuracao = config
     app.state.fabrica_sessao = criar_fabrica(motor)
-    app.state.cliente_llm = cliente_llm or ClienteClaude(config.modelo, config.chave_api or None)
+    app.state.cliente_llm = cliente_llm or criar_cliente(
+        config.provedor, config.modelo, config.chave_openai, config.chave_api
+    )
     app.state.limite_entrada = LimiteDeTentativas(config.tentativas_entrada, config.bloqueio_entrada_minutos * 60)
 
     app.add_middleware(
