@@ -1,4 +1,4 @@
-/* Gera um HTML único, com CSS, JavaScript e a marca embutidos, que abre
+/* Gera um HTML único, com CSS, JavaScript, a marca e as ilustrações embutidos, que abre
    por duplo clique. A pasta dist/ não abre direto do disco porque o navegador
    bloqueia <script type="module"> em file://.
 
@@ -31,11 +31,27 @@ html = html.replace(
 const svg = fs.readFileSync(path.join(dist, 'marca', 'entende-mais-icone.svg'), 'utf8');
 const svgEmbutido = `data:image/svg+xml;base64,${Buffer.from(svg, 'utf8').toString('base64')}`;
 
+// --- Ilustrações (public/ilustracoes), como data URI ------------------------
+const tipos = { '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg' };
+const pastaIlustracoes = path.join(dist, 'ilustracoes');
+const ilustracoes = fs.existsSync(pastaIlustracoes)
+  ? fs.readdirSync(pastaIlustracoes).map((nome) => [
+      `./ilustracoes/${nome}`,
+      `data:${tipos[path.extname(nome)]};base64,${fs.readFileSync(path.join(pastaIlustracoes, nome)).toString('base64')}`,
+    ])
+  : [];
+
+function embutir(codigo) {
+  let resultado = codigo.split('./marca/entende-mais-icone.svg').join(svgEmbutido);
+  for (const [caminho, dados] of ilustracoes) resultado = resultado.split(caminho).join(dados);
+  return resultado;
+}
+
 // --- JavaScript ------------------------------------------------------------
 html = html.replace(
   /<script type="module"[^>]*src="\.\/([^"]+)"[^>]*><\/script>/,
   (_, arquivo) => {
-    const codigo = ler(arquivo).split('./marca/entende-mais-icone.svg').join(svgEmbutido);
+    const codigo = embutir(ler(arquivo));
     // A tag de fechamento não pode aparecer literal dentro do script.
     return `<script type="module">\n${codigo.split('</script>').join('<\\/script>')}\n</script>`;
   },

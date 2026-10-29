@@ -256,6 +256,7 @@ export function Layout() {
 /** Layout sem o menu do professor: entrada e telas do estudante. */
 export function LayoutSimples() {
   const principal = useRef(null);
+  const naEntrada = useLocation().pathname === '/';
   usarFocoNaTroca(principal, true);
 
   return (
@@ -265,6 +266,7 @@ export function LayoutSimples() {
         <div className="barra-interna">
           <Marca />
           <div className="barra__acoes">
+            {naEntrada && <LinkAjuda />}
             <PainelPreferencias />
           </div>
         </div>

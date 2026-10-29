@@ -21,7 +21,8 @@ export function Botao({ variante = 'principal', como = 'button', para, largo, ch
 }
 
 /** Campo de formulário com rótulo sempre visível. Dica e mensagem de erro
- *  são ligadas ao campo por aria-describedby. */
+ *  são ligadas ao campo por aria-describedby. `icone` (componente de ícone)
+ *  fica à esquerda, dentro da caixa; `final` (um botão) fica à direita. */
 export function Campo({
   rotulo,
   dica,
@@ -29,6 +30,8 @@ export function Campo({
   obrigatorio,
   tipo = 'text',
   multilinha,
+  icone: Icone,
+  final,
   className = '',
   ...resto
 }) {
@@ -54,15 +57,31 @@ export function Campo({
           {dica}
         </span>
       )}
-      <Elemento
-        id={id}
-        className={`${multilinha ? 'area-texto' : 'entrada'} ${className}`.trim()}
-        type={multilinha ? undefined : tipo}
-        aria-invalid={erro ? 'true' : undefined}
-        aria-describedby={descrito || undefined}
-        required={obrigatorio || undefined}
-        {...resto}
-      />
+      {Icone || final ? (
+        <div className="entrada-composta">
+          {Icone && <Icone aria-hidden="true" className="entrada-composta__icone" />}
+          <Elemento
+            id={id}
+            className={`entrada ${className}`.trim()}
+            type={tipo}
+            aria-invalid={erro ? 'true' : undefined}
+            aria-describedby={descrito || undefined}
+            required={obrigatorio || undefined}
+            {...resto}
+          />
+          {final}
+        </div>
+      ) : (
+        <Elemento
+          id={id}
+          className={`${multilinha ? 'area-texto' : 'entrada'} ${className}`.trim()}
+          type={multilinha ? undefined : tipo}
+          aria-invalid={erro ? 'true' : undefined}
+          aria-describedby={descrito || undefined}
+          required={obrigatorio || undefined}
+          {...resto}
+        />
+      )}
       {erro && (
         <p className="campo__erro" id={idErro}>
           <span aria-hidden="true">⚠</span>

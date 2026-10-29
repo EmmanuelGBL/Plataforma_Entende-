@@ -1,13 +1,45 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChartNoAxesColumnIncreasing, Eye, EyeOff, FileText, Gamepad2, Lock, Mail, UserPlus, UserRound } from 'lucide-react';
 import { Aviso, Botao, Campo } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 
-/* Tela de entrada e criação de conta (RF01).
+/* Tela de entrada e criação de conta (RF01): apresentação à esquerda e
+   formulário à direita; em tela estreita, o formulário vem primeiro.
 
-   O campo de senha aceita colar (gerenciador de senhas). Os erros aparecem
-   em um resumo no topo, que recebe o foco. */
+   O campo de senha aceita colar (gerenciador de senhas) e tem o botão
+   "Mostrar senha". Os erros aparecem em um resumo no topo do cartão, que
+   recebe o foco. */
+
+const DESTAQUES = [
+  { Icone: FileText, tom: 'azul', texto: 'Adapta textos e atividades com regras para TEA' },
+  { Icone: Gamepad2, tom: 'verde', texto: 'Gera atividades gamificadas para os estudantes' },
+  { Icone: ChartNoAxesColumnIncreasing, tom: 'amarelo', texto: 'Mais tempo para o que realmente importa: seus alunos' },
+];
+
+function Apresentacao() {
+  return (
+    <section className="entrada-apresentacao" aria-labelledby="titulo-apresentacao">
+      <h2 id="titulo-apresentacao">Mais tempo para ensinar.</h2>
+      <p>
+        O Entende+ ajuda o professor do 5º ano a adaptar materiais didáticos para estudantes com
+        TEA, aplicando um conjunto de regras de forma simples e segura.
+      </p>
+      <ul className="entrada-destaques">
+        {DESTAQUES.map(({ Icone, tom, texto }) => (
+          <li key={texto}>
+            <span className={`entrada-destaques__icone entrada-destaques__icone--${tom}`}>
+              <Icone aria-hidden="true" />
+            </span>
+            {texto}
+          </li>
+        ))}
+      </ul>
+      <img className="entrada-apresentacao__ilustracao" src="./ilustracoes/entrada.webp" alt="" />
+    </section>
+  );
+}
 
 export function Entrar() {
   const { entrar, cadastrar, modoServidor } = usarApp();
@@ -19,6 +51,7 @@ export function Entrar() {
   const [senha, setSenha] = useState(modoServidor ? '' : 'demonstracao');
   const [erros, setErros] = useState({});
   const [enviando, setEnviando] = useState(false);
+  const [senhaVisivel, setSenhaVisivel] = useState(false);
   const resumo = useRef(null);
 
   function focarResumo() {
@@ -62,99 +95,118 @@ export function Entrar() {
   const listaErros = Object.entries(erros);
 
   return (
-    <div style={{ maxWidth: '34rem', marginInline: 'auto' }}>
-      <div className="cabecalho-pagina">
-        <h1>{criando ? 'Criar conta no Entende+' : 'Entrar no Entende+'}</h1>
-        <p>
-          Adaptação de material didático para estudantes com autismo do 5º ano do ensino
-          fundamental.
-        </p>
+    <div className="entrada-tela">
+      <div className="entrada-formulario">
+        <section className="cartao entrada-cartao" aria-labelledby="titulo-entrada">
+          <div className="entrada-cartao__marca" aria-hidden="true">
+            <img src="./marca/entende-mais-icone.svg" alt="" />
+            <span>
+              Entende<span className="mais">+</span>
+            </span>
+          </div>
+          <h1 id="titulo-entrada">{criando ? 'Crie sua conta de professor' : 'Acesse sua conta de professor'}</h1>
+
+          {listaErros.length > 0 && (
+            <div ref={resumo} tabIndex={-1}>
+              <Aviso
+                tipo="erro"
+                titulo={criando ? 'Não foi possível criar a conta' : 'Não foi possível entrar'}
+                papel="alert"
+                nivel={2}
+              >
+                <ul>
+                  {listaErros.map(([campo, mensagem]) => (
+                    <li key={campo}>{mensagem}</li>
+                  ))}
+                </ul>
+              </Aviso>
+            </div>
+          )}
+
+          <form onSubmit={enviar} noValidate>
+            {criando && (
+              <Campo
+                rotulo="Nome"
+                icone={UserRound}
+                autoComplete="name"
+                obrigatorio
+                placeholder="Seu nome completo"
+                value={nome}
+                erro={erros.nome}
+                onChange={(e) => setNome(e.target.value)}
+              />
+            )}
+            <Campo
+              rotulo="E-mail"
+              tipo="email"
+              icone={Mail}
+              autoComplete="username"
+              obrigatorio
+              placeholder="Seu e-mail institucional ou pessoal"
+              value={email}
+              erro={erros.email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Campo
+              rotulo="Senha"
+              tipo={senhaVisivel ? 'text' : 'password'}
+              icone={Lock}
+              autoComplete={criando ? 'new-password' : 'current-password'}
+              obrigatorio
+              placeholder="Sua senha"
+              value={senha}
+              erro={erros.senha}
+              dica={criando ? 'Pelo menos 8 caracteres.' : undefined}
+              onChange={(e) => setSenha(e.target.value)}
+              final={
+                <button
+                  type="button"
+                  className="entrada-composta__final"
+                  aria-pressed={senhaVisivel}
+                  aria-label="Mostrar senha"
+                  onClick={() => setSenhaVisivel((v) => !v)}
+                >
+                  {senhaVisivel ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
+              }
+            />
+
+            <Botao type="submit" largo disabled={enviando}>
+              {enviando ? 'Aguarde…' : criando ? 'Criar conta' : 'Entrar'}
+            </Botao>
+          </form>
+
+          {modoServidor && (
+            <>
+              <p className="entrada-cartao__ou">
+                <span>ou</span>
+              </p>
+              <Botao variante="secundario" largo onClick={alternarModo}>
+                {!criando && <UserPlus aria-hidden="true" />}
+                {criando ? 'Já tenho conta: entrar' : 'Criar uma nova conta'}
+              </Botao>
+            </>
+          )}
+        </section>
+
+        {modoServidor ? (
+          <Aviso tipo="info" titulo="Sobre os seus dados" nivel={2}>
+            <p>
+              O Entende+ guarda o seu nome, o seu e-mail e a sua senha cifrada, e o texto dos
+              materiais que você enviar. Os materiais só podem ser vistos por você.
+            </p>
+          </Aviso>
+        ) : (
+          <Aviso tipo="info" titulo="Protótipo de demonstração" nivel={2}>
+            <p>
+              Os campos já vêm preenchidos e qualquer senha é aceita. Nenhum dado é enviado para
+              servidor algum.
+            </p>
+          </Aviso>
+        )}
       </div>
 
-      {listaErros.length > 0 && (
-        <div ref={resumo} tabIndex={-1}>
-          <Aviso
-            tipo="erro"
-            titulo={criando ? 'Não foi possível criar a conta' : 'Não foi possível entrar'}
-            papel="alert"
-            nivel={2}
-          >
-            <ul>
-              {listaErros.map(([campo, mensagem]) => (
-                <li key={campo}>{mensagem}</li>
-              ))}
-            </ul>
-          </Aviso>
-        </div>
-      )}
-
-      <section className="cartao">
-        <form onSubmit={enviar} noValidate>
-          {criando && (
-            <Campo
-              rotulo="Nome"
-              autoComplete="name"
-              obrigatorio
-              value={nome}
-              erro={erros.nome}
-              onChange={(e) => setNome(e.target.value)}
-            />
-          )}
-          <Campo
-            rotulo="E-mail"
-            tipo="email"
-            autoComplete="username"
-            obrigatorio
-            value={email}
-            erro={erros.email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Campo
-            rotulo="Senha"
-            tipo="password"
-            autoComplete={criando ? 'new-password' : 'current-password'}
-            obrigatorio
-            value={senha}
-            erro={erros.senha}
-            dica={
-              criando
-                ? 'Pelo menos 8 caracteres. Você pode colar a senha, se usa um gerenciador de senhas.'
-                : 'Você pode colar a senha, se usa um gerenciador de senhas.'
-            }
-            onChange={(e) => setSenha(e.target.value)}
-          />
-
-          <Botao type="submit" largo disabled={enviando}>
-            {enviando ? 'Aguarde…' : criando ? 'Criar conta' : 'Entrar'}
-          </Botao>
-        </form>
-
-        {modoServidor && (
-          <p style={{ marginTop: 'var(--e4)', marginBottom: 0 }}>
-            {criando ? 'Já tem conta? ' : 'Ainda não tem conta? '}
-            <Botao variante="discreto" onClick={alternarModo}>
-              {criando ? 'Entrar' : 'Criar uma conta'}
-            </Botao>
-          </p>
-        )}
-      </section>
-
-      {modoServidor ? (
-        <Aviso tipo="info" titulo="Sobre os seus dados" nivel={2}>
-          <p>
-            O Entende+ guarda o seu nome, o seu e-mail e a sua senha cifrada, e o texto dos
-            materiais que você enviar. Os materiais só podem ser vistos por você.
-          </p>
-        </Aviso>
-      ) : (
-        <Aviso tipo="info" titulo="Protótipo de demonstração" nivel={2}>
-          <p>
-            Esta é uma demonstração de interface para o Trabalho de Conclusão de Curso. Os campos
-            já vêm preenchidos e qualquer senha é aceita. Nenhum dado é enviado para servidor
-            algum.
-          </p>
-        </Aviso>
-      )}
+      <Apresentacao />
     </div>
   );
 }
