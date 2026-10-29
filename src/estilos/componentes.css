@@ -1145,13 +1145,12 @@ table.dados--estreita { max-width: 46rem; }
       O voo (bola ou foguete) chega em 0,8 s, o troféu entra com um pulo e o
       confete cai uma vez. Com movimento reduzido nada disso se move: o
       confete e o voo nem aparecem, e o troféu já está no lugar. */
-/* O confete cai numa faixa no alto da conclusão, dos lados do troféu (como
-   era antes de 29/10/2026), sem pegar clique. */
-.conclusao__confete { position: absolute; inset: 0 0 auto; height: 16rem; z-index: 3; pointer-events: none; overflow: hidden; }
+/* O confete cobre a tela inteira, por cima de tudo, sem pegar clique. */
+.conclusao__confete { position: fixed; inset: 0; z-index: 30; pointer-events: none; overflow: hidden; }
 .conclusao__confete span {
   position: absolute; top: -2rem; left: var(--x);
   width: 0.55rem; height: 1.2rem; border-radius: 3px;
-  animation: confete-cai 2.8s cubic-bezier(0.25, 0.4, 0.45, 1) calc(0.9s + var(--atraso)) 1 both;
+  animation: confete-cai 3s cubic-bezier(0.25, 0.4, 0.45, 1) calc(0.4s + var(--atraso)) 1 both;
 }
 .conclusao__confete span:nth-child(5n+1) { background: #1463d6; }
 .conclusao__confete span:nth-child(5n+2) { background: #3b9a4b; }
@@ -1162,7 +1161,7 @@ table.dados--estreita { max-width: 46rem; }
   0% { opacity: 0; transform: translate(0, 0) rotate(0); }
   8% { opacity: 1; }
   80% { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--deriva), 16rem) rotate(var(--giro)); }
+  100% { opacity: 0; transform: translate(var(--deriva), 100vh) rotate(var(--giro)); }
 }
 
 .conclusao__palco { position: relative; width: 9rem; height: 7rem; margin: 0 auto var(--e2); }
