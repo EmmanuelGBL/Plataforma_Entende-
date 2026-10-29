@@ -15,7 +15,7 @@ import {
   Send,
   Trash2,
 } from 'lucide-react';
-import { Aviso, AvisoConteudoDemo, Botao, Etiqueta } from '../componentes/basicos.jsx';
+import { Aviso, Botao, Etiqueta } from '../componentes/basicos.jsx';
 import { Dialogo } from '../componentes/Dialogo.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarAdaptacao, usarApp } from '../contextos/Aplicacao.jsx';
@@ -152,7 +152,6 @@ export function Atividade() {
         </p>
       </div>
 
-      <AvisoConteudoDemo material={dados} />
 
       {falha && (
         <Aviso tipo="erro" titulo={falha.titulo} papel="alert">
@@ -208,7 +207,7 @@ export function Atividade() {
             <p className="campo__dica">
               {questoes.length === 0
                 ? 'Nenhuma pergunta nesta atividade.'
-                : `${questoes.length} ${questoes.length === 1 ? 'pergunta gerada' : 'perguntas geradas'} com base no seu material adaptado (RN04). Abra uma pergunta para ver as alternativas, editar ou excluir.`}
+                : `${questoes.length} ${questoes.length === 1 ? 'pergunta gerada' : 'perguntas geradas'} com base no seu material adaptado.`}
             </p>
 
             {questoes.length === 0 ? (
@@ -387,7 +386,7 @@ export function Atividade() {
           {questoes.length > 0 && (
             <section className="cartao cartao--compacto" aria-labelledby="titulo-impressao">
               <h2 id="titulo-impressao">Versão impressa</h2>
-              <p className="campo__dica">Folha com as perguntas, com e sem gabarito (RF23).</p>
+              <p className="campo__dica">Folha com as perguntas, com e sem gabarito.</p>
               <Botao como="link" para={`/materiais/${id}/questionario`} variante="secundario" largo>
                 <Printer aria-hidden="true" />
                 Imprimir ou salvar em PDF

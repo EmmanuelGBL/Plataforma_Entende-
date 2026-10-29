@@ -233,37 +233,6 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 .aviso--erro { background: var(--cor-erro-fundo); border-color: var(--cor-erro); }
 :root[data-contraste='alto'] .aviso { border: 2px solid #ffffff; border-left-width: 6px; }
 
-/* --- Passos ---------------------------------------------------------------- */
-.passos { display: flex; flex-wrap: wrap; gap: var(--e2); margin-bottom: var(--e5); padding: 0; list-style: none; }
-.passos li {
-  display: flex;
-  align-items: center;
-  gap: var(--e2);
-  padding: var(--e2) var(--e3);
-  border: 2px solid var(--cor-borda);
-  border-radius: var(--raio);
-  font-size: 0.9375rem;
-  background: var(--cor-superficie);
-  color: var(--cor-texto-apoio);
-}
-.passos__numero {
-  flex: none;
-  width: 1.75rem; height: 1.75rem;
-  border-radius: 50%;
-  display: grid; place-items: center;
-  background: var(--cor-superficie-alt);
-  border: 2px solid var(--cor-borda-forte);
-  font-weight: 700; font-size: 0.875rem;
-}
-.passos li[aria-current='step'] {
-  border-color: var(--cor-primaria-escura);
-  background: var(--cor-info-fundo);
-  color: var(--cor-tinta);
-  font-weight: 600;
-}
-.passos li[aria-current='step'] .passos__numero { background: var(--cor-primaria); color: #fff; border-color: var(--cor-primaria-escura); }
-.passos li[data-estado='concluido'] .passos__numero { background: var(--cor-sucesso); color: #fff; border-color: var(--cor-sucesso); }
-
 /* --- Progresso ----------------------------------------------------------- */
 .progresso { max-width: 34rem; }
 .progresso__trilho {
@@ -832,7 +801,7 @@ table.dados--estreita { max-width: 46rem; }
 .voltar svg { width: 1.25rem; height: 1.25rem; }
 .voltar:hover { text-decoration: underline; }
 
-/* --- Adaptação: resumo do material, etapas -------------------------------- */
+/* --- Adaptação: resumo do material --------------------------------------- */
 .material-resumo {
   display: flex; gap: var(--e3); align-items: flex-start;
   background: var(--cor-primaria-clara);
@@ -849,49 +818,6 @@ table.dados--estreita { max-width: 46rem; }
 .material-resumo__nome { font-weight: 700; overflow-wrap: anywhere; }
 .material-resumo__meta { font-size: 0.9375rem; color: var(--cor-texto-apoio); }
 
-.etapas {
-  list-style: none; padding: 0; margin: 0 0 var(--e5);
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-g);
-  box-shadow: var(--sombra);
-  overflow: hidden;
-}
-.etapas li {
-  display: flex; gap: var(--e3); align-items: center;
-  padding: var(--e2) var(--e4);
-  color: var(--cor-texto-apoio);
-}
-.etapas li + li { border-left: 1px solid var(--cor-borda); }
-.etapas li[data-estado='atual'] { background: var(--cor-primaria-clara); color: var(--cor-texto); }
-.etapas__numero {
-  flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%;
-  display: grid; place-items: center;
-  font-weight: 700; background: var(--cor-superficie-alt); color: var(--cor-texto);
-}
-.etapas__numero svg { width: 1.25rem; height: 1.25rem; }
-.etapas li[data-estado='atual'] .etapas__numero { background: var(--cor-primaria); color: #fff; }
-.etapas li[data-estado='concluida'] .etapas__numero { background: var(--cor-sucesso); color: #fff; }
-.etapas__titulo { display: block; font-weight: 600; color: var(--cor-texto); }
-.etapas__apoio { display: block; font-size: 0.875rem; }
-@media (max-width: 62rem) {
-  .etapas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .etapas li:nth-child(3) { border-left: none; }
-  .etapas li:nth-child(n+3) { border-top: 1px solid var(--cor-borda); }
-}
-.etapas__contagem { display: none; }
-/* Celular: só a etapa atual (ou a última, quando tudo foi concluído), com
-   "Etapa 1 de 4" à vista. As outras continuam para o leitor de tela no
-   computador; aqui o texto da contagem já diz onde se está. */
-@media (max-width: 40rem) {
-  .etapas { grid-template-columns: minmax(0, 1fr); }
-  .etapas li { border: none !important; }
-  .etapas:has(li[data-estado='atual']) li:not([data-estado='atual']),
-  .etapas:not(:has(li[data-estado='atual'])) li:not(:last-child) { display: none; }
-  .etapas__contagem { display: block; font-size: 0.8125rem; font-weight: 600; color: var(--cor-primaria-escura); }
-}
-:root[data-contraste='alto'] .etapas li[data-estado='atual'] { outline: 2px solid #ffe600; outline-offset: -2px; }
 
 /* --- Adaptação: grade principal ----------------------------------------- */
 .adaptacao-grade {
@@ -1204,7 +1130,6 @@ table.dados--estreita { max-width: 46rem; }
 :root[data-contraste='alto'] .enviar-como__numero,
 :root[data-contraste='alto'] .pergunta__numero,
 :root[data-contraste='alto'] .atividade__letra,
-:root[data-contraste='alto'] .etapas__numero,
 :root[data-contraste='alto'] .escolha__figura {
   background: #000000 !important;
   color: #ffe600 !important;
@@ -1213,8 +1138,6 @@ table.dados--estreita { max-width: 46rem; }
 :root[data-contraste='alto'] .escolha__opcao--futebol .escolha__figura svg circle { fill: #000000; }
 :root[data-contraste='alto'] .resumo-metricas__item { background: #000000; border: 1px solid #ffffff; }
 
-.enviar-demo { display: flex; gap: var(--e2); align-items: flex-start; max-width: none; margin-bottom: var(--e3); padding: var(--e3) var(--e4); background: var(--cor-info-fundo); border-radius: var(--raio); font-size: 0.9375rem; }
-.enviar-demo svg { width: 1.25rem; height: 1.25rem; flex: none; margin-top: 0.15em; color: var(--cor-primaria-escura); }
 .enviar-secao fieldset { border: none; padding: 0; margin: 0 0 var(--e3); }
 
 /* Celular: pontos e progresso numa linha só. */

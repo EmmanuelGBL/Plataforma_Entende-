@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ChartColumnBig, Check, FileText, Gamepad2, Pencil } from 'lucide-react';
-import { Aviso, AvisoConteudoDemo, Botao, Cartao, Etiqueta } from '../componentes/basicos.jsx';
+import { Aviso, Botao, Cartao, Etiqueta } from '../componentes/basicos.jsx';
 import { ComparadorTextos, TabelaMetricas } from '../componentes/Comparador.jsx';
 import { PainelRegras } from '../componentes/PainelRegras.jsx';
 import { Dialogo } from '../componentes/Dialogo.jsx';
@@ -34,44 +34,6 @@ function desserializar(texto, blocosOriginais) {
       paragrafos: corpo.split(/\n\s*\n/).filter(Boolean),
     };
   });
-}
-
-/* Etapas da revisão. A etapa 3 acontece na tela da atividade. */
-const ETAPAS = [
-  ['Revisar adaptação', 'Compare o texto original e o adaptado.'],
-  ['Editar (opcional)', 'Faça ajustes se necessário.'],
-  ['Verificar atividade', 'Veja as perguntas geradas.'],
-  ['Aprovar e gerar PDF', 'Finalize para salvar o material.'],
-];
-
-function EtapasRevisao({ aprovado }) {
-  return (
-    <ol className="etapas" aria-label="Etapas da revisão">
-      {ETAPAS.map(([titulo, apoio], indice) => {
-        const estado = aprovado ? 'concluida' : indice === 0 ? 'atual' : 'pendente';
-        return (
-          <li key={titulo} data-estado={estado} aria-current={estado === 'atual' ? 'step' : undefined}>
-            <span className="etapas__numero" aria-hidden="true">
-              {estado === 'concluida' ? <Check /> : indice + 1}
-            </span>
-            <span>
-              <span className="apenas-leitor">
-                {`Etapa ${indice + 1} de ${ETAPAS.length}${
-                  estado === 'concluida' ? ', concluída' : estado === 'atual' ? ', etapa atual' : ''
-                }: `}
-              </span>
-              {/* Só aparece no celular, onde só a etapa atual fica à vista. */}
-              <span className="etapas__contagem" aria-hidden="true">
-                Etapa {indice + 1} de {ETAPAS.length}
-              </span>
-              <span className="etapas__titulo">{titulo}</span>
-              <span className="etapas__apoio">{apoio}</span>
-            </span>
-          </li>
-        );
-      })}
-    </ol>
-  );
 }
 
 /** Resumo das métricas na coluna lateral: o nível de leitura estimado
@@ -297,10 +259,6 @@ export function Adaptacao() {
         )}
       </div>
 
-      <EtapasRevisao aprovado={aprovado} />
-
-      <AvisoConteudoDemo material={dados} />
-
       {falha && (
         <Aviso tipo="erro" titulo={falha.titulo} papel="alert">
           <p>{falha.motivo}</p>
@@ -336,10 +294,7 @@ export function Adaptacao() {
               Reprocessar com a versão atual
             </Botao>
           </p>
-          <p className="campo__dica">
-            Não é preciso enviar o arquivo de novo. O texto do material original continua guardado
-            (RF12).
-          </p>
+          <p className="campo__dica">Não é preciso enviar o arquivo de novo.</p>
         </Aviso>
       )}
 

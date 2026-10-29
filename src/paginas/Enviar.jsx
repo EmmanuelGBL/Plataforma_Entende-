@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CircleCheck, CloudUpload, FileText, Info, Lightbulb, Sparkles } from 'lucide-react';
+import { CircleCheck, CloudUpload, FileText, Lightbulb, Sparkles } from 'lucide-react';
 import { Aviso, Botao, Cartao } from '../componentes/basicos.jsx';
 import { BarraProgresso } from '../componentes/Passos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
@@ -241,13 +241,6 @@ export function Enviar() {
                 <p>
                   <strong>O que fazer:</strong> {problema.saida}
                 </p>
-                {problema.regra && (
-                  <p className="campo__dica">
-                    Regra do sistema: {problema.regra}.
-                    {problema.regra === 'RN09' &&
-                      ' A recusa é proposital — adaptar um material lido pela metade produziria um resultado errado sem avisar você.'}
-                  </p>
-                )}
               </Aviso>
             </div>
           )}
@@ -321,15 +314,7 @@ export function Enviar() {
                   ) : (
                     <>
                       {/* Na demonstração não há servidor para ler arquivo: a escolha é entre
-                         os materiais de exemplo, e a tela diz isso em uma linha. */}
-                      <p className="enviar-demo">
-                        <Info aria-hidden="true" />
-                        <span>
-                          Nesta demonstração o Entende+ roda sem servidor e não lê arquivo do seu
-                          computador. Escolha um dos materiais de exemplo:
-                        </span>
-                      </p>
-
+                         os materiais de exemplo. */}
                       <fieldset>
                         <legend className="apenas-leitor">Materiais de exemplo</legend>
                         {ARQUIVOS_DEMO.map((item) => {
@@ -411,11 +396,6 @@ export function Enviar() {
                       </dd>
                     </div>
                   </dl>
-                  <p className="campo__dica">
-                    Esta versão foi construída e validada para estudantes com TEA do 5º ano. A versão
-                    do conjunto de regras fica registrada junto com a adaptação e não muda depois
-                    (RN08).
-                  </p>
                 </div>
               </section>
 

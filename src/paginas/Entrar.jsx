@@ -196,12 +196,13 @@ export function Entrar() {
             </>
           )}
 
-          <p className="entrada-cartao__nota">
-            <Info aria-hidden="true" />
-            {modoServidor
-              ? 'Guardamos seu nome, seu e-mail, a senha cifrada e os materiais que você enviar. Só você vê seus materiais.'
-              : 'Demonstração: os campos já vêm preenchidos, qualquer senha é aceita e nada é enviado a servidor algum.'}
-          </p>
+          {modoServidor && (
+            <p className="entrada-cartao__nota">
+              <Info aria-hidden="true" />
+              Guardamos seu nome, seu e-mail, a senha cifrada e os materiais que você enviar. Só você
+              vê seus materiais.
+            </p>
+          )}
         </section>
 
         <p className="entrada-formulario__rodape">

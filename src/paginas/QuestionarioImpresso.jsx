@@ -85,15 +85,6 @@ export function QuestionarioImpresso() {
             <dd>{dados.perfil} — Transtorno do Espectro Autista</dd>
             <dt>Conjunto de regras:</dt>
             <dd>{dados.versaoRegras}</dd>
-            {!dados.conteudoProprio && (
-              <>
-                <dt>Observação:</dt>
-                <dd>
-                  Conteúdo de demonstração — as questões abaixo são as do material Ciências —
-                  Fotossíntese, único incluído neste protótipo.
-                </dd>
-              </>
-            )}
           </dl>
         </div>
 
@@ -157,10 +148,6 @@ export function QuestionarioImpresso() {
                 ))}
               </tbody>
             </table>
-            <p className="folha__rodape">
-              A coluna da direita é o que permite conferir a RN04 sem confiar na nossa palavra: cada
-              questão aponta o trecho do material que a originou.
-            </p>
           </section>
         )}
       </main>

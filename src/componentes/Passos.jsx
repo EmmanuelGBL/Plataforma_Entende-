@@ -1,39 +1,5 @@
-/* Indicadores de progresso.
-
-   Passos: etapa atual do envio (aria-current="step").
-   BarraProgresso: role="progressbar" com valores ARIA e o percentual repetido
-   em texto. */
-
-export function Passos({ passos, atual }) {
-  return (
-    <nav aria-label="Etapas do envio">
-      <ol className="passos">
-        {passos.map((passo, indice) => {
-          const estado = indice < atual ? 'concluido' : indice === atual ? 'atual' : 'pendente';
-          return (
-            <li
-              key={passo}
-              data-estado={estado}
-              aria-current={estado === 'atual' ? 'step' : undefined}
-            >
-              <span className="passos__numero" aria-hidden="true">
-                {estado === 'concluido' ? '✓' : indice + 1}
-              </span>
-              <span>
-                <span className="apenas-leitor">
-                  {`Etapa ${indice + 1} de ${passos.length}, ${
-                    estado === 'concluido' ? 'concluída' : estado === 'atual' ? 'etapa atual' : 'ainda não iniciada'
-                  }: `}
-                </span>
-                {passo}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
-  );
-}
+/* Barra de progresso: role="progressbar" com valores ARIA e o percentual
+   repetido em texto. */
 
 export function BarraProgresso({ valor, etapa, rotulo = 'Progresso da adaptação' }) {
   return (

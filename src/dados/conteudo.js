@@ -290,7 +290,7 @@ export const QUESTOES = [
 
 /* --- Materiais do professor (RF19) ---------------------------------------
       Só o material com `conteudoProprio` tem texto adaptado próprio; os outros
-      mostram o texto de Ciências com o aviso AvisoConteudoDemo. */
+      mostram o texto de Ciências. */
 export const MATERIAIS_INICIAIS = [
   {
     id: 'm-102',

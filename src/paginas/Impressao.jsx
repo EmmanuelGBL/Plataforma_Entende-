@@ -93,16 +93,6 @@ export function Impressao() {
             <dd>{dados.perfil} — Transtorno do Espectro Autista</dd>
             <dt>Conjunto de regras:</dt>
             <dd>{dados.versaoRegras}</dd>
-            {/* O aviso de conteúdo de demonstração também sai no papel. */}
-            {!dados.conteudoProprio && (
-              <>
-                <dt>Observação:</dt>
-                <dd>
-                  Conteúdo de demonstração — o texto abaixo é o do material Ciências —
-                  Fotossíntese, único incluído neste protótipo.
-                </dd>
-              </>
-            )}
           </dl>
         </div>
 

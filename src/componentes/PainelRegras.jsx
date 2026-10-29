@@ -120,8 +120,7 @@ export function PainelRegras({ conjunto, regras, destacada, aoDestacar }) {
       <p className="painel-regras__nota">
         <Info aria-hidden="true" />
         <span>
-          As regras mudam a forma do material. Nenhum conceito é acrescentado nem retirado — a
-          responsabilidade pedagógica continua sendo sua (RN01).
+          As regras mudam a forma do material, nunca o conteúdo.
         </span>
       </p>
     </section>

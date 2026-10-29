@@ -160,18 +160,3 @@ export function Cartao({ compacto, className = '', children, ...resto }) {
     </section>
   );
 }
-
-/** Aviso do modo demonstração para materiais que não têm texto adaptado
- *  próprio (só o de Ciências tem). */
-export function AvisoConteudoDemo({ material }) {
-  if (material?.conteudoProprio) return null;
-  return (
-    <Aviso tipo="atencao" titulo="Conteúdo de demonstração">
-      <p>
-        Este material existe no histórico para mostrar a listagem e os estados da atividade. O
-        texto adaptado e as questões exibidas abaixo são os do material{' '}
-        <strong>Ciências — Fotossíntese</strong>, o único conteúdo incluído nesta demonstração.
-      </p>
-    </Aviso>
-  );
-}
