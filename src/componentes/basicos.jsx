@@ -141,8 +141,13 @@ export function TabelaEnvolvente({ rotulo, children }) {
   );
 }
 
-export function Etiqueta({ tom = 'neutra', children }) {
-  return <span className={`etiqueta etiqueta--${tom}`}>{children}</span>;
+export function Etiqueta({ tom = 'neutra', icone: Icone, children }) {
+  return (
+    <span className={`etiqueta etiqueta--${tom}`}>
+      {Icone && <Icone aria-hidden="true" />}
+      {children}
+    </span>
+  );
 }
 
 export function Cartao({ compacto, className = '', children, ...resto }) {

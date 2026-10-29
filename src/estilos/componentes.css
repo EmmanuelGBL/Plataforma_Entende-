@@ -614,3 +614,94 @@ table.dados--estreita { max-width: 46rem; }
   .entrada-formulario { grid-column: 1; grid-row: 1; }
 }
 :root[data-contraste='alto'] .entrada-apresentacao { background: #000; }
+
+/* --- Ícones dentro de botão e etiqueta ----------------------------------- */
+.botao svg { width: 1.25rem; height: 1.25rem; flex: none; }
+.etiqueta svg { width: 1rem; height: 1rem; flex: none; }
+.etiqueta { padding: 4px var(--e3); font-size: 0.875rem; }
+
+/* --- Meus materiais: filtros --------------------------------------------- */
+.filtros {
+  display: flex; flex-wrap: wrap; gap: var(--e3);
+  align-items: end;
+  margin-bottom: var(--e5);
+}
+.filtros__campo { display: grid; gap: var(--e1); flex: 1 1 14rem; }
+.filtros__campo--busca { flex: 3 1 22rem; }
+.filtros__campo label { font-weight: 600; font-size: 0.9375rem; }
+
+/* --- Meus materiais: lista ----------------------------------------------- */
+.lista-materiais { list-style: none; padding: 0; display: grid; gap: var(--e3); margin-bottom: var(--e5); }
+.item-material {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: var(--e3) var(--e5);
+  align-items: center;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-g);
+  padding: var(--e4) var(--e5);
+  box-shadow: var(--sombra);
+}
+.item-material__arquivo {
+  width: 4rem; height: 4.25rem;
+  border-radius: 12px;
+  display: grid; place-items: center; align-content: center; gap: 2px;
+  font-size: 0.75rem; font-weight: 700;
+  background: var(--cor-primaria-clara); color: var(--cor-primaria-escura);
+}
+.item-material__arquivo svg { width: 1.75rem; height: 1.75rem; }
+.item-material__arquivo--pdf { background: #fdecec; color: var(--cor-erro); }
+.item-material__arquivo--docx, .item-material__arquivo--doc { background: var(--cor-primaria-clara); color: var(--cor-primaria-escura); }
+.item-material__dados h2 { font-size: 1.1875rem; font-weight: 700; }
+.item-material__dados h2 a { color: var(--cor-texto); text-decoration: none; }
+.item-material__dados h2 a:hover { text-decoration: underline; color: var(--cor-primaria-escura); }
+.item-material__meta { font-size: 0.9375rem; color: var(--cor-texto-apoio); margin-top: 2px; }
+.item-material__meta + .item-material__meta { margin-top: 0; font-size: 0.875rem; }
+.item-material__situacao { display: flex; flex-direction: column; align-items: flex-start; gap: var(--e2); }
+.item-material__acoes { display: flex; align-items: center; gap: var(--e2); }
+
+@media (max-width: 75rem) {
+  .item-material { grid-template-columns: auto minmax(0, 1fr); }
+  .item-material__situacao { grid-column: 2; flex-direction: row; flex-wrap: wrap; }
+  .item-material__acoes { grid-column: 2; }
+}
+@media (max-width: 40rem) {
+  .item-material { grid-template-columns: minmax(0, 1fr); padding: var(--e4); }
+  .item-material__arquivo { display: none; }
+  .item-material__situacao, .item-material__acoes { grid-column: 1; }
+}
+
+/* --- Menu ⋮ --------------------------------------------------------------- */
+.menu-acoes { position: relative; }
+.menu-acoes__gatilho {
+  width: var(--alvo-minimo); height: var(--alvo-minimo);
+  display: grid; place-items: center;
+  background: none; border: 2px solid transparent; border-radius: var(--raio);
+  color: var(--cor-texto); cursor: pointer;
+}
+.menu-acoes__gatilho:hover, .menu-acoes__gatilho[aria-expanded='true'] { background: var(--cor-superficie-alt); }
+.menu-acoes__gatilho svg { width: 1.5rem; height: 1.5rem; }
+.menu-acoes__lista {
+  position: absolute; right: 0; top: calc(100% + var(--e1));
+  min-width: 15rem; z-index: 30;
+  list-style: none; padding: var(--e2); margin: 0;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+  box-shadow: var(--sombra-alta);
+}
+.menu-acoes__lista a, .menu-acoes__lista button {
+  width: 100%; min-height: var(--alvo-minimo);
+  display: flex; align-items: center; gap: var(--e3);
+  padding: var(--e2) var(--e3);
+  background: none; border: none; border-radius: var(--raio);
+  color: var(--cor-texto); text-decoration: none; font-size: 1rem; text-align: left; cursor: pointer;
+}
+.menu-acoes__lista a:hover, .menu-acoes__lista button:hover { background: var(--cor-superficie-alt); text-decoration: underline; }
+.menu-acoes__lista svg { width: 1.25rem; height: 1.25rem; flex: none; }
+.menu-acoes__lista .menu-acoes__perigo { color: var(--cor-erro); }
+/* Etiqueta sem contorno: a situação já vem dita em texto e ícone. No alto
+   contraste o contorno volta. */
+.etiqueta { border-color: transparent !important; }
+:root[data-contraste='alto'] .etiqueta { border-color: currentColor !important; }
