@@ -1,16 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useMatch,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom';
 import {
   ChevronDown,
   CircleHelp,
   CircleUserRound,
-  CloudUpload,
   FileText,
+  FolderOpen,
   Gamepad2,
-  House,
+  ListChecks,
   LogOut,
+  Settings,
 } from 'lucide-react';
 import { PainelPreferencias } from './PainelPreferencias.jsx';
+import { JanelaEnviar } from './JanelaEnviar.jsx';
 import { ALTURA, LARGURA, MAIS, PALAVRA, SIMBOLO } from './marcaVetorial.js';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
@@ -139,6 +149,14 @@ function MenuProfessor() {
         <div className="menu-professor__painel" id="menu-professor">
           <p className="menu-professor__nome">{professor.nome}</p>
           {professor.email && <p className="menu-professor__email">{professor.email}</p>}
+          <Link
+            to="/configuracoes"
+            className="botao botao--discreto botao--largo"
+            onClick={() => setAberto(false)}
+          >
+            <Settings aria-hidden="true" />
+            Configurações
+          </Link>
           <button
             type="button"
             className="botao botao--secundario botao--largo"
@@ -156,6 +174,16 @@ function MenuProfessor() {
   );
 }
 
+/** Itens fixos do menu. O envio de material não é item de menu: abre em
+ *  janela pelo botão "Enviar material" de Meus materiais. */
+const ITENS_MENU = [
+  ['/painel', FolderOpen, 'Meus materiais'],
+  ['/atividades', Gamepad2, 'Atividades'],
+  ['/regras', ListChecks, 'Regras de adaptação'],
+  ['/configuracoes', Settings, 'Configurações'],
+  ['/ajuda', CircleHelp, 'Ajuda'],
+];
+
 /** Menu lateral. Adaptação e Atividade dependem do material, então só
  *  aparecem quando um material está aberto. */
 function MenuLateral() {
@@ -167,18 +195,14 @@ function MenuLateral() {
   return (
     <nav className="menu-lateral" id="menu" aria-label="Navegação principal" accessKey="2">
       <ul>
-        <li>
-          <NavLink to="/painel">
-            <House aria-hidden="true" />
-            Meus materiais
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/enviar">
-            <CloudUpload aria-hidden="true" />
-            Enviar material
-          </NavLink>
-        </li>
+        {ITENS_MENU.map(([caminho, Icone, rotulo]) => (
+          <li key={caminho}>
+            <NavLink to={caminho}>
+              <Icone aria-hidden="true" />
+              {rotulo}
+            </NavLink>
+          </li>
+        ))}
       </ul>
 
       {aberto && (
@@ -242,9 +266,30 @@ function usarFocoNaTroca(principal, focarNaPrimeira) {
   }, [local.pathname, principal]);
 }
 
+/** A janela de envio abre por `?enviar=1` na URL: assim o botão Voltar do
+ *  navegador também a fecha, e o endereço antigo /enviar continua valendo. */
+export const PARAMETRO_ENVIO = 'enviar';
+
+function usarJanelaEnvio() {
+  const [busca, setBusca] = useSearchParams();
+  const aberta = busca.get(PARAMETRO_ENVIO) === '1';
+  function fechar() {
+    setBusca(
+      (atual) => {
+        const nova = new URLSearchParams(atual);
+        nova.delete(PARAMETRO_ENVIO);
+        return nova;
+      },
+      { replace: true },
+    );
+  }
+  return { aberta, fechar };
+}
+
 export function Layout() {
   const { professor } = usarApp();
   const principal = useRef(null);
+  const envio = usarJanelaEnvio();
   usarFocoNaTroca(principal, false);
 
   return (
@@ -255,7 +300,8 @@ export function Layout() {
         <div className="barra-interna">
           <Marca para="/painel" />
           <div className="barra__acoes">
-            <LinkAjuda />
+            {/* Com sessão, a Ajuda está no menu lateral. */}
+            {!professor && <LinkAjuda />}
             <PainelPreferencias />
             <MenuProfessor />
           </div>
@@ -271,6 +317,8 @@ export function Layout() {
       </div>
 
       <Rodape />
+
+      {professor && envio.aberta && <JanelaEnviar aoFechar={envio.fechar} />}
     </div>
   );
 }

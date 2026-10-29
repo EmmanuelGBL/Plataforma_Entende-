@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { Cartao, TabelaEnvolvente } from '../componentes/basicos.jsx';
+import { ArrowLeft, ListChecks } from 'lucide-react';
+import { Botao, Cartao, TabelaEnvolvente } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
-import { usarApp, usarCatalogo } from '../contextos/Aplicacao.jsx';
-import { CONJUNTO_REGRAS, REGRAS } from '../dados/conteudo.js';
+import { usarApp } from '../contextos/Aplicacao.jsx';
 
-/* Tela de Ajuda: perguntas frequentes e catálogo das regras do conjunto
-   vigente, com a base normativa de cada uma (RF10). */
+/* Tela de Ajuda: perguntas frequentes, o caminho para as regras de adaptação
+   e os atalhos de teclado. */
 
 const PERGUNTAS = [
   {
@@ -53,20 +52,18 @@ const PERGUNTAS = [
 
 export function Ajuda() {
   usarTituloDaPagina('Ajuda');
-  // Enquanto o servidor não responde, mostra o catálogo que acompanha a
-  // interface.
-  const catalogo = usarCatalogo();
-  const conjunto = catalogo?.conjunto ?? CONJUNTO_REGRAS;
-  const regras = catalogo?.regras ?? REGRAS;
   // A Ajuda também abre da tela de entrada, sem sessão.
   const { autenticado } = usarApp();
 
   return (
     <>
-      <Link to={autenticado ? '/painel' : '/'} className="voltar">
-        <ArrowLeft aria-hidden="true" />
-        {autenticado ? 'Voltar para Meus materiais' : 'Voltar para a entrada'}
-      </Link>
+      {/* Com sessão, a Ajuda é item do menu lateral e não precisa de "voltar". */}
+      {!autenticado && (
+        <Link to="/" className="voltar">
+          <ArrowLeft aria-hidden="true" />
+          Voltar para a entrada
+        </Link>
+      )}
 
       <div className="cabecalho-pagina">
         <h1>Ajuda</h1>
@@ -88,48 +85,15 @@ export function Ajuda() {
           </dl>
         </Cartao>
 
-        <Cartao>
-          <h2>
-            Conjunto de regras {conjunto.identificador} v{conjunto.versao}
-          </h2>
-          <p>{conjunto.descricao}</p>
-          <p className="campo__dica" style={{ marginBottom: 'var(--e5)' }}>
-            Publicado em {conjunto.publicadoEm}. Toda adaptação registra qual versão foi
-            usada, e esse registro não pode ser alterado.
+        <Cartao className="cartao--acao">
+          <h2>Regras de adaptação</h2>
+          <p style={{ marginBottom: 'var(--e4)' }}>
+            O que cada regra do perfil TEA faz no texto, por que existe e em que se baseia.
           </p>
-
-          <TabelaEnvolvente rotulo="Regras de adaptação do perfil TEA">
-            <table className="dados">
-              <caption className="apenas-leitor">
-                Regras de adaptação do perfil TEA, com a base normativa de cada uma
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Código</th>
-                  <th scope="col">Regra</th>
-                  <th scope="col">O que ela faz</th>
-                  <th scope="col">Base normativa</th>
-                </tr>
-              </thead>
-              <tbody>
-                {regras.map((regra) => (
-                  <tr key={regra.codigo}>
-                    <th scope="row" style={{ fontFamily: 'var(--fonte-mono)', whiteSpace: 'nowrap' }}>
-                      {regra.codigo}
-                    </th>
-                    <td>{regra.nome}</td>
-                    <td>
-                      {regra.descricao}
-                      <span className="campo__dica" style={{ marginBottom: 0 }}>
-                        {regra.justificativa}
-                      </span>
-                    </td>
-                    <td>{regra.base}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </TabelaEnvolvente>
+          <Botao como="link" para="/regras" variante="secundario">
+            <ListChecks aria-hidden="true" />
+            Ver as regras de adaptação
+          </Botao>
         </Cartao>
 
         <Cartao className="cartao--acao">

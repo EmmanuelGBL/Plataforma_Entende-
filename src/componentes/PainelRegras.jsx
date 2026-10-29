@@ -34,6 +34,11 @@ const APARENCIA = {
   'TEA-10': { Icone: Eraser, tom: 'verde' },
 };
 
+/** Ícone e tom de uma regra; usado também na tela Regras de adaptação. */
+export function aparenciaDaRegra(codigo) {
+  return APARENCIA[codigo] ?? { Icone: ListChecks, tom: 'azul' };
+}
+
 /** `conjunto` e `regras` são os da versão usada nesta adaptação, e não os
  *  da versão vigente. */
 export function PainelRegras({ conjunto, regras, destacada, aoDestacar }) {
@@ -65,7 +70,7 @@ export function PainelRegras({ conjunto, regras, destacada, aoDestacar }) {
         {regras.map((regra) => {
           const aberta = abertas.has(regra.codigo);
           const idDetalhe = `detalhe-${regra.codigo}`;
-          const { Icone, tom } = APARENCIA[regra.codigo] ?? { Icone: ListChecks, tom: 'azul' };
+          const { Icone, tom } = aparenciaDaRegra(regra.codigo);
           const ocorrencias =
             regra.aplicacao === 'apresentacao'
               ? 'na folha'

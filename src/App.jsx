@@ -4,7 +4,6 @@ import { CarregarAtividade } from './componentes/AtividadeAcesso.jsx';
 import { usarApp } from './contextos/Aplicacao.jsx';
 import { Entrar } from './paginas/Entrar.jsx';
 import { Painel } from './paginas/Painel.jsx';
-import { Enviar } from './paginas/Enviar.jsx';
 import { Adaptacao } from './paginas/Adaptacao.jsx';
 import { Atividade } from './paginas/Atividade.jsx';
 import { AtividadeEscolha } from './paginas/AtividadeEscolha.jsx';
@@ -13,6 +12,9 @@ import { AtividadeEstudante } from './paginas/AtividadeEstudante.jsx';
 import { Impressao } from './paginas/Impressao.jsx';
 import { QuestionarioImpresso } from './paginas/QuestionarioImpresso.jsx';
 import { Ajuda } from './paginas/Ajuda.jsx';
+import { Regras } from './paginas/Regras.jsx';
+import { Atividades } from './paginas/Atividades.jsx';
+import { Configuracoes } from './paginas/Configuracoes.jsx';
 import { Acessibilidade } from './paginas/Acessibilidade.jsx';
 import { NaoEncontrada } from './paginas/NaoEncontrada.jsx';
 
@@ -94,11 +96,21 @@ export default function App() {
             </ExigeSessao>
           }
         />
+        {/* O envio virou janela sobre Meus materiais; o endereço antigo leva até ela. */}
+        <Route path="/enviar" element={<Navigate to="/painel?enviar=1" replace />} />
         <Route
-          path="/enviar"
+          path="/atividades"
           element={
             <ExigeSessao>
-              <Enviar />
+              <Atividades />
+            </ExigeSessao>
+          }
+        />
+        <Route
+          path="/configuracoes"
+          element={
+            <ExigeSessao>
+              <Configuracoes />
             </ExigeSessao>
           }
         />
@@ -119,6 +131,7 @@ export default function App() {
           }
         />
         <Route path="/ajuda" element={<Ajuda />} />
+        <Route path="/regras" element={<Regras />} />
         <Route path="/acessibilidade" element={<Acessibilidade />} />
         <Route path="*" element={<NaoEncontrada />} />
       </Route>

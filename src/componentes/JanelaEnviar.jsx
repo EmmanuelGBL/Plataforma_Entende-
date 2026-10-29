@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CircleCheck, CloudUpload, FileText, Lightbulb, Sparkles } from 'lucide-react';
-import { Aviso, Botao, Cartao } from '../componentes/basicos.jsx';
-import { BarraProgresso } from '../componentes/Passos.jsx';
-import { usarTituloDaPagina } from '../componentes/Layout.jsx';
+import { Aviso, Botao } from './basicos.jsx';
+import { BarraProgresso } from './Passos.jsx';
+import { Janela } from './Dialogo.jsx';
 import { usarApp, usarCatalogo } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 import { ARQUIVOS_DEMO, CONJUNTO_REGRAS } from '../dados/conteudo.js';
 import { enviarMaterial, processarAdaptacao, validarArquivo } from '../servicos/api.js';
 
-/* Envio do material (RF02) e adaptação (RF04) num formulário só: escolher o
-   arquivo, conferir as informações e enviar. "Enviar material" manda o
-   arquivo e já pede a adaptação; se a adaptação falhar, o arquivo enviado é
-   reaproveitado na próxima tentativa. O arquivo é validado antes do envio. */
+/* Envio do material (RF02) e adaptação (RF04) num formulário só, em janela
+   aberta pelo botão "Enviar material" de Meus materiais: escolher o arquivo,
+   conferir as informações e enviar. "Enviar material" manda o arquivo e já
+   pede a adaptação; se a adaptação falhar, o arquivo enviado é reaproveitado
+   na próxima tentativa. O arquivo é validado antes do envio. Fechar a janela
+   durante o processamento cancela o envio. */
 
 const LIMITE_MB = 15; // RNF08; o servidor confere de novo, inclusive as páginas
 
@@ -70,7 +72,7 @@ function Lateral() {
   return (
     <aside className="enviar-lateral" aria-label="Sobre o envio">
       <section className="enviar-lateral__bloco enviar-lateral__bloco--como">
-        <h2>Como funciona</h2>
+        <h3>Como funciona</h3>
         <ol className="enviar-como">
           {COMO_FUNCIONA.map(([titulo, texto], i) => (
             <li key={titulo}>
@@ -87,10 +89,10 @@ function Lateral() {
       </section>
 
       <section className="enviar-lateral__bloco enviar-lateral__bloco--dicas">
-        <h2>
+        <h3>
           <Lightbulb aria-hidden="true" />
           Dicas para um bom resultado
-        </h2>
+        </h3>
         <ul>
           {DICAS.map((dica) => (
             <li key={dica}>{dica}</li>
@@ -101,8 +103,7 @@ function Lateral() {
   );
 }
 
-export function Enviar() {
-  usarTituloDaPagina('Enviar material');
+export function JanelaEnviar({ aoFechar }) {
   const navegar = useNavigate();
   const { acrescentarMaterial, modoServidor, enviarArquivo, adaptarMaterial, excluir } = usarApp();
   const catalogo = usarCatalogo();
@@ -114,7 +115,7 @@ export function Enviar() {
 
   const [processando, setProcessando] = useState(false);
   const [arquivo, setArquivo] = useState(ARQUIVOS_DEMO[0]);
-  const [disciplina, setDisciplina] = useState('Ciências');
+  const [disciplina, setDisciplina] = useState(ARQUIVOS_DEMO[0].disciplina);
   const [problema, setProblema] = useState(null);
   const [progresso, setProgresso] = useState(0);
   const [etapaAtual, setEtapaAtual] = useState('');
@@ -225,18 +226,24 @@ export function Enviar() {
     cancelamento.current.controle?.abort();
   }
 
-  return (
-    <>
-      <div className="cabecalho-pagina">
-        <h1>Enviar material</h1>
-        <p>Envie o material da sua aula para o Entende+ adaptar para estudantes com TEA.</p>
-      </div>
+  function fechar() {
+    if (processando) cancelar();
+    aoFechar();
+  }
 
+  return (
+    <Janela
+      aberto
+      titulo={processando ? 'Adaptando o material' : 'Enviar material'}
+      aoFechar={fechar}
+      classe="janela-enviar"
+      botaoFechar
+    >
       <div className="enviar-grade">
         <div>
           {problema && (
             <div ref={areaProblema} tabIndex={-1}>
-              <Aviso tipo="erro" titulo={problema.titulo} papel="alert" nivel={2}>
+              <Aviso tipo="erro" titulo={problema.titulo} papel="alert">
                 <p>{problema.motivo}</p>
                 <p>
                   <strong>O que fazer:</strong> {problema.saida}
@@ -246,8 +253,7 @@ export function Enviar() {
           )}
 
           {processando ? (
-            <Cartao>
-              <h2>Adaptando o material</h2>
+            <div className="enviar-processando">
               <p>
                 Você pode acompanhar o andamento abaixo. Materiais de até 20 páginas levam menos de
                 dois minutos.
@@ -261,15 +267,15 @@ export function Enviar() {
               <p className="campo__dica" style={{ marginTop: 'var(--e3)' }}>
                 Se cancelar, nada é salvo e o arquivo enviado é descartado.
               </p>
-            </Cartao>
+            </div>
           ) : (
-            <form className="cartao enviar-formulario" onSubmit={enviarEAdaptar} noValidate>
+            <form className="enviar-formulario" onSubmit={enviarEAdaptar} noValidate>
               <section className="enviar-secao" aria-labelledby="secao-arquivo">
                 <span className="enviar-secao__numero" aria-hidden="true">
                   1
                 </span>
                 <div>
-                  <h2 id="secao-arquivo">Selecione o arquivo</h2>
+                  <h3 id="secao-arquivo">Selecione o arquivo</h3>
                   <p className="enviar-secao__apoio">Você pode enviar arquivos em PDF ou DOCX (Word).</p>
 
                   {modoServidor ? (
@@ -328,6 +334,8 @@ export function Enviar() {
                                 checked={marcado}
                                 onChange={() => {
                                   setArquivo(item);
+                                  // A disciplina acompanha o arquivo, e o professor ainda pode trocar.
+                                  if (item.disciplina) setDisciplina(item.disciplina);
                                   setProblema(null);
                                 }}
                               />
@@ -360,7 +368,7 @@ export function Enviar() {
                   2
                 </span>
                 <div>
-                  <h2 id="secao-informacoes">Informações do material</h2>
+                  <h3 id="secao-informacoes">Informações do material</h3>
 
                   {!modoServidor && (
                     <div className="campo">
@@ -400,7 +408,7 @@ export function Enviar() {
               </section>
 
               <div className="enviar-formulario__acoes">
-                <Botao como="link" para="/painel" variante="secundario">
+                <Botao variante="secundario" onClick={fechar}>
                   Cancelar
                 </Botao>
                 <Botao type="submit" disabled={!podeEnviar}>
@@ -412,8 +420,8 @@ export function Enviar() {
           )}
         </div>
 
-        <Lateral />
+        {!processando && <Lateral />}
       </div>
-    </>
+    </Janela>
   );
 }

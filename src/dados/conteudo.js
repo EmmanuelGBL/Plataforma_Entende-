@@ -62,7 +62,7 @@ export const REGRAS = [
       'conjunto de regras — termos do conteúdo fora do vocabulário esperado para o 5º ano.',
     base: 'WCAG 2.2 — SC 3.1.3 Unusual Words (AAA)',
     justificativa:
-      'Manter o termo técnico e explicá-lo preserva o conteúdo pedagógico (RN01) sem ' +
+      'Manter o termo técnico e explicá-lo preserva o conteúdo pedagógico sem ' +
       'interromper a leitura para consultar outra fonte.',
     ocorrencias: 3,
   },
@@ -94,7 +94,7 @@ export const REGRAS = [
     base: 'WCAG 2.2 — SC 1.4.8 Visual Presentation (AAA)',
     justificativa:
       'Texto justificado cria "rios" de espaço em branco e larguras de palavra irregulares, ' +
-      'que atrapalham o rastreamento da linha. É a regra que responde por RNF02.',
+      'que atrapalham o rastreamento da linha.',
     ocorrencias: 1,
   },
   {
@@ -114,7 +114,7 @@ export const REGRAS = [
       'Remover elemento decorativo que não carrega informação e concorre com o texto pela atenção.',
     base: 'W3C COGA — Avoid Visual Clutter; DUA 7.3 (CAST, 2024)',
     justificativa:
-      'Nenhuma informação é perdida: o que sai é ornamento, não conteúdo (RN01).',
+      'Nenhuma informação é perdida: o que sai é ornamento, não conteúdo.',
     ocorrencias: 2,
   },
 ];
@@ -223,14 +223,14 @@ export const METRICAS = [
     situacao: 'atencao',
     leitura:
       'O texto adaptado ficou 18% mais longo. Explicar termos e dividir períodos alonga o ' +
-      'material. É o custo conhecido da adaptação, e ele é mostrado sempre (RN10).',
+      'material. É o custo conhecido da adaptação.',
   },
   {
     nome: 'Nível de leitura estimado',
     original: 'Ensino médio',
     adaptado: 'Anos iniciais do fundamental',
     situacao: 'melhora',
-    leitura: 'Meta de RNF03: não exigir leitura acima dos anos iniciais.',
+    leitura: 'A meta é não exigir leitura acima dos anos iniciais.',
   },
 ];
 
@@ -341,7 +341,8 @@ export const ARQUIVOS_DEMO = [
     tamanho: '1,8 MB',
     paginas: 3,
     extraivel: true,
-    descricao: 'PDF com texto selecionável. É o caminho principal da demonstração.',
+    disciplina: 'Ciências',
+    descricao: 'PDF com texto selecionável.',
   },
   {
     id: 'docx',
@@ -349,7 +350,8 @@ export const ARQUIVOS_DEMO = [
     tamanho: '740 KB',
     paginas: 5,
     extraivel: true,
-    descricao: 'Arquivo do Word, o formato que o professor costuma ter em mãos (RF02).',
+    disciplina: 'História',
+    descricao: 'Arquivo do Word.',
   },
   {
     id: 'imagem',
@@ -357,8 +359,8 @@ export const ARQUIVOS_DEMO = [
     tamanho: '9,2 MB',
     paginas: 4,
     extraivel: false,
-    descricao:
-      'PDF que é só imagem escaneada, sem texto reconhecido. Demonstra a recusa prevista na RN09.',
+    disciplina: 'Ciências',
+    descricao: 'PDF escaneado, só imagem, sem texto para ler.',
   },
   {
     id: 'grande',
@@ -366,7 +368,8 @@ export const ARQUIVOS_DEMO = [
     tamanho: '22,4 MB',
     paginas: 46,
     extraivel: true,
-    descricao: 'Acima do limite de 20 páginas e 15 MB (RNF08). Demonstra a prevenção de erro.',
+    disciplina: 'Ciências',
+    descricao: 'Acima do limite de 20 páginas e 15 MB.',
   },
 ];
 

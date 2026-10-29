@@ -32,9 +32,56 @@ const NOMES = {
   movimento: 'Animações',
 };
 
-export function PainelPreferencias() {
+/** Os grupos de opções e o "Restaurar o padrão". Aparece no painel da barra
+ *  superior e na tela Configurações. */
+export function OpcoesPreferencias() {
   const { preferencias, definir, restaurar, ehPadrao } = usarPreferencias();
   const { anunciar } = usarAnuncios();
+
+  function trocar(chave, valor, rotulo) {
+    definir(chave, valor);
+    anunciar(`${NOMES[chave]}: ${rotulo}.`);
+  }
+
+  return (
+    <>
+      {Object.keys(OPCOES).map((chave) => (
+        <fieldset key={chave}>
+          <legend>{NOMES[chave]}</legend>
+          <div className="grupo-botoes">
+            {OPCOES[chave].map((opcao) => (
+              <button
+                key={opcao.valor}
+                type="button"
+                /* aria-label com o nome do grupo: o texto "Padrão" se repete em todos os
+                   grupos. */
+                aria-label={`${NOMES[chave]}: ${opcao.rotulo}`}
+                aria-pressed={preferencias[chave] === opcao.valor}
+                onClick={() => trocar(chave, opcao.valor, opcao.rotulo)}
+              >
+                {opcao.rotulo}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+
+      <button
+        type="button"
+        className="botao botao--discreto"
+        disabled={ehPadrao}
+        onClick={() => {
+          restaurar();
+          anunciar('Preferências de exibição restauradas para o padrão.');
+        }}
+      >
+        Restaurar o padrão
+      </button>
+    </>
+  );
+}
+
+export function PainelPreferencias() {
   const [aberto, setAberto] = useState(false);
   const area = useRef(null);
   const gatilho = useRef(null);
@@ -58,11 +105,6 @@ export function PainelPreferencias() {
     };
   }, [aberto]);
 
-  function trocar(chave, valor, rotulo) {
-    definir(chave, valor);
-    anunciar(`${NOMES[chave]}: ${rotulo}.`);
-  }
-
   return (
     <div className="preferencias" ref={area}>
       <button
@@ -80,38 +122,7 @@ export function PainelPreferencias() {
       {aberto && (
         <div className="preferencias__painel" id="painel-preferencias">
           <h2 className="apenas-leitor">Preferências de exibição</h2>
-          {Object.keys(OPCOES).map((chave) => (
-            <fieldset key={chave}>
-              <legend>{NOMES[chave]}</legend>
-              <div className="grupo-botoes">
-                {OPCOES[chave].map((opcao) => (
-                  <button
-                    key={opcao.valor}
-                    type="button"
-                    /* aria-label com o nome do grupo: o texto "Padrão" se repete em todos os
-                       grupos. */
-                    aria-label={`${NOMES[chave]}: ${opcao.rotulo}`}
-                    aria-pressed={preferencias[chave] === opcao.valor}
-                    onClick={() => trocar(chave, opcao.valor, opcao.rotulo)}
-                  >
-                    {opcao.rotulo}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-          ))}
-
-          <button
-            type="button"
-            className="botao botao--discreto"
-            disabled={ehPadrao}
-            onClick={() => {
-              restaurar();
-              anunciar('Preferências de exibição restauradas para o padrão.');
-            }}
-          >
-            Restaurar o padrão
-          </button>
+          <OpcoesPreferencias />
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CircleCheck,
+  CircleSlash,
   Clock,
   CloudUpload,
   EllipsisVertical,
@@ -9,11 +10,13 @@ import {
   Gamepad2,
   LoaderCircle,
   Search,
+  Send,
   Trash2,
   Upload,
 } from 'lucide-react';
 import { Aviso, Botao, Etiqueta } from '../componentes/basicos.jsx';
 import { Dialogo } from '../componentes/Dialogo.jsx';
+import { IconeDisciplina } from '../componentes/IconeDisciplina.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
@@ -21,18 +24,25 @@ import { usarAnuncios } from '../contextos/Anuncios.jsx';
 /* Tela Meus materiais: lista os materiais do professor (RF19), com busca e
    filtros, e exclui um material com tudo o que depende dele (RF20). */
 
-const ESTADOS = {
-  enviado: { tom: 'neutra', icone: Upload, rotulo: 'Enviado, ainda não adaptado' },
-  adaptado: { tom: 'info', icone: Clock, rotulo: 'Adaptado, aguardando sua revisão' },
-  aprovado: { tom: 'boa', icone: CircleCheck, rotulo: 'Aprovado por você' },
+/* Uma situação só por material, juntando a do material e a da atividade:
+   o que importa na lista é em que ponto ele está e qual é o próximo passo. */
+const SITUACOES = {
   processando: { tom: 'atencao', icone: LoaderCircle, rotulo: 'Em processamento' },
+  enviado: { tom: 'neutra', icone: Upload, rotulo: 'Ainda não adaptado' },
+  revisar: { tom: 'info', icone: Clock, rotulo: 'Aguardando sua revisão' },
+  aprovado: { tom: 'boa', icone: CircleCheck, rotulo: 'Aprovado' },
+  publicado: { tom: 'boa', icone: Send, rotulo: 'Atividade publicada' },
+  revogado: { tom: 'atencao', icone: CircleSlash, rotulo: 'Link revogado' },
 };
 
-const ESTADOS_ATIVIDADE = {
-  rascunho: { tom: 'neutra', rotulo: 'Atividade em rascunho' },
-  publicada: { tom: 'boa', rotulo: 'Atividade publicada' },
-  revogada: { tom: 'atencao', rotulo: 'Link revogado' },
-};
+function situacaoDo(material) {
+  if (material.estado === 'processando') return 'processando';
+  if (material.estado === 'enviado') return 'enviado';
+  if (material.estado !== 'aprovado') return 'revisar';
+  if (material.atividade?.estado === 'publicada') return 'publicado';
+  if (material.atividade?.estado === 'revogada') return 'revogado';
+  return 'aprovado';
+}
 
 /** "Ciências — Fotossíntese.pdf" → { titulo: "Ciências — Fotossíntese", formato: "PDF" } */
 function partesDoNome(nome) {
@@ -142,7 +152,7 @@ export function Painel() {
       (m) =>
         (!termo || `${m.nome} ${m.disciplina ?? ''}`.toLocaleLowerCase('pt-BR').includes(termo)) &&
         (!disciplina || m.disciplina === disciplina) &&
-        (!situacao || m.estado === situacao),
+        (!situacao || situacaoDo(m) === situacao),
     );
   }, [materiais, busca, disciplina, situacao]);
 
@@ -162,9 +172,9 @@ export function Painel() {
           <h1>Meus materiais</h1>
           <p>Aqui estão os materiais que você enviou e adaptou no Entende+.</p>
         </div>
-        <Botao como="link" para="/enviar">
+        <Botao como="link" para="?enviar=1">
           <CloudUpload aria-hidden="true" />
-          Enviar novo material
+          Enviar material
         </Botao>
       </div>
 
@@ -187,7 +197,7 @@ export function Painel() {
             adaptada e uma atividade sobre o mesmo conteúdo.
           </p>
           <div className="linha" style={{ justifyContent: 'center', marginTop: 'var(--e4)' }}>
-            <Botao como="link" para="/enviar">
+            <Botao como="link" para="?enviar=1">
               Enviar meu primeiro material
             </Botao>
           </div>
@@ -236,7 +246,7 @@ export function Painel() {
                 onChange={(e) => setSituacao(e.target.value)}
               >
                 <option value="">Todas as situações</option>
-                {Object.entries(ESTADOS).map(([valor, { rotulo }]) => (
+                {Object.entries(SITUACOES).map(([valor, { rotulo }]) => (
                   <option key={valor} value={valor}>
                     {rotulo}
                   </option>
@@ -265,23 +275,20 @@ export function Painel() {
           ) : (
             <ul className="lista-materiais">
               {filtrados.map((material) => {
-                const estado = ESTADOS[material.estado] ?? ESTADOS.adaptado;
-                const atividade = ESTADOS_ATIVIDADE[material.atividade?.estado];
+                const situacao = SITUACOES[situacaoDo(material)];
                 const { titulo, formato } = partesDoNome(material.nome);
                 const meta = [
                   material.disciplina,
+                  [formato, material.paginas && `${material.paginas} páginas`]
+                    .filter(Boolean)
+                    .join(', '),
+                  `Perfil ${material.perfil}`,
                   `Enviado em ${material.enviadoEm}`,
-                  material.paginas && `${material.paginas} páginas`,
                 ].filter(Boolean);
                 return (
                   <li key={material.id}>
                     <article className="item-material">
-                      <span
-                        className={`item-material__arquivo item-material__arquivo--${formato.toLowerCase()}`}
-                      >
-                        <FileText aria-hidden="true" />
-                        <span>{formato}</span>
-                      </span>
+                      <IconeDisciplina material={material} />
 
                       <div className="item-material__dados">
                         <h2>
@@ -290,21 +297,17 @@ export function Painel() {
                         <p className="item-material__meta">
                           {meta.map((parte, i) => (
                             <span key={parte}>
-                              {i > 0 && <span aria-hidden="true"> • </span>}
+                              {i > 0 && <span aria-hidden="true"> · </span>}
                               {parte}
                             </span>
                           ))}
                         </p>
-                        <p className="item-material__meta">
-                          Perfil {material.perfil} · Conjunto de regras {material.versaoRegras}
-                        </p>
                       </div>
 
                       <div className="item-material__situacao">
-                        <Etiqueta tom={estado.tom} icone={estado.icone}>
-                          {estado.rotulo}
+                        <Etiqueta tom={situacao.tom} icone={situacao.icone}>
+                          {situacao.rotulo}
                         </Etiqueta>
-                        {atividade && <Etiqueta tom={atividade.tom}>{atividade.rotulo}</Etiqueta>}
                       </div>
 
                       <div className="item-material__acoes">
@@ -314,7 +317,7 @@ export function Painel() {
                           variante="secundario"
                         >
                           <FileText aria-hidden="true" />
-                          {material.estado === 'aprovado' ? 'Ver material' : 'Revisar adaptação'}
+                          {material.estado === 'aprovado' ? 'Ver material' : 'Revisar'}
                           <span className="apenas-leitor">: {titulo}</span>
                         </Botao>
                         <MenuAcoes material={material} aoExcluir={setAExcluir} />
@@ -327,13 +330,6 @@ export function Painel() {
           )}
         </>
       )}
-
-      <Aviso tipo="info" titulo="Sobre os materiais guardados aqui">
-        <p>
-          Só você tem acesso aos materiais que enviou. Ao excluir um material, a adaptação e a
-          atividade gerada a partir dele são apagadas junto, e a ação não pode ser desfeita.
-        </p>
-      </Aviso>
 
       <Dialogo
         aberto={Boolean(aExcluir)}
