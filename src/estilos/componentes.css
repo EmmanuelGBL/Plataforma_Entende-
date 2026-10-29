@@ -1218,6 +1218,15 @@ table.dados--estreita { max-width: 46rem; }
 /* Jogo: a cena é a peça principal e pode passar da largura das outras
    telas do estudante. */
 .atividade.jogo { max-width: 80rem; }
+/* Jogo sem rolagem em tela larga: a largura acompanha a altura da janela, para
+   a cena (16:9), os pontos e o "Prefere sem jogo?" caberem juntos. 15rem é o
+   que fica fora da cena: barra, folgas, pontos e o link. Em janela muito baixa
+   a cena para em 30rem de largura e a página volta a rolar. */
+@media (min-width: 40.0625rem) {
+  .atividade.jogo { max-width: min(80rem, max(30rem, calc((100dvh - 15rem) * 16 / 9))); }
+  .conteudo:has(> .jogo) { padding-block: var(--e4); }
+  .jogo .atividade__troca { margin: var(--e3) 0 0; }
+}
 
 /* --- Alto contraste: fundos claros fixos ---------------------------------
       Tudo que tem fundo claro escrito à mão (sem variável) vira preto com
