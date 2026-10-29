@@ -1164,13 +1164,13 @@ table.dados--estreita { max-width: 46rem; }
 .conclusao__confete span:nth-child(1) { left: 6%; top: 18%; transform: rotate(25deg); }
 .conclusao__confete span:nth-child(2) { left: 14%; top: 52%; transform: rotate(-35deg); }
 .conclusao__confete span:nth-child(3) { left: 22%; top: 10%; transform: rotate(60deg); }
-.conclusao__confete span:nth-child(4) { left: 28%; top: 70%; transform: rotate(-15deg); }
-.conclusao__confete span:nth-child(5) { left: 34%; top: 30%; transform: rotate(80deg); }
+.conclusao__confete span:nth-child(4) { left: 16%; top: 78%; transform: rotate(-15deg); }
+.conclusao__confete span:nth-child(5) { left: 30%; top: 22%; transform: rotate(80deg); }
 .conclusao__confete span:nth-child(6) { left: 40%; top: 4%; transform: rotate(-50deg); }
 .conclusao__confete span:nth-child(7) { left: 58%; top: 8%; transform: rotate(40deg); }
-.conclusao__confete span:nth-child(8) { left: 64%; top: 40%; transform: rotate(-70deg); }
+.conclusao__confete span:nth-child(8) { left: 72%; top: 34%; transform: rotate(-70deg); }
 .conclusao__confete span:nth-child(9) { left: 70%; top: 14%; transform: rotate(15deg); }
-.conclusao__confete span:nth-child(10) { left: 76%; top: 62%; transform: rotate(-25deg); }
+.conclusao__confete span:nth-child(10) { left: 86%; top: 70%; transform: rotate(-25deg); }
 .conclusao__confete span:nth-child(11) { left: 82%; top: 26%; transform: rotate(55deg); }
 .conclusao__confete span:nth-child(12) { left: 88%; top: 6%; transform: rotate(-40deg); }
 .conclusao__confete span:nth-child(13) { left: 92%; top: 48%; transform: rotate(30deg); }
