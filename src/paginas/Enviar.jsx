@@ -1,19 +1,22 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Aviso, Botao, Cartao, Etiqueta, Migalhas } from '../componentes/basicos.jsx';
-import { BarraProgresso, Passos } from '../componentes/Passos.jsx';
+import { CircleCheck, CloudUpload, FileText, Lightbulb, Sparkles } from 'lucide-react';
+import { Aviso, Botao, Cartao, Etiqueta } from '../componentes/basicos.jsx';
+import { BarraProgresso } from '../componentes/Passos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp, usarCatalogo } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 import { ARQUIVOS_DEMO, CONJUNTO_REGRAS } from '../dados/conteudo.js';
 import { enviarMaterial, processarAdaptacao, validarArquivo } from '../servicos/api.js';
 
-/* Envio do material em três passos: escolher o arquivo (RF02), configurar
-   a adaptação (RF04) e processar. O arquivo é validado antes do envio. */
-
-const PASSOS = ['Escolher o material', 'Configurar a adaptação', 'Processar'];
+/* Envio do material (RF02) e adaptação (RF04) num formulário só: escolher o
+   arquivo, conferir as informações e enviar. "Enviar material" manda o
+   arquivo e já pede a adaptação; se a adaptação falhar, o arquivo enviado é
+   reaproveitado na próxima tentativa. O arquivo é validado antes do envio. */
 
 const LIMITE_MB = 15; // RNF08; o servidor confere de novo, inclusive as páginas
+
+const DISCIPLINAS = ['Ciências', 'Geografia', 'História', 'Língua Portuguesa', 'Matemática'];
 
 function tamanhoLegivel(bytes) {
   const mb = bytes / (1024 * 1024);
@@ -43,19 +46,60 @@ function problemaDoArquivo(arquivo) {
   return null;
 }
 
-/* Perfis fora do escopo desta versão: aparecem desligados, como extensão futura. */
-const PERFIS_FUTUROS = [
-  {
-    sigla: 'TDAH',
-    nome: 'Transtorno do Déficit de Atenção com Hiperatividade',
-    apoio: 'Exigiria um conjunto de regras próprio. Não faz parte desta versão.',
-  },
-  {
-    sigla: 'Dislexia',
-    nome: 'Transtorno específico da leitura',
-    apoio: 'Exigiria um conjunto de regras próprio. Não faz parte desta versão.',
-  },
+const COMO_FUNCIONA = [
+  ['Envie o seu material', 'Em PDF ou Word (.docx), com até 20 páginas.'],
+  [
+    'O Entende+ aplica as regras para TEA',
+    'O sistema identifica o que cada parágrafo precisa e aplica o conjunto de regras.',
+  ],
+  ['Você revisa e edita', 'A versão adaptada aparece ao lado do original, com cada mudança explicada.'],
+  [
+    'Gere o material e a atividade',
+    'Depois da sua aprovação, o material sai em PDF e vira uma atividade gamificada.',
+  ],
 ];
+
+const DICAS = [
+  'Use textos e atividades do 5º ano.',
+  'Prefira arquivos com texto selecionável: PDF só de imagem escaneada não pode ser lido.',
+  'Separe apostilas longas em partes de até 20 páginas.',
+  'Quanto mais claro o material original, melhor a adaptação.',
+];
+
+function Lateral() {
+  return (
+    <aside className="enviar-lateral" aria-label="Sobre o envio">
+      <section className="enviar-lateral__bloco enviar-lateral__bloco--como">
+        <h2>Como funciona</h2>
+        <ol className="enviar-como">
+          {COMO_FUNCIONA.map(([titulo, texto], i) => (
+            <li key={titulo}>
+              <span className="enviar-como__numero" aria-hidden="true">
+                {i + 1}
+              </span>
+              <span>
+                <strong>{titulo}</strong>
+                <span>{texto}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="enviar-lateral__bloco enviar-lateral__bloco--dicas">
+        <h2>
+          <Lightbulb aria-hidden="true" />
+          Dicas para um bom resultado
+        </h2>
+        <ul>
+          {DICAS.map((dica) => (
+            <li key={dica}>{dica}</li>
+          ))}
+        </ul>
+      </section>
+    </aside>
+  );
+}
 
 export function Enviar() {
   usarTituloDaPagina('Enviar material');
@@ -66,9 +110,9 @@ export function Enviar() {
   const { anunciar } = usarAnuncios();
   const [arquivoReal, setArquivoReal] = useState(null);
   const [enviado, setEnviado] = useState(null);
-  const [enviando, setEnviando] = useState(false);
+  const [arrastando, setArrastando] = useState(false);
 
-  const [passo, setPasso] = useState(0);
+  const [processando, setProcessando] = useState(false);
   const [arquivo, setArquivo] = useState(ARQUIVOS_DEMO[0]);
   const [disciplina, setDisciplina] = useState('Ciências');
   const [problema, setProblema] = useState(null);
@@ -78,76 +122,72 @@ export function Enviar() {
   const areaProblema = useRef(null);
 
   const problemaPrevio = modoServidor ? problemaDoArquivo(arquivoReal) : validarArquivo(arquivo);
-  const nomeDoMaterial = modoServidor ? (enviado?.nome_arquivo ?? arquivoReal?.name) : arquivo.nome;
-  const paginasDoMaterial = modoServidor
-    ? enviado?.paginas_estimadas
-      ? `cerca de ${enviado.numero_paginas}`
-      : enviado?.numero_paginas
-    : arquivo.paginas;
+  const podeEnviar = !problemaPrevio && (!modoServidor || arquivoReal);
 
   function mostrarProblema(erro) {
     setProblema(erro);
     anunciar(`Erro: ${erro.titulo}`);
-    window.setTimeout(() => areaProblema.current?.focus(), 0);
   }
 
-  async function avancarParaConfiguracao() {
+  // O foco vai para a mensagem depois que ela aparece: o botão que disparou
+  // o envio some durante o processamento.
+  useEffect(() => {
+    if (!problema) return;
+    areaProblema.current?.focus();
+    areaProblema.current?.scrollIntoView({ block: 'start' });
+  }, [problema]);
+
+  function escolherArquivoReal(novo) {
+    setArquivoReal(novo ?? null);
+    setEnviado(null);
     setProblema(null);
-    if (modoServidor) {
-      setEnviando(true);
-      anunciar('Enviando o material e lendo o texto.');
-      try {
-        setEnviado(await enviarArquivo(arquivoReal));
-        setPasso(1);
-        anunciar('Material aceito. Etapa 2 de 3: configurar a adaptação.');
-      } catch (erro) {
-        mostrarProblema(erro);
-      } finally {
-        setEnviando(false);
-      }
-      return;
-    }
-    try {
-      await enviarMaterial(arquivo);
-      setPasso(1);
-      anunciar('Material aceito. Etapa 2 de 3: configurar a adaptação.');
-    } catch (erro) {
-      mostrarProblema(erro);
-    }
+    if (novo) anunciar(`Arquivo escolhido: ${novo.name}.`);
   }
 
-  async function iniciarProcessamento() {
-    setPasso(2);
+  async function enviarEAdaptar(evento) {
+    evento.preventDefault();
+    setProblema(null);
     setProgresso(0);
+    setEtapaAtual('Enviando o material e lendo o texto');
+    setProcessando(true);
     cancelamento.current = { cancelado: false, controle: new AbortController() };
-    anunciar('Etapa 3 de 3: processando o material. Isso leva alguns segundos.');
+    anunciar('Enviando e adaptando o material. Isso leva alguns segundos.');
 
     if (modoServidor) {
+      let material = enviado;
       try {
-        await adaptarMaterial(enviado.id, (percentual, etapa) => {
-          setProgresso(percentual);
-          setEtapaAtual(etapa);
-        }, cancelamento.current);
+        if (!material) {
+          material = await enviarArquivo(arquivoReal);
+          setEnviado(material);
+        }
+        await adaptarMaterial(
+          material.id,
+          (percentual, etapa) => {
+            setProgresso(percentual);
+            setEtapaAtual(etapa);
+          },
+          cancelamento.current,
+        );
         anunciar('Adaptação concluída. Abrindo a revisão do material.');
-        navegar(`/materiais/${enviado.id}/adaptacao`);
+        navegar(`/materiais/${material.id}/adaptacao`);
       } catch (erro) {
+        setProcessando(false);
         if (cancelamento.current.cancelado) {
           // Cancelar descarta também o material já enviado.
-          await excluir(enviado.id).catch(() => {});
+          if (material) await excluir(material.id).catch(() => {});
           setEnviado(null);
-          setArquivoReal(null);
-          setPasso(0);
           anunciar('Processamento cancelado. Nenhum material foi salvo.');
           return;
         }
-        // O material continua enviado: dá para tentar adaptar de novo daqui.
-        setPasso(1);
+        // Se o envio deu certo e só a adaptação falhou, o material continua
+        // enviado e a próxima tentativa pula o envio.
         mostrarProblema(erro);
       }
       return;
     }
 
     try {
+      await enviarMaterial(arquivo);
       await processarAdaptacao((percentual, etapa) => {
         setProgresso(percentual);
         setEtapaAtual(etapa);
@@ -171,12 +211,11 @@ export function Enviar() {
       anunciar('Adaptação concluída. Abrindo a revisão do material.');
       navegar(`/materiais/${id}/adaptacao`);
     } catch (erro) {
+      setProcessando(false);
       if (cancelamento.current.cancelado) {
-        setPasso(0);
         anunciar('Processamento cancelado. Nenhum material foi salvo.');
         return;
       }
-      setPasso(0);
       mostrarProblema(erro);
     }
   }
@@ -187,246 +226,215 @@ export function Enviar() {
   }
 
   return (
-    <div className="pagina-fluxo">
-      <Migalhas itens={[{ rotulo: 'Meus materiais', para: '/painel' }, { rotulo: 'Enviar material' }]} />
-
+    <>
       <div className="cabecalho-pagina">
         <h1>Enviar material</h1>
-        <p>
-          Envie um material que você já usa em aula. O Entende+ devolve a versão adaptada para o
-          perfil TEA e uma atividade sobre o mesmo conteúdo.
-        </p>
+        <p>Envie o material da sua aula para o Entende+ adaptar para estudantes com TEA.</p>
       </div>
 
-      <Passos passos={PASSOS} atual={passo} />
-
-      {problema && (
-        <div ref={areaProblema} tabIndex={-1}>
-          <Aviso tipo="erro" titulo={problema.titulo} papel="alert">
-            <p>{problema.motivo}</p>
-            <p>
-              <strong>O que fazer:</strong> {problema.saida}
-            </p>
-            {problema.regra && (
-              <p className="campo__dica">
-                Regra do sistema: {problema.regra}.
-                {problema.regra === 'RN09' &&
-                  ' A recusa é proposital — adaptar um material lido pela metade produziria um resultado errado sem avisar você.'}
-              </p>
-            )}
-          </Aviso>
-        </div>
-      )}
-
-      {passo === 0 && (
-        <Cartao className="cartao--acao">
-          <h2>1. Escolher o material</h2>
-          <p className="campo__dica">
-            Aceitamos PDF e Word (.docx), com até 20 páginas e 15 MB por envio.
-          </p>
-
-          {/* Na demonstração, o envio de arquivo aparece desligado, com o motivo. */}
-          {modoServidor ? (
-            <div className="area-envio">
-              <label className="campo" style={{ marginBottom: 0 }}>
-                <span className="campo__rotulo">Arquivo do material</span>
-                <input
-                  type="file"
-                  accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  onChange={(e) => {
-                    setArquivoReal(e.target.files?.[0] ?? null);
-                    setProblema(null);
-                  }}
-                />
-              </label>
-              {arquivoReal && (
-                <p className="campo__dica" style={{ marginTop: 'var(--e3)', marginBottom: 0 }}>
-                  {arquivoReal.name} · {tamanhoLegivel(arquivoReal.size)}
+      <div className="enviar-grade">
+        <div>
+          {problema && (
+            <div ref={areaProblema} tabIndex={-1}>
+              <Aviso tipo="erro" titulo={problema.titulo} papel="alert" nivel={2}>
+                <p>{problema.motivo}</p>
+                <p>
+                  <strong>O que fazer:</strong> {problema.saida}
                 </p>
-              )}
+                {problema.regra && (
+                  <p className="campo__dica">
+                    Regra do sistema: {problema.regra}.
+                    {problema.regra === 'RN09' &&
+                      ' A recusa é proposital — adaptar um material lido pela metade produziria um resultado errado sem avisar você.'}
+                  </p>
+                )}
+              </Aviso>
             </div>
-          ) : (
-          <>
-          <div className="area-envio">
-            <Botao variante="secundario" disabled>
-              Upload do material
-            </Botao>
-            <div className="linha" style={{ justifyContent: 'center' }}>
-              <Etiqueta tom="neutra">Indisponível nesta demonstração</Etiqueta>
-            </div>
-            <p className="campo__dica" style={{ marginTop: 'var(--e3)', marginBottom: 0 }}>
-              O protótipo roda inteiro no navegador, sem servidor, e por isso não lê arquivo do seu
-              computador. Escolha um dos materiais de exemplo abaixo.
-            </p>
-          </div>
-
-          <fieldset>
-            <legend>Arquivos disponíveis nesta demonstração</legend>
-            {ARQUIVOS_DEMO.map((item) => {
-              const marcado = arquivo.id === item.id;
-              return (
-                <label key={item.id} className={`opcao${marcado ? ' opcao--marcada' : ''}`}>
-                  <input
-                    type="radio"
-                    name="arquivo"
-                    value={item.id}
-                    checked={marcado}
-                    onChange={() => {
-                      setArquivo(item);
-                      setProblema(null);
-                    }}
-                  />
-                  <span>
-                    <span className="opcao__titulo">{item.nome}</span>
-                    <span className="opcao__apoio">
-                      {item.tamanho} · {item.paginas} páginas — {item.descricao}
-                    </span>
-                  </span>
-                </label>
-              );
-            })}
-          </fieldset>
-          </>
           )}
 
-          {problemaPrevio && (
-            <Aviso tipo="atencao" titulo="Este arquivo não vai ser aceito">
-              <p>{problemaPrevio.motivo}</p>
+          {processando ? (
+            <Cartao>
+              <h2>Adaptando o material</h2>
               <p>
-                <strong>O que fazer:</strong> {problemaPrevio.saida}
+                Você pode acompanhar o andamento abaixo. Materiais de até 20 páginas levam menos de
+                dois minutos.
               </p>
-            </Aviso>
-          )}
-
-          <div className="linha linha-fim">
-            <Botao como="link" para="/painel" variante="discreto">
-              Cancelar
-            </Botao>
-            <Botao
-              onClick={avancarParaConfiguracao}
-              disabled={Boolean(problemaPrevio) || enviando || (modoServidor && !arquivoReal)}
-            >
-              {enviando ? 'Enviando…' : 'Continuar'}
-            </Botao>
-          </div>
-        </Cartao>
-      )}
-
-      {passo === 1 && (
-        <Cartao className="cartao--acao">
-          <h2>2. Configurar a adaptação</h2>
-
-          <Aviso tipo="boa" titulo="Material lido com sucesso">
-            <p>
-              <strong>{nomeDoMaterial}</strong> — {paginasDoMaterial} páginas, texto extraído com a
-              ordem de leitura e os títulos preservados.
-            </p>
-          </Aviso>
-
-          <div className="campo" style={{ maxWidth: '44rem' }}>
-            <span className="campo__rotulo" id="rotulo-perfil">
-              Perfil de adaptação
-            </span>
-            <div className="opcao opcao--marcada" aria-labelledby="rotulo-perfil">
-              <span aria-hidden="true">●</span>
-              <span>
-                <span className="opcao__titulo">TEA — Transtorno do Espectro Autista</span>
-                <span className="opcao__apoio">
-                  Único perfil desta versão. Cada adaptação corresponde a um perfil só (RN03).
-                </span>
-              </span>
-            </div>
-
-            {PERFIS_FUTUROS.map((perfil) => (
-              <div key={perfil.sigla} className="opcao opcao--indisponivel" aria-disabled="true">
-                <span aria-hidden="true">○</span>
-                <span>
-                  <span className="opcao__titulo">
-                    {perfil.sigla} — {perfil.nome}
-                  </span>
-                  <span className="opcao__apoio">{perfil.apoio}</span>
-                </span>
-                <span style={{ marginLeft: 'auto', flex: 'none' }}>
-                  <Etiqueta tom="neutra">Extensão futura</Etiqueta>
-                </span>
+              <BarraProgresso valor={progresso} etapa={etapaAtual} />
+              <div className="linha" style={{ marginTop: 'var(--e5)' }}>
+                <Botao variante="secundario" onClick={cancelar}>
+                  Cancelar o processamento
+                </Botao>
               </div>
-            ))}
+              <p className="campo__dica" style={{ marginTop: 'var(--e3)' }}>
+                Se cancelar, nada é salvo e o arquivo enviado é descartado.
+              </p>
+            </Cartao>
+          ) : (
+            <form className="cartao enviar-formulario" onSubmit={enviarEAdaptar} noValidate>
+              <section className="enviar-secao" aria-labelledby="secao-arquivo">
+                <span className="enviar-secao__numero" aria-hidden="true">
+                  1
+                </span>
+                <div>
+                  <h2 id="secao-arquivo">Selecione o arquivo</h2>
+                  <p className="enviar-secao__apoio">Você pode enviar arquivos em PDF ou DOCX (Word).</p>
 
-            <span className="campo__dica" style={{ marginTop: 'var(--e2)' }}>
-              O conjunto de regras, os materiais de teste e a validação com professores foram
-              construídos para o perfil TEA. Adaptar para outro perfil exige um conjunto de regras
-              próprio, e não é o recorte deste trabalho.
-            </span>
-          </div>
+                  {modoServidor ? (
+                    <div
+                      className={`area-envio${arrastando ? ' area-envio--arrastando' : ''}`}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setArrastando(true);
+                      }}
+                      onDragLeave={() => setArrastando(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setArrastando(false);
+                        escolherArquivoReal(e.dataTransfer.files?.[0]);
+                      }}
+                    >
+                      <CloudUpload aria-hidden="true" className="area-envio__icone" />
+                      <p className="area-envio__titulo">Arraste e solte o arquivo aqui</p>
+                      <p className="area-envio__apoio">ou</p>
+                      <input
+                        id="arquivo-material"
+                        className="apenas-leitor area-envio__entrada"
+                        type="file"
+                        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        onChange={(e) => escolherArquivoReal(e.target.files?.[0])}
+                      />
+                      <label htmlFor="arquivo-material" className="botao botao--principal">
+                        <FileText aria-hidden="true" />
+                        Selecionar arquivo
+                      </label>
+                      {arquivoReal ? (
+                        <p className="area-envio__escolhido">
+                          <CircleCheck aria-hidden="true" />
+                          {arquivoReal.name} · {tamanhoLegivel(arquivoReal.size)}
+                        </p>
+                      ) : (
+                        <p className="area-envio__apoio">
+                          Formatos aceitos: PDF ou DOCX · Até 20 páginas e {LIMITE_MB} MB
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      {/* Na demonstração, o envio de arquivo aparece desligado, com o motivo. */}
+                      <div className="area-envio area-envio--desligada">
+                        <CloudUpload aria-hidden="true" className="area-envio__icone" />
+                        <p className="area-envio__titulo">Arraste e solte o arquivo aqui</p>
+                        <Etiqueta tom="neutra">Indisponível nesta demonstração</Etiqueta>
+                        <p className="area-envio__apoio">
+                          O protótipo roda inteiro no navegador, sem servidor, e por isso não lê
+                          arquivo do seu computador. Escolha um dos materiais de exemplo abaixo.
+                        </p>
+                      </div>
 
-          <label className="campo">
-            <span className="campo__rotulo">Etapa escolar de destino</span>
-            <select className="selecao" defaultValue="5" disabled>
-              <option value="5">5º ano do ensino fundamental</option>
-            </select>
-            <span className="campo__dica">
-              Esta versão do sistema foi construída e validada para o 5º ano.
-            </span>
-          </label>
+                      <fieldset>
+                        <legend>Arquivos disponíveis nesta demonstração</legend>
+                        {ARQUIVOS_DEMO.map((item) => {
+                          const marcado = arquivo.id === item.id;
+                          return (
+                            <label key={item.id} className={`opcao${marcado ? ' opcao--marcada' : ''}`}>
+                              <input
+                                type="radio"
+                                name="arquivo"
+                                value={item.id}
+                                checked={marcado}
+                                onChange={() => {
+                                  setArquivo(item);
+                                  setProblema(null);
+                                }}
+                              />
+                              <span>
+                                <span className="opcao__titulo">{item.nome}</span>
+                                <span className="opcao__apoio">
+                                  {item.tamanho} · {item.paginas} páginas — {item.descricao}
+                                </span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </fieldset>
+                    </>
+                  )}
 
-          {!modoServidor && (
-          <label className="campo">
-            <span className="campo__rotulo">Disciplina</span>
-            <select
-              className="selecao"
-              value={disciplina}
-              onChange={(e) => setDisciplina(e.target.value)}
-            >
-              <option>Ciências</option>
-              <option>História</option>
-              <option>Geografia</option>
-              <option>Língua Portuguesa</option>
-              <option>Matemática</option>
-            </select>
-          </label>
+                  {problemaPrevio && (
+                    <Aviso tipo="atencao" titulo="Este arquivo não vai ser aceito">
+                      <p>{problemaPrevio.motivo}</p>
+                      <p>
+                        <strong>O que fazer:</strong> {problemaPrevio.saida}
+                      </p>
+                    </Aviso>
+                  )}
+                </div>
+              </section>
+
+              <section className="enviar-secao" aria-labelledby="secao-informacoes">
+                <span className="enviar-secao__numero" aria-hidden="true">
+                  2
+                </span>
+                <div>
+                  <h2 id="secao-informacoes">Informações do material</h2>
+
+                  {!modoServidor && (
+                    <div className="campo">
+                      <label className="campo__rotulo" htmlFor="disciplina">
+                        Disciplina
+                      </label>
+                      <select
+                        id="disciplina"
+                        className="selecao"
+                        value={disciplina}
+                        onChange={(e) => setDisciplina(e.target.value)}
+                      >
+                        {DISCIPLINAS.map((d) => (
+                          <option key={d}>{d}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  <dl className="enviar-fixos">
+                    <div>
+                      <dt>Perfil de adaptação</dt>
+                      <dd>TEA — Transtorno do Espectro Autista</dd>
+                    </div>
+                    <div>
+                      <dt>Etapa escolar</dt>
+                      <dd>5º ano do ensino fundamental</dd>
+                    </div>
+                    <div>
+                      <dt>Conjunto de regras</dt>
+                      <dd>
+                        {conjuntoVigente.identificador} v{conjuntoVigente.versao}
+                      </dd>
+                    </div>
+                  </dl>
+                  <p className="campo__dica">
+                    Esta versão foi construída e validada para estudantes com TEA do 5º ano. A versão
+                    do conjunto de regras fica registrada junto com a adaptação e não muda depois
+                    (RN08).
+                  </p>
+                </div>
+              </section>
+
+              <div className="enviar-formulario__acoes">
+                <Botao como="link" para="/painel" variante="secundario">
+                  Cancelar
+                </Botao>
+                <Botao type="submit" disabled={!podeEnviar}>
+                  <Sparkles aria-hidden="true" />
+                  Enviar material
+                </Botao>
+              </div>
+            </form>
           )}
+        </div>
 
-          <div className="linha" style={{ marginTop: 'var(--e4)' }}>
-            <Etiqueta tom="info">
-              Conjunto {conjuntoVigente.identificador} v{conjuntoVigente.versao}
-            </Etiqueta>
-            <span className="campo__dica" style={{ marginBottom: 0 }}>
-              A versão do conjunto de regras fica registrada junto com a adaptação e não pode ser
-              alterada depois (RN08).
-            </span>
-          </div>
-
-          <div className="linha linha-fim">
-            {!modoServidor && (
-              <Botao variante="discreto" onClick={() => setPasso(0)}>
-                Voltar
-              </Botao>
-            )}
-            <Botao onClick={iniciarProcessamento}>Adaptar material</Botao>
-          </div>
-        </Cartao>
-      )}
-
-      {passo === 2 && (
-        <Cartao className="cartao--acao">
-          <h2>3. Adaptando o material</h2>
-          <p>
-            Você pode acompanhar o andamento abaixo. Materiais de até 20 páginas levam menos de
-            dois minutos.
-          </p>
-
-          <BarraProgresso valor={progresso} etapa={etapaAtual} />
-
-          <div className="linha" style={{ marginTop: 'var(--e5)' }}>
-            <Botao variante="secundario" onClick={cancelar}>
-              Cancelar o processamento
-            </Botao>
-          </div>
-          <p className="campo__dica" style={{ marginTop: 'var(--e3)' }}>
-            Se cancelar, nada é salvo e o arquivo enviado é descartado.
-          </p>
-        </Cartao>
-      )}
-    </div>
+        <Lateral />
+      </div>
+    </>
   );
 }

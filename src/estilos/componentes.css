@@ -705,3 +705,73 @@ table.dados--estreita { max-width: 46rem; }
    contraste o contorno volta. */
 .etiqueta { border-color: transparent !important; }
 :root[data-contraste='alto'] .etiqueta { border-color: currentColor !important; }
+
+/* --- Enviar material ----------------------------------------------------- */
+.enviar-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+  gap: var(--e5);
+  align-items: start;
+}
+@media (max-width: 75rem) { .enviar-grade { grid-template-columns: minmax(0, 1fr); } }
+
+.enviar-formulario { padding: var(--e6); }
+.enviar-secao { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--e4); }
+.enviar-secao + .enviar-secao { margin-top: var(--e5); padding-top: var(--e5); border-top: 1px solid var(--cor-borda); }
+.enviar-secao h2 { font-size: 1.25rem; }
+.enviar-secao__apoio { color: var(--cor-texto-apoio); margin: var(--e1) 0 var(--e4); }
+.enviar-secao__numero,
+.enviar-como__numero {
+  width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 700; font-size: 1.125rem;
+  background: var(--cor-primaria); color: #fff;
+}
+.enviar-secao .campo { max-width: none; }
+.enviar-secao .campo__dica { margin-bottom: 0; }
+
+.area-envio {
+  display: grid; justify-items: center; gap: var(--e2);
+  border: 2px dashed #8fb3e6;
+  background: #f4f8fe;
+  padding: var(--e6) var(--e5);
+}
+.area-envio p { margin: 0; }
+.area-envio .botao { margin: var(--e2) 0; }
+.area-envio__icone { width: 3.5rem; height: 3.5rem; color: var(--cor-primaria); }
+.area-envio__titulo { font-weight: 700; font-size: 1.125rem; }
+.area-envio__apoio { color: var(--cor-texto-apoio); font-size: 0.9375rem; }
+.area-envio__escolhido { display: flex; align-items: center; gap: var(--e2); font-weight: 600; color: var(--cor-sucesso); overflow-wrap: anywhere; }
+.area-envio__escolhido svg { width: 1.25rem; height: 1.25rem; flex: none; }
+.area-envio--arrastando { border-color: var(--cor-primaria); background: var(--cor-primaria-clara); }
+.area-envio--desligada { background: var(--cor-superficie-alt); border-color: var(--cor-borda-forte); }
+.area-envio--desligada .area-envio__icone { color: var(--cor-borda-forte); }
+/* A entrada de arquivo fica escondida; o foco aparece no botão (o rótulo). */
+.area-envio__entrada:focus-visible + label { outline: var(--contorno-foco); outline-offset: var(--deslocamento-foco); }
+
+.enviar-fixos { display: grid; gap: var(--e3); grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); margin: var(--e2) 0 var(--e3); }
+.enviar-fixos > div { background: var(--cor-superficie-alt); border-radius: var(--raio); padding: var(--e3); }
+.enviar-fixos dt { font-size: 0.875rem; font-weight: 600; color: var(--cor-texto-apoio); }
+.enviar-fixos dd { margin: var(--e1) 0 0; font-weight: 600; }
+
+.enviar-formulario__acoes {
+  display: flex; justify-content: space-between; gap: var(--e3); flex-wrap: wrap;
+  margin-top: var(--e6);
+}
+.enviar-formulario__acoes .botao { min-width: 10rem; min-height: 3rem; }
+
+.enviar-lateral { display: grid; gap: var(--e4); }
+.enviar-lateral__bloco { border-radius: var(--raio-g); padding: var(--e5); }
+.enviar-lateral__bloco h2 { font-size: 1.25rem; display: flex; align-items: center; gap: var(--e2); margin-bottom: var(--e4); }
+.enviar-lateral__bloco h2 svg { width: 1.5rem; height: 1.5rem; color: var(--cor-destaque-escuro); }
+.enviar-lateral__bloco--como { background: #eaf2fd; }
+.enviar-lateral__bloco--dicas { background: #fdf6e7; }
+.enviar-lateral__bloco--dicas ul { padding-left: 1.25rem; display: grid; gap: var(--e2); }
+.enviar-lateral__bloco--dicas li::marker { color: var(--cor-destaque); }
+.enviar-como { list-style: none; padding: 0; display: grid; gap: var(--e4); }
+.enviar-como li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--e3); }
+.enviar-como__numero { background: #cfe0fa; color: var(--cor-primaria-escura); }
+.enviar-como strong { display: block; }
+.enviar-como li span span { color: var(--cor-texto-apoio); font-size: 0.9375rem; }
+:root[data-contraste='alto'] .enviar-lateral__bloco { background: #000; border: 2px solid #fff; }
+.enviar-secao h2 + .campo, .enviar-secao h2 + .enviar-fixos { margin-top: var(--e3); }
