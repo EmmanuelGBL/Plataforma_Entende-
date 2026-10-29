@@ -39,7 +39,7 @@ A mesma atividade, com as mesmas questões, por três caminhos. Quem escolhe ent
 
 | Forma | O que é |
 | --- | --- |
-| **Jogo** | Treino de pênalti (ou de pontaria, no tema neutro). A criança escolhe onde mirar, responde e vê o resultado. |
+| **Jogo** | Viagem pelo espaço (o tema neutro, padrão) ou treino de pênalti. A criança toca numa das cinco áreas da cena, responde numa janela dentro do jogo e vê o resultado. |
 | **Lista de perguntas** | Uma questão por vez, sem cena e sem desenho. |
 | **Folha impressa** | PDF das questões, com gabarito opcional em página separada. |
 

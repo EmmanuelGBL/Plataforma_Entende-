@@ -109,7 +109,10 @@ teste e a seguinte.
 | --- | --- |
 | `#/` | Entrar |
 | `#/painel` | Meus materiais |
-| `#/enviar` | Enviar material, em três passos |
+| `#/painel?enviar=1` | Enviar material, em janela sobre Meus materiais (`#/enviar` leva até ela) |
+| `#/atividades` | Todas as atividades, por situação do link |
+| `#/regras` | Regras de adaptação do perfil TEA (RF10) |
+| `#/configuracoes` | Conta, exibição e perfil de adaptação |
 | `#/materiais/m-102/adaptacao` | Revisar a adaptação — **a tela núcleo** |
 | `#/materiais/m-102/impressao` | Material adaptado em PDF (botão Salvar como PDF) |
 | `#/materiais/m-102/atividade` | Revisar e publicar a atividade |
@@ -117,7 +120,7 @@ teste e a seguinte.
 | `#/atividade/PXK4T9` | Escolher a forma: jogar ou responder (RF22) |
 | `#/atividade/PXK4T9/jogo` | Atividade gamificada (RF21) |
 | `#/atividade/PXK4T9/perguntas` | Lista de perguntas, sem jogo (RF16, RF17) |
-| `#/ajuda` | Ajuda e catálogo das dez regras |
+| `#/ajuda` | Ajuda: perguntas frequentes e atalhos de teclado |
 | `#/acessibilidade` | Declaração de acessibilidade |
 
 Qualquer outro endereço cai na página de erro.
