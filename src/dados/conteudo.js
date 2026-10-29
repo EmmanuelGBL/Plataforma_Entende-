@@ -234,7 +234,9 @@ export const METRICAS = [
 
 /* --- Questões geradas do mesmo material (RF13, RN04) --------------------- */
 /* Na demonstração a resposta certa é sempre a letra A, para a apresentação à
-   banca. Com o servidor, o gerador embaralha a posição (questoes.py). */
+   banca. Com o servidor, o gerador embaralha a posição (questoes.py).
+   A dica fala do conteúdo, sem entregar a resposta (G04, G11), como a que o
+   servidor gera; sem ela, o jogo cai no "a resposta está neste trecho". */
 export const QUESTOES = [
   {
     id: 'q1',
@@ -243,6 +245,7 @@ export const QUESTOES = [
     alternativas: ['Fotossíntese', 'Respiração', 'Digestão', 'Evaporação'],
     correta: 0,
     trecho: 'Bloco 1 — O que é a fotossíntese',
+    dica: 'O nome desse processo tem a ver com luz. Ele é o assunto principal do texto.',
   },
   {
     id: 'q2',
@@ -251,6 +254,7 @@ export const QUESTOES = [
     alternativas: ['Nas folhas', 'Nas raízes', 'No caule', 'Nas flores'],
     correta: 0,
     trecho: 'Bloco 2 — Onde a fotossíntese acontece',
+    dica: 'Pense na parte verde da planta, onde ficam os cloroplastos e a clorofila.',
   },
   {
     id: 'q3',
@@ -259,6 +263,7 @@ export const QUESTOES = [
     alternativas: ['A clorofila', 'A glicose', 'A água', 'O gás oxigênio'],
     correta: 0,
     trecho: 'Bloco 2 — Onde a fotossíntese acontece',
+    dica: 'É a substância que dá a cor verde às folhas.',
   },
   {
     id: 'q4',
@@ -272,6 +277,7 @@ export const QUESTOES = [
     ],
     correta: 0,
     trecho: 'Bloco 3 — O que a planta usa e o que ela produz',
+    dica: 'Uma coisa vem do Sol, outra entra pelas raízes e a outra vem do ar.',
   },
   {
     id: 'q5',
@@ -285,6 +291,7 @@ export const QUESTOES = [
     ],
     correta: 0,
     trecho: 'Bloco 4 — O que acontece de noite',
+    dica: 'Lembre do que a planta precisa para fazer a fotossíntese. O que falta quando é noite?',
   },
 ];
 
