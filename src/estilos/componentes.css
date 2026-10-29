@@ -1195,3 +1195,21 @@ table.dados--estreita { max-width: 46rem; }
   .jogo__interacao .atividade__pergunta { text-align: left; font-size: 1.5rem; margin-bottom: var(--e4); }
   .jogo__interacao .jogo__passo { margin-top: 0; }
 }
+
+/* --- Alto contraste: fundos claros fixos ---------------------------------
+      Tudo que tem fundo claro escrito à mão (sem variável) vira preto com
+      traço amarelo, para o ícone e o número continuarem visíveis (SC 1.4.11). */
+:root[data-contraste='alto'] .item-material__arquivo,
+:root[data-contraste='alto'] .material-resumo__icone,
+:root[data-contraste='alto'] .entrada-destaques__icone,
+:root[data-contraste='alto'] .enviar-como__numero,
+:root[data-contraste='alto'] .pergunta__numero,
+:root[data-contraste='alto'] .atividade__letra,
+:root[data-contraste='alto'] .etapas__numero,
+:root[data-contraste='alto'] .escolha__figura {
+  background: #000000 !important;
+  color: #ffe600 !important;
+  border: 2px solid #ffe600 !important;
+}
+:root[data-contraste='alto'] .escolha__opcao--futebol .escolha__figura svg circle { fill: #000000; }
+:root[data-contraste='alto'] .resumo-metricas__item { background: #000000; border: 1px solid #ffffff; }
