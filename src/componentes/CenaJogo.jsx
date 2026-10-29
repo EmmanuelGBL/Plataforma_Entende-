@@ -1,97 +1,173 @@
-/* Cena do jogo em SVG (só desenho). O SVG é aria-hidden: tudo o que acontece
-   na cena também está escrito na tela e é anunciado.
+import { MousePointerClick } from 'lucide-react';
+
+/* Cena do jogo: desenho em SVG (aria-hidden) com as áreas de mira por cima,
+   que são botões de verdade. Tudo o que acontece na cena também está escrito
+   na tela e é anunciado.
 
    Estilo plano, sem fotorrealismo (G13), com tons frios e um único acento
-   quente, as luvas, fora do centro (G12).
+   quente fora do centro (G12): as luvas do goleiro no futebol, a chama do
+   foguete no espaço.
+
+   Os dois temas têm as mesmas cinco áreas, no mesmo lugar, e a mesma ordem
+   de turno (G01); muda só o desenho (G07).
 
    Regras de movimento:
-   1. a bola só se move depois da resposta confirmada (G03);
-   2. o goleiro pula sempre para a ponta oposta ao canto escolhido, então
+   1. o objeto (bola ou foguete) só se move depois da resposta (G03);
+   2. no futebol o goleiro pula sempre para o lado oposto ao escolhido, então
       acerto é sempre gol (G02);
-   3. no erro a bola passa por cima do gol, nunca vai para a mão do goleiro (G04);
-   4. enquanto a criança lê, o goleiro só balança devagar.
+   3. no erro o objeto passa por cima do alvo, nunca é defendido (G04);
+   4. enquanto a criança lê, a cena fica parada, só o goleiro balança devagar.
 
    Tudo é transition/animation, e o base.css zera os dois quando o movimento
    reduzido está ligado (G09). */
 
-/* O alvo do meio fica mais alto que os laterais, abaixo do travessão (y=42). */
-export const CANTOS = [
-  { x: 96, y: 80 },
-  { x: 160, y: 62 },
-  { x: 224, y: 80 },
+/** As cinco áreas, em unidades do viewBox (320 × 180): o centro (onde o
+ *  objeto chega) e o retângulo clicável. A do meio ocupa a coluna inteira. */
+export const ZONAS = [
+  { x: 95, y: 68, area: [62, 52, 66, 35] },
+  { x: 95, y: 105, area: [62, 87, 66, 35] },
+  { x: 160, y: 70, area: [128, 52, 64, 70] },
+  { x: 225, y: 68, area: [192, 52, 66, 35] },
+  { x: 225, y: 105, area: [192, 87, 66, 35] },
 ];
 
-const REPOUSO = { x: 160, y: 156 };
-const ALTURA_POR_CIMA = 20;
+const LARGURA = 320;
+const ALTURA = 180;
+/* Ponto de partida: a marca do pênalti, ou a base de lançamento. */
+const REPOUSO = { futebol: { x: 160, y: 156 }, espaco: { x: 160, y: 164 } };
+/* Altura onde o objeto passa no erro: acima da trave, ou acima dos planetas. */
+const ALTURA_POR_CIMA = { futebol: 16, espaco: 36 };
+const RAIO_PLANETA = 13;
 
 /** Linha do gol: é onde o goleiro tem os pés. */
 const LINHA_DO_GOL = 128;
 
-export function CenaJogo({ tema, canto, fase, resultado, comemorar, sobreposicao }) {
+const porcento = (valor, total) => `${((valor / total) * 100).toFixed(3)}%`;
+
+export function CenaJogo({
+  tema,
+  canto,
+  fase,
+  resultado,
+  comemorar,
+  cantos,
+  convite,
+  aoMirar,
+  sobreposicao,
+}) {
+  const espaco = tema !== 'futebol';
   const mirou = canto !== null && canto !== undefined;
   const mostrandoResultado = fase === 'resultado' && mirou;
-  const foiGol = mostrandoResultado && resultado === 'acerto';
+  const acertou = mostrandoResultado && resultado === 'acerto';
+  const zona = mirou ? ZONAS[canto] : null;
 
-  let bola = REPOUSO;
+  /* Onde o objeto para: no alvo, no acerto; acima dele, no erro. O foguete
+     pousa em cima do planeta. */
+  let objeto = espaco ? REPOUSO.espaco : REPOUSO.futebol;
   if (mostrandoResultado) {
-    bola = foiGol ? CANTOS[canto] : { x: CANTOS[canto].x, y: ALTURA_POR_CIMA };
+    if (!acertou) objeto = { x: zona.x, y: espaco ? ALTURA_POR_CIMA.espaco : ALTURA_POR_CIMA.futebol };
+    else objeto = espaco ? { x: zona.x, y: zona.y - RAIO_PLANETA + 1 } : zona;
   }
+  /* O objeto encolhe ao chegar, para dar a ideia de distância. */
+  const escala = acertou ? (espaco ? 0.7 : 0.78) : 1;
 
-  // Sempre a ponta oposta à escolhida (regra 2 acima).
-  const ladoDoPulo = mostrandoResultado ? (canto === 2 ? -1 : 1) : 0;
+  // Goleiro: sempre o lado oposto ao escolhido (regra 2).
+  const ladoEscolhido = mirou ? Math.sign(zona.x - 160) || -1 : 0;
   const guardiao = {
-    x: mostrandoResultado ? CANTOS[canto === 2 ? 0 : 2].x : 160,
+    x: mostrandoResultado ? 160 - ladoEscolhido * 65 : 160,
     y: mostrandoResultado ? LINHA_DO_GOL - 12 : LINHA_DO_GOL,
-    giro: ladoDoPulo * 24,
+    giro: mostrandoResultado ? -ladoEscolhido * 24 : 0,
   };
-
-  /* A bola encolhe ao entrar, para dar a ideia de profundidade da rede. */
-  const escalaDaBola = foiGol ? 0.78 : 1;
 
   return (
     <div
       className="jogo__cena"
-      data-tema={tema}
+      data-tema={espaco ? 'espaco' : 'futebol'}
+      data-fase={fase}
       data-resultado={mostrandoResultado ? resultado : undefined}
     >
-      <svg viewBox="0 0 320 180" aria-hidden="true" focusable="false">
-        {tema === 'futebol' ? <Campo /> : <Quadra />}
+      <svg viewBox={`0 0 ${LARGURA} ${ALTURA}`} aria-hidden="true" focusable="false">
+        {espaco ? <Espaco destacado={mirou ? canto : null} /> : <Campo />}
 
-        <g
-          className="jogo__guardiao"
-          transform={`translate(${guardiao.x} ${guardiao.y}) rotate(${guardiao.giro})`}
-        >
-          <g className="jogo__guardiao-espera">
-            <Guardiao />
+        {!espaco && (
+          <g
+            className="jogo__guardiao"
+            style={{
+              transform: `translate(${guardiao.x}px, ${guardiao.y}px) rotate(${guardiao.giro}deg)`,
+            }}
+          >
+            <g className="jogo__guardiao-espera">
+              <Guardiao />
+            </g>
           </g>
-        </g>
+        )}
 
-        {/* Balanço da rede no gol: efeito visual do acerto (G08). */}
-        {foiGol && comemorar && (
-          <g className="jogo__balanco" transform={`translate(${bola.x} ${bola.y})`}>
+        {/* Efeito visual do acerto (G08): a rede balança ou o planeta brilha. */}
+        {acertou && comemorar && (
+          <g className="jogo__balanco" transform={`translate(${zona.x} ${zona.y})`}>
             <circle r="14" />
             <circle r="22" />
           </g>
         )}
 
-        {/* Marca do canto escolhido, visível até o fim da rodada. */}
+        {/* Marca da área escolhida, visível até o fim da rodada. */}
         {mirou && (
-          <g className="jogo__mira" transform={`translate(${CANTOS[canto].x} ${CANTOS[canto].y})`}>
-            <circle r="16" />
-            <path d="M -7 0 H 7 M 0 -7 V 7" />
+          <g className="jogo__mira" transform={`translate(${zona.x} ${zona.y})`}>
+            <circle r={espaco ? 18 : 16} />
+            {/* No espaço a cruz taparia o planeta: fica só o anel. */}
+            {!espaco && <path d="M -7 0 H 7 M 0 -7 V 7" />}
           </g>
         )}
 
         <g
           className="jogo__movel"
-          transform={`translate(${bola.x} ${bola.y}) scale(${escalaDaBola})`}
+          data-em-voo={mostrandoResultado ? 'sim' : undefined}
+          style={{ transform: `translate(${objeto.x}px, ${objeto.y}px) scale(${escala})` }}
         >
-          {tema === 'futebol' ? <Bola /> : <Disco />}
+          {espaco ? <Foguete /> : <Bola />}
         </g>
+
+        {/* Bandeirinha no planeta onde o foguete pousou. */}
+        {acertou && espaco && (
+          <g className="jogo__bandeira" transform={`translate(${zona.x + 9} ${zona.y - 8})`}>
+            <path d="M 0 0 V -12" />
+            <path d="M 0 -12 L 8 -9 L 0 -6 Z" />
+          </g>
+        )}
       </svg>
 
-      {/* O resultado aparece no centro da cena, com o botão de seguir junto. */}
-      {sobreposicao && <div className="jogo__aviso-cena">{sobreposicao}</div>}
+      {/* Áreas de mira: botões sobre o desenho, na mesma ordem para o teclado
+          (esquerda em cima, esquerda embaixo, meio, direita em cima, direita
+          embaixo). Só existem enquanto a criança escolhe. */}
+      {fase === 'mirar' && (
+        <>
+          <p className="jogo__convite">
+            <MousePointerClick aria-hidden="true" />
+            {convite}
+          </p>
+          <ul className="jogo__zonas" aria-label={convite}>
+            {ZONAS.map(({ area: [x, y, largura, altura] }, posicao) => (
+              <li key={cantos[posicao]}>
+                <button
+                  type="button"
+                  className="jogo__zona"
+                  style={{
+                    left: porcento(x, LARGURA),
+                    top: porcento(y, ALTURA),
+                    width: porcento(largura, LARGURA),
+                    height: porcento(altura, ALTURA),
+                  }}
+                  onClick={() => aoMirar(posicao)}
+                >
+                  <span className="apenas-leitor">{cantos[posicao]}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {sobreposicao}
     </div>
   );
 }
@@ -122,7 +198,7 @@ function Guardiao() {
       <rect className="jogo-g__camisa-faixa" x="-16" y="-52" width="32" height="5" />
       <path className="jogo-g__camisa-gola" d="M -6 -60 H 6 L 3 -55 H -3 Z" />
 
-      {/* Braços abertos para os lados, para não esconder o alvo do meio. */}
+      {/* Braços abertos para os lados. */}
       <path className="jogo-g__manga" d="M -14 -56 L -27 -58" />
       <path className="jogo-g__manga" d="M 14 -56 L 27 -58" />
       <path className="jogo-g__pele-traco" d="M -27 -58 L -35 -50" />
@@ -218,13 +294,18 @@ function pentagono(cx, cy, raio, rotacaoGraus) {
   }).join(' ');
 }
 
-/** Versão do tema neutro: um disco. */
-function Disco() {
+/* --- Foguete ---------------------------------------------------------------
+      Origem na base, no centro: é o ponto que encosta no planeta. A chama só
+      aparece durante o voo. */
+function Foguete() {
   return (
-    <g className="jogo__bola">
-      <rect className="jogo-b__couro" x="-9" y="-9" width="18" height="18" rx="5" />
-      <rect className="jogo-b__gomo" x="-4.5" y="-4.5" width="9" height="9" rx="2.5" />
-      <rect className="jogo-b__contorno" x="-9" y="-9" width="18" height="18" rx="5" />
+    <g className="jogo__foguete">
+      <path className="jogo-f__chama" d="M -3.5 0 Q 0 9 3.5 0 Z" />
+      <path className="jogo-f__aleta" d="M -5 -4 L -9 1 L -5 -1 Z" />
+      <path className="jogo-f__aleta" d="M 5 -4 L 9 1 L 5 -1 Z" />
+      <path className="jogo-f__corpo" d="M -5 0 V -14 Q -5 -22 0 -26 Q 5 -22 5 -14 V 0 Z" />
+      <path className="jogo-f__ponta" d="M -4.2 -18 Q -3.6 -23 0 -26 Q 3.6 -23 4.2 -18 Z" />
+      <circle className="jogo-f__janela" cx="0" cy="-11" r="2.6" />
     </g>
   );
 }
@@ -264,26 +345,46 @@ function Campo() {
   );
 }
 
-/* --- Tema neutro ---------------------------------------------------------
-      Mesma estrutura, sem esporte: um quadro com três alvos (G07). */
-function Quadra() {
+/* --- Tema espaço (o neutro, padrão) --------------------------------------
+      Céu claro com poucas estrelas de baixo contraste (G10, G12), cinco
+      planetas no lugar das cinco áreas e a base de lançamento embaixo. Sem
+      adversário: ninguém defende, o foguete só precisa da resposta certa. */
+const PLANETAS = ['a', 'b', 'c', 'd', 'e'];
+const ESTRELAS = [
+  [24, 22], [58, 140], [118, 26], [204, 30], [292, 24], [300, 118], [20, 96], [270, 150],
+  [140, 118], [184, 132],
+];
+
+function Espaco({ destacado }) {
   return (
     <g className="jogo__palco">
-      <rect className="jogo__ceu" x="0" y="0" width="320" height="124" />
-      <rect className="jogo__gramado" x="0" y="118" width="320" height="62" />
+      <rect className="jogo__ceu" x="0" y="0" width="320" height="180" />
 
-      <rect className="jogo__rede-fundo" x="46" y="42" width="228" height="86" rx="8" />
+      <g className="jogo__estrelas">
+        {ESTRELAS.map(([x, y]) => (
+          <path key={`${x}-${y}`} d={`M ${x} ${y - 3} L ${x + 1} ${y - 1} L ${x + 3} ${y} L ${x + 1} ${y + 1} L ${x} ${y + 3} L ${x - 1} ${y + 1} L ${x - 3} ${y} L ${x - 1} ${y - 1} Z`} />
+        ))}
+      </g>
 
-      {CANTOS.map((posicao) => (
-        <g key={posicao.x}>
-          <circle className="jogo__lugar" cx={posicao.x} cy={posicao.y} r="17" />
-          <circle className="jogo__lugar-centro" cx={posicao.x} cy={posicao.y} r="6" />
+      {ZONAS.map(({ x, y }, posicao) => (
+        <g
+          key={PLANETAS[posicao]}
+          className={`jogo__planeta jogo__planeta--${PLANETAS[posicao]}`}
+          data-destacado={destacado === posicao ? 'sim' : undefined}
+          transform={`translate(${x} ${y})`}
+        >
+          <circle r={RAIO_PLANETA} />
+          {/* Detalhe plano de cada planeta: faixa, cratera ou anel. */}
+          {posicao === 0 && <path className="jogo__planeta-detalhe" d="M -12 -4 Q 0 -1 12 -4 V 0 Q 0 3 -12 0 Z" />}
+          {posicao === 1 && <circle className="jogo__planeta-detalhe" cx="-4" cy="3" r="3" />}
+          {posicao === 2 && <ellipse className="jogo__planeta-anel" rx="21" ry="5" transform="rotate(-12)" />}
+          {posicao === 3 && <circle className="jogo__planeta-detalhe" cx="4" cy="-3" r="4" />}
+          {posicao === 4 && <path className="jogo__planeta-detalhe" d="M -12 3 Q 0 6 12 3 V 6 Q 0 9 -12 6 Z" />}
         </g>
       ))}
 
-      <path className="jogo__linha-campo" d="M 24 174 L 56 140 H 264 L 296 174" />
-      <rect className="jogo__trave" x="46" y="42" width="228" height="86" rx="8" />
-      <ellipse className="jogo__marca-penalti" cx="160" cy="162" rx="7" ry="2.4" />
+      {/* base de lançamento */}
+      <path className="jogo__base" d="M 140 164 H 180 L 174 170 H 146 Z" />
     </g>
   );
 }

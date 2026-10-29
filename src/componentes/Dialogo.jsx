@@ -10,27 +10,29 @@ import { Botao } from './basicos.jsx';
    Dialogo: confirmação das ações irreversíveis (excluir, publicar, revogar),
    com o par cancelar/confirmar. */
 
-export function Janela({ aberto, titulo, aoFechar, largo, classe = '', botaoFechar, children }) {
-  const caixa = useRef(null);
-  const focoAnterior = useRef(null);
-  // O efeito não deve reiniciar (e roubar o foco) a cada render de quem usa a
-  // janela, que costuma passar uma função nova em aoFechar.
-  const fechar = useRef(aoFechar);
-  fechar.current = aoFechar;
+/** Prende o foco dentro de `caixa` enquanto `ativo`: foca o primeiro item,
+ *  Tab circula só pelos itens da caixa, Esc chama `aoEscape`, e ao terminar
+ *  o foco volta a quem estava com ele (se ainda estiver na tela). Usado pelas
+ *  janelas daqui e pela janela da pergunta, dentro do jogo. */
+export function usarFocoPreso(caixa, ativo, aoEscape, seletorInicial) {
+  // O efeito não deve reiniciar (e roubar o foco) a cada render de quem usa,
+  // que costuma passar uma função nova em aoEscape.
+  const escape = useRef(aoEscape);
+  escape.current = aoEscape;
 
   useEffect(() => {
-    if (!aberto) return undefined;
+    if (!ativo) return undefined;
 
-    focoAnterior.current = document.activeElement;
+    const focoAnterior = document.activeElement;
     const primeiro = caixa.current?.querySelector(
-      'button:not(.janela__fechar), [href], input, textarea, select',
+      seletorInicial ?? 'button:not(.janela__fechar), [href], input, textarea, select',
     );
     primeiro?.focus();
 
     function aoTeclar(evento) {
       if (evento.key === 'Escape') {
         evento.preventDefault();
-        fechar.current();
+        escape.current?.();
         return;
       }
       if (evento.key !== 'Tab') return;
@@ -54,12 +56,14 @@ export function Janela({ aberto, titulo, aoFechar, largo, classe = '', botaoFech
     document.addEventListener('keydown', aoTeclar);
     return () => {
       document.removeEventListener('keydown', aoTeclar);
-      // Devolve o foco a quem abriu a janela, se ele ainda estiver na tela.
-      if (focoAnterior.current instanceof HTMLElement && focoAnterior.current.isConnected) {
-        focoAnterior.current.focus();
-      }
+      if (focoAnterior instanceof HTMLElement && focoAnterior.isConnected) focoAnterior.focus();
     };
-  }, [aberto]);
+  }, [ativo, caixa, seletorInicial]);
+}
+
+export function Janela({ aberto, titulo, aoFechar, largo, classe = '', botaoFechar, children }) {
+  const caixa = useRef(null);
+  usarFocoPreso(caixa, aberto, aoFechar);
 
   if (!aberto) return null;
 

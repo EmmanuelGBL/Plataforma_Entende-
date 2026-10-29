@@ -1,8 +1,9 @@
 /* Atividade em forma de jogo (RF21, RN11).
 
    - Acerto e erro têm sempre texto e símbolo junto da cor.
-   - Paleta de tons frios com um único acento quente, as luvas (G12); sem
-     amarelo, exceto no alto contraste.
+   - Paleta de tons frios com um único acento quente (G12): as luvas no
+     futebol, a chama do foguete no espaço; sem amarelo, exceto no alto
+     contraste.
    - Todo movimento é transition ou animation curta, zeradas pelo base.css
      quando o movimento reduzido está ligado (G09). */
 
@@ -21,23 +22,29 @@
   --jogo-calcado: #0f1f3d;
   --jogo-alvo: #8fe6da; /* o mais brilhante e saturado da cena */
 
+  /* Espaço: céu claro, planetas em azul, verde-água e lilás. */
+  --jogo-espaco-ceu: #dde7fa;
+  --jogo-estrela: #b3c6ec;
+  --jogo-traco: #1d3b6e;
+
   /* --- Tons quentes: só onde têm função ----------------------------------- */
   --jogo-luva: #e0912b; /* nas mãos do goleiro, fora do centro */
+  --jogo-chama: #f29a38; /* só durante o voo do foguete */
   --jogo-pele: #e8b58c;
   --jogo-cabelo: #3a2a20;
 }
 
 .jogo__topo {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--e3);
   flex-wrap: wrap;
+  margin-bottom: var(--e3);
 }
+.jogo__topo .progresso-perguntas { flex: 1 1 14rem; }
 
 /* --- Ajustes do jogo ----------------------------------------------------- */
-.jogo__ajustes { margin-bottom: var(--e4); }
-
 .jogo__ajustes-gatilho {
   min-height: var(--alvo-minimo);
   display: inline-flex;
@@ -51,123 +58,222 @@
   font-weight: 600;
 }
 .jogo__ajustes-gatilho:hover { background: var(--cor-superficie-alt); }
+.jogo__ajustes-gatilho svg { width: 1.25rem; height: 1.25rem; }
 
 /* Os grupos ficam dentro do diálogo e usam a moldura dele. */
 .jogo__ajustes-grupos { margin-top: var(--e4); }
 .jogo__ajustes-grupos fieldset { border: none; padding: 0; margin: 0 0 var(--e4); }
 .jogo__ajustes-grupos legend { padding: 0; margin-bottom: var(--e2); font-size: 0.9375rem; }
 
-/* --- A cena --------------------------------------------------------------
-      Proporção fixa, para a cena não mudar de altura entre as fases (G01). */
+/* --- A arena --------------------------------------------------------------
+      A cena é a peça principal: ocupa a largura e cabe na altura da tela.
+      Proporção fixa, para não mudar de tamanho entre as fases (G01). */
+.jogo__arena {
+  width: min(100%, max(36rem, calc((100dvh - 14rem) * 16 / 9)));
+  margin: 0 auto var(--e3);
+}
+
 .jogo__cena {
   position: relative;
   aspect-ratio: 16 / 9;
   width: 100%;
-  margin-bottom: var(--e5);
   border: 2px solid var(--cor-borda);
   border-radius: var(--raio-g);
   background: var(--jogo-ceu);
   overflow: hidden;
+  box-shadow: var(--sombra);
 }
+.jogo__cena[data-tema='espaco'] { background: var(--jogo-espaco-ceu); }
 .jogo__cena svg { width: 100%; height: 100%; display: block; }
 
-/* --- Aviso no meio da cena ----------------------------------------------
-      O resultado aparece sobre a cena, com o botão de seguir junto. O véu
-      escuro por trás garante o contraste do texto sobre qualquer parte da cena. */
-.jogo__aviso-cena {
+/* --- Convite e áreas de mira ---------------------------------------------- */
+.jogo__convite {
+  position: absolute;
+  top: 3.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  max-width: calc(100% - 2rem);
+  margin: 0;
+  padding: 0.35em 1em;
+  border: 2px solid var(--jogo-traco);
+  border-radius: 999px;
+  background: var(--cor-superficie);
+  color: var(--jogo-traco);
+  box-shadow: var(--sombra);
+  font-size: clamp(0.875rem, 1.7vw, 1.125rem);
+  font-weight: 700;
+  white-space: nowrap;
+  animation: jogo-convite-entra 300ms ease-out 1 both;
+}
+.jogo__convite svg { width: 1.25em; height: 1.25em; flex: none; }
+@keyframes jogo-convite-entra {
+  from { opacity: 0; transform: translate(-50%, -0.5rem); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.jogo__zonas { list-style: none; margin: 0; padding: 0; }
+.jogo__zona {
+  position: absolute;
+  padding: 0;
+  border: 2px dashed rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
+}
+.jogo__cena[data-tema='espaco'] .jogo__zona {
+  border-color: rgba(29, 59, 110, 0.28);
+  border-radius: 16px;
+  background: transparent;
+}
+.jogo__zona:hover,
+.jogo__zona:focus-visible {
+  border-style: solid;
+  border-color: var(--jogo-alvo);
+  background: rgba(143, 230, 218, 0.32);
+}
+.jogo__cena[data-tema='espaco'] .jogo__zona:hover,
+.jogo__cena[data-tema='espaco'] .jogo__zona:focus-visible {
+  border-color: var(--jogo-traco);
+  background: rgba(255, 255, 255, 0.45);
+}
+.jogo__zona:focus-visible { outline: var(--contorno-foco); outline-offset: 2px; }
+
+/* --- Janela da pergunta e do resultado, dentro da cena ------------------- */
+.jogo__janela-fundo {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: grid;
   place-items: center;
   padding: var(--e3);
   background: rgba(15, 31, 61, 0.55);
+  animation: jogo-veu 200ms ease-out 1 both;
 }
+@keyframes jogo-veu { from { opacity: 0; } to { opacity: 1; } }
 
-.jogo__aviso-caixa {
-  max-width: 26rem;
-  text-align: center;
+.jogo__janela {
+  width: min(100%, 42rem);
+  max-height: 100%;
+  overflow-y: auto;
   padding: var(--e4) var(--e5);
   border: 3px solid var(--cor-borda-forte);
   border-radius: var(--raio-g);
   background: var(--cor-superficie);
   box-shadow: var(--sombra-alta);
+  animation: jogo-janela-entra 240ms ease-out 1 both;
+}
+@keyframes jogo-janela-entra {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Erro em vermelho (--cor-erro, 7,07:1 sobre branco), como na lista de
-   perguntas. Informa o erro sem punição: não tira ponto. */
-.jogo__aviso-caixa--erro {
-  border-color: var(--cor-erro);
-  border-top-width: 8px;
+.jogo__janela-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
 }
-.jogo__aviso-caixa--erro .jogo__aviso-titulo { color: var(--cor-erro); }
-.jogo__aviso-caixa--erro .jogo__aviso-icone { background: var(--cor-erro); }
+.jogo__mirou { margin: 0; font-size: 0.9375rem; color: var(--cor-texto-apoio); }
+.jogo__trocar { display: inline-flex; align-items: center; gap: var(--e1); flex: none; }
+.jogo__trocar svg { width: 1rem; height: 1rem; }
 
-/* Acerto: o mesmo cartão em verde (--cor-sucesso, 5,86:1), com o botão no
-   mesmo lugar (G01). */
-.jogo__aviso-caixa--acerto {
-  border-color: var(--cor-sucesso);
-  border-top-width: 8px;
+.jogo__janela .atividade__pergunta {
+  margin: var(--e2) 0 var(--e3);
+  font-size: clamp(1.125rem, 2.1vw, 1.5rem);
+  text-align: left;
 }
-.jogo__aviso-caixa--acerto .jogo__aviso-titulo { color: var(--cor-sucesso); }
-.jogo__aviso-caixa--acerto .jogo__aviso-icone { background: var(--cor-sucesso); }
+.jogo__janela .atividade__pergunta:focus { outline: none; }
+.jogo__janela .atividade__opcoes--grade { gap: var(--e3); }
+.jogo__janela .atividade__opcoes--grade .atividade__opcao { min-height: 3.5rem; font-size: 1.0625rem; }
 
-/* Entrada do cartão: 260 ms. O atraso até ele aparecer está em
-   `esperaDoAviso`, no AtividadeJogo.jsx. */
-.jogo__aviso-caixa { animation: jogo-aviso-entra 260ms ease-out 1 both; }
-@keyframes jogo-aviso-entra {
-  from { opacity: 0; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1); }
+/* Resultado na base da cena, com véu leve, para o desenho continuar à vista:
+   a criança vê onde a bola ou o foguete parou. */
+.jogo__janela-fundo--resultado {
+  align-items: end;
+  background: rgba(15, 31, 61, 0.18);
 }
-.jogo__aviso-icone { animation: jogo-icone-entra 420ms cubic-bezier(0.2, 1.4, 0.4, 1) 1 both; }
-@keyframes jogo-icone-entra {
-  from { transform: scale(0.2); }
-  to   { transform: scale(1); }
-}
+.jogo__janela-fundo--resultado .jogo__janela { width: min(100%, 38rem); padding: var(--e3) var(--e4); }
+
+/* Resultado: a mesma janela, com a cor e o símbolo do resultado. Erro em
+   vermelho (--cor-erro, 7,07:1 sobre branco) informa sem punir: não tira
+   ponto. O botão principal fica sempre no mesmo lugar (G01). */
+.jogo__janela--acerto { border-color: var(--cor-sucesso); border-top-width: 8px; }
+.jogo__janela--erro { border-color: var(--cor-erro); border-top-width: 8px; }
+.jogo__resultado { display: flex; align-items: center; justify-content: center; gap: var(--e3); }
+.jogo__resultado .jogo__aviso-icone { margin: 0; flex: none; }
+.jogo__janela--acerto .jogo__aviso-titulo { color: var(--cor-sucesso); }
+.jogo__janela--acerto .jogo__aviso-icone { background: var(--cor-sucesso); }
+.jogo__janela--erro .jogo__aviso-titulo { color: var(--cor-erro); }
+.jogo__janela--erro .jogo__aviso-icone { background: var(--cor-erro); }
 
 .jogo__aviso-icone {
   display: inline-grid;
   place-items: center;
   width: 3rem;
   height: 3rem;
-  margin-bottom: var(--e3);
+  margin-bottom: var(--e2);
   border-radius: 50%;
-  background: var(--cor-erro);
   color: #ffffff;
   font-size: 1.75rem;
   font-weight: 700;
   line-height: 1;
+  animation: jogo-icone-entra 420ms cubic-bezier(0.2, 1.4, 0.4, 1) 1 both;
 }
-
+@keyframes jogo-icone-entra {
+  from { transform: scale(0.2); }
+  to { transform: scale(1); }
+}
 .jogo__aviso-titulo {
-  margin: 0 0 var(--e2);
-  max-width: none;
+  margin: 0 0 var(--e1);
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.2;
-  color: var(--cor-texto);
 }
-.jogo__aviso-texto {
-  margin: 0;
-  max-width: none;
-  color: var(--cor-texto-apoio);
-}
-.jogo__aviso-acoes {
-  margin-top: var(--e4);
+.jogo__aviso-texto { margin: 0; color: var(--cor-texto-apoio); }
+.jogo__janela-acoes {
+  margin-top: var(--e3);
   display: flex;
   gap: var(--e2);
   flex-wrap: wrap;
   justify-content: center;
 }
 
-/* Em tela estreita com texto aumentado, a caixa rola dentro da cena em vez
-   de a cena crescer (G01). */
-@media (max-width: 30rem) {
-  .jogo__aviso-cena { overflow-y: auto; align-content: center; }
-  .jogo__aviso-caixa { padding: var(--e3); }
-  .jogo__aviso-titulo { font-size: 1.25rem; }
+/* Celular: a janela vira uma folha presa embaixo da tela, com a cena
+   esmaecida em cima. Dentro da cena pequena não caberiam a pergunta e as
+   quatro alternativas sem rolar. */
+@media (max-width: 40rem) {
+  .jogo__janela-fundo {
+    position: fixed;
+    z-index: 55;
+    align-items: end;
+    padding: 0;
+  }
+  .jogo__janela {
+    width: 100%;
+    max-height: 88dvh;
+    padding: var(--e4);
+    border-width: 0;
+    border-top-width: 3px;
+    border-radius: 20px 20px 0 0;
+    animation-name: jogo-folha-sobe;
+  }
+  .jogo__janela--acerto, .jogo__janela--erro { border-top-width: 8px; }
+  @keyframes jogo-folha-sobe {
+    from { transform: translateY(2rem); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  .jogo__ajustes-rotulo {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .jogo__convite { top: 2%; padding: 0.2em 0.75em; }
 }
 
-/* --- Cenário ------------------------------------------------------------- */
+/* --- Cenário: futebol ------------------------------------------------------ */
 .jogo__ceu { fill: var(--jogo-ceu); }
 .jogo__gramado { fill: var(--jogo-gramado); }
 
@@ -198,15 +304,37 @@
 
 .jogo__marca-penalti { fill: var(--jogo-gramado-linha); }
 
-/* Alvos do tema neutro */
-.jogo__lugar {
-  fill: none;
-  stroke: var(--jogo-alvo);
-  stroke-width: 2.5;
-  stroke-dasharray: 6 6;
-  opacity: 0.75;
+/* --- Cenário: espaço ------------------------------------------------------ */
+.jogo__cena[data-tema='espaco'] .jogo__ceu { fill: var(--jogo-espaco-ceu); }
+.jogo__estrelas { fill: var(--jogo-estrela); }
+
+.jogo__planeta circle:first-child { stroke: var(--jogo-traco); stroke-width: 1.4; }
+.jogo__planeta--a circle:first-child { fill: #8ccbec; }
+.jogo__planeta--b circle:first-child { fill: #93dbbd; }
+.jogo__planeta--c circle:first-child { fill: #a9bbf2; }
+.jogo__planeta--d circle:first-child { fill: #7fd3d8; }
+.jogo__planeta--e circle:first-child { fill: #bcaeee; }
+.jogo__planeta-detalhe { fill: rgba(15, 31, 61, 0.16); }
+.jogo__planeta-anel { fill: none; stroke: var(--jogo-traco); stroke-width: 1.4; opacity: 0.7; }
+
+.jogo__base { fill: #a3b3cf; }
+
+/* Foguete: branco com contorno escuro; a chama, o único tom quente, só
+   aparece durante o voo. */
+.jogo-f__corpo { fill: #ffffff; stroke: var(--jogo-traco); stroke-width: 1.2; }
+.jogo-f__ponta, .jogo-f__aleta { fill: var(--jogo-camisa); }
+.jogo-f__janela { fill: var(--jogo-alvo); stroke: var(--jogo-traco); stroke-width: 1; }
+.jogo-f__chama { fill: var(--jogo-chama); opacity: 0; transition: opacity 150ms ease-out; }
+.jogo__movel[data-em-voo] .jogo-f__chama { opacity: 1; }
+
+/* Bandeirinha no planeta do pouso: entra depois que o foguete chega. */
+.jogo__bandeira path:first-child { stroke: var(--jogo-traco); stroke-width: 1.2; stroke-linecap: round; }
+.jogo__bandeira path:last-child { fill: var(--jogo-camisa); }
+.jogo__bandeira { animation: jogo-bandeira 300ms ease-out 720ms 1 both; }
+@keyframes jogo-bandeira {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-.jogo__lugar-centro { fill: var(--jogo-alvo); opacity: 0.35; }
 
 /* --- Marca de mira -------------------------------------------------------
       O elemento mais brilhante da cena, onde a criança precisa olhar (G12). */
@@ -220,9 +348,10 @@
   stroke-width: 3;
   stroke-linecap: round;
 }
+.jogo__cena[data-tema='espaco'] .jogo__mira circle { stroke: var(--jogo-traco); stroke-width: 2; stroke-dasharray: 4 3; }
 
 /* --- Goleiro ------------------------------------------------------------- */
-.jogo__guardiao { transition: transform 400ms ease-out; }
+.jogo__guardiao { transition: transform 450ms ease-out; }
 
 /* Balanço lento do goleiro enquanto a criança lê. Ver a regra 4 em
    CenaJogo.jsx. */
@@ -258,8 +387,8 @@
   stroke-linecap: round;
 }
 
-/* --- Bola ---------------------------------------------------------------- */
-.jogo__movel { transition: transform 540ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+/* --- Bola e foguete -------------------------------------------------------- */
+.jogo__movel { transition: transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1); }
 
 /* O couro não leva `fill` aqui: ele vem do gradiente do SVG, e uma regra
    CSS apagaria o brilho. As espessuras estão multiplicadas por ~2,2 porque a
@@ -276,79 +405,51 @@
   stroke-width: 3;
 }
 
-/* --- Balanço da rede no gol ---------------------------------------------
-      Efeito visual do acerto (G08): curto, silencioso e sem piscar
-      (WCAG SC 2.3.1). */
+/* --- Efeito do acerto ------------------------------------------------------
+      Curto, silencioso e sem piscar (G08, WCAG SC 2.3.1). */
 .jogo__balanco circle {
   fill: none;
   stroke: var(--jogo-alvo);
   stroke-width: 2.5;
-  /* O atraso é o tempo de voo da bola: a rede só balança quando a bola chega. */
-  animation: jogo-balanco 620ms ease-out 520ms 1 both;
+  /* O atraso é o tempo de voo: o efeito só começa quando o objeto chega. */
+  animation: jogo-balanco 620ms ease-out 680ms 1 both;
 }
-.jogo__balanco circle:last-child { animation-delay: 630ms; }
+.jogo__balanco circle:last-child { animation-delay: 790ms; }
+.jogo__cena[data-tema='espaco'] .jogo__balanco circle { stroke: var(--jogo-traco); }
 @keyframes jogo-balanco {
   from { opacity: 0.9; transform: scale(0.35); }
   to   { opacity: 0; transform: scale(1.35); }
 }
 
-/* --- Escolher o canto ---------------------------------------------------- */
-.jogo__passo {
-  font-size: 1.25rem;
-  margin-bottom: var(--e4);
-}
-
-.jogo__cantos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
-  gap: var(--e3);
-  list-style: none;
-  padding: 0;
-}
-.jogo__canto {
-  width: 100%;
-  min-height: 4.5rem;
-  padding: var(--e3) var(--e4);
-  border: 3px solid var(--cor-borda-forte);
-  border-radius: var(--raio-g);
-  background: var(--cor-superficie);
-  color: var(--cor-texto);
-  font-size: 1.125rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.jogo__canto:hover { border-color: var(--cor-primaria); background: var(--cor-info-fundo); }
-
-.jogo__mirou {
-  margin-bottom: var(--e4);
-  color: var(--cor-texto-apoio);
-}
-
-/* Alternativa desabilitada enquanto o resultado está na tela: muda o fundo,
-   não a opacidade, para manter o contraste do texto. */
-.jogo .atividade__opcao:disabled:not(.atividade__opcao--certa):not(.atividade__opcao--errada) {
-  background: var(--cor-superficie-alt);
-  border-color: var(--cor-borda);
-}
-
 /* --- Dica ---------------------------------------------------------------- */
 .jogo__dica {
-  margin-top: var(--e4);
-  padding: var(--e4);
+  margin: 0 0 var(--e3);
+  padding: var(--e3) var(--e4);
   border: 2px dashed var(--cor-borda-forte);
   border-radius: var(--raio-g);
-  background: var(--cor-superficie);
+  background: var(--cor-superficie-alt);
 }
-.jogo__dica h3 { margin-bottom: var(--e2); }
+.jogo__resultado + .jogo__dica { margin-top: var(--e4); margin-bottom: 0; }
+.jogo__dica p { margin: 0; }
+.jogo__dica-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  font-weight: 700;
+  margin-bottom: var(--e1) !important;
+}
+.jogo__dica-titulo svg { width: 1.125rem; height: 1.125rem; }
 
 /* Botão de dica junto da pergunta (G11). */
-.jogo__pedir-dica { margin-bottom: var(--e4); }
-
+.jogo__pedir-dica { margin-bottom: var(--e3); }
 
 /* --- Alto contraste ------------------------------------------------------
       O esquema preto e amarelo do e-MAG substitui a paleta inteira. */
 :root[data-contraste='alto'] .jogo {
   --jogo-ceu: #000000;
+  --jogo-espaco-ceu: #000000;
+  --jogo-estrela: #ffffff;
+  --jogo-traco: #ffffff;
   --jogo-gramado: #000000;
   --jogo-gramado-linha: #ffffff;
   --jogo-rede-painel: #000000;
@@ -361,23 +462,28 @@
   --jogo-calcado: #000000;
   --jogo-alvo: #ffe600;
   --jogo-luva: #ffe600;
+  --jogo-chama: #ffe600;
   --jogo-pele: #000000;
   --jogo-cabelo: #ffffff;
 }
 :root[data-contraste='alto'] .jogo__cena { border-color: #ffffff; }
+:root[data-contraste='alto'] .jogo__planeta circle:first-child,
+:root[data-contraste='alto'] .jogo-f__corpo { fill: #000000; }
+:root[data-contraste='alto'] .jogo__zona { border-color: #ffe600 !important; }
+:root[data-contraste='alto'] .jogo__convite { background: #000000; color: #ffe600; border-color: #ffe600; }
 /* No alto contraste não há vermelho utilizável: o erro é dito pela borda
    grossa e pelo símbolo. */
-:root[data-contraste='alto'] .jogo__aviso-caixa--erro { border-color: #ff8f8f; }
-:root[data-contraste='alto'] .jogo__aviso-caixa--erro .jogo__aviso-titulo { color: #ff8f8f; }
-:root[data-contraste='alto'] .jogo__aviso-caixa--acerto { border-color: #6cf58f; }
-:root[data-contraste='alto'] .jogo__aviso-caixa--acerto .jogo__aviso-titulo { color: #6cf58f; }
-:root[data-contraste='alto'] .jogo__aviso-icone { background: #000000; }
-:root[data-contraste='alto'] .jogo__aviso-caixa--erro .jogo__aviso-icone {
+:root[data-contraste='alto'] .jogo__janela { background: #000000; border-color: #ffffff; }
+:root[data-contraste='alto'] .jogo__janela--erro { border-color: #ff8f8f; }
+:root[data-contraste='alto'] .jogo__janela--erro .jogo__aviso-titulo { color: #ff8f8f; }
+:root[data-contraste='alto'] .jogo__janela--acerto { border-color: #6cf58f; }
+:root[data-contraste='alto'] .jogo__janela--acerto .jogo__aviso-titulo { color: #6cf58f; }
+:root[data-contraste='alto'] .jogo__janela--erro .jogo__aviso-icone {
   background: #000000;
   color: #ff8f8f;
   box-shadow: inset 0 0 0 2px #ff8f8f;
 }
-:root[data-contraste='alto'] .jogo__aviso-caixa--acerto .jogo__aviso-icone {
+:root[data-contraste='alto'] .jogo__janela--acerto .jogo__aviso-icone {
   background: #000000;
   color: #6cf58f;
   box-shadow: inset 0 0 0 2px #6cf58f;
@@ -397,6 +503,5 @@
 :root[data-contraste='alto'] .jogo-b__gomo { fill: #ffffff; }
 :root[data-contraste='alto'] .jogo-b__costura { stroke: #ffffff; opacity: 1; }
 :root[data-contraste='alto'] .jogo-b__contorno { stroke: #ffffff; }
-:root[data-contraste='alto'] .jogo__canto,
 :root[data-contraste='alto'] .jogo__ajustes-gatilho,
 :root[data-contraste='alto'] .jogo__dica { background: #000000; border-color: #ffffff; }

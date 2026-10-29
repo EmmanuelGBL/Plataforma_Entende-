@@ -1,4 +1,5 @@
-import { CircleCheck, Star, Trophy } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { CircleCheck, Rocket, Star, Trophy } from 'lucide-react';
 
 /* Peças visuais comuns ao jogo (RF21) e à lista de perguntas (RF16):
    progresso em segmentos, pontos e tela de conclusão.
@@ -49,17 +50,111 @@ function mensagem(acertos, total, assunto) {
   return ['Você chegou até o fim!', 'Que tal treinar de novo? A dica mostra onde procurar a resposta.'];
 }
 
-export function ConclusaoAtividade({ acertos, total, assunto, acoes, aviso }) {
-  const [titulo, texto] = mensagem(acertos, total, assunto);
+/** O sistema ou o painel Exibição pedem movimento reduzido. */
+function semMovimento() {
   return (
-    <div className="conclusao">
-      <div className="conclusao__confete" aria-hidden="true">
-        {Array.from({ length: 14 }, (_, i) => (
-          <span key={i} />
-        ))}
-      </div>
+    document.documentElement.dataset.movimento === 'reduzido' ||
+    Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+  );
+}
 
-      <Trophy aria-hidden="true" className="conclusao__trofeu" />
+/** Número que sobe de 0 até `valor` em cerca de um segundo. Sem animação
+ *  quando o movimento reduzido está ligado. */
+function usarContagem(valor, ligado) {
+  const [atual, setAtual] = useState(() => (ligado && !semMovimento() ? 0 : valor));
+  useEffect(() => {
+    if (!ligado || semMovimento()) {
+      setAtual(valor);
+      return undefined;
+    }
+    let quadro;
+    const inicio = { tempo: 0 };
+    const DURACAO = 1000;
+    function passo(agora) {
+      if (!inicio.tempo) inicio.tempo = agora;
+      const t = Math.min(1, (agora - inicio.tempo) / DURACAO);
+      setAtual(Math.round(valor * (1 - (1 - t) ** 3)));
+      if (t < 1) quadro = requestAnimationFrame(passo);
+    }
+    // Começa quando o troféu já entrou.
+    const espera = window.setTimeout(() => {
+      quadro = requestAnimationFrame(passo);
+    }, 900);
+    return () => {
+      window.clearTimeout(espera);
+      cancelAnimationFrame(quadro);
+    };
+  }, [valor, ligado]);
+  return atual;
+}
+
+/* Confete: 28 peças com posição, atraso, giro e deriva próprios, que caem
+   uma vez (cerca de 3 s) e somem. Não pisca e não se repete sozinho (WCAG
+   2.2.2 e 2.3.1); tocar no troféu lança de novo. */
+const PECAS = Array.from({ length: 28 }, (_, i) => ({
+  x: (i * 37) % 100,
+  atraso: ((i * 53) % 900) / 1000,
+  giro: ((i * 71) % 540) - 270,
+  deriva: ((i * 29) % 80) - 40,
+}));
+
+function Confete() {
+  return (
+    <div className="conclusao__confete" aria-hidden="true">
+      {PECAS.map((peca, i) => (
+        <span
+          key={i}
+          style={{
+            '--x': `${peca.x}%`,
+            '--atraso': `${peca.atraso}s`,
+            '--giro': `${peca.giro}deg`,
+            '--deriva': `${peca.deriva}px`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Bola de futebol simples, no traço dos ícones do lucide. */
+function BolaPequena(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="#ffffff" stroke="currentColor" strokeWidth="2" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 7.5l4.3 3.1-1.6 5h-5.4l-1.6-5z" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Tela de conclusão. No jogo, a bola ou o foguete do tema chega voando até o
+ *  troféu, que entra com um pulo; depois os pontos sobem e o confete cai.
+ *  Tocar no troféu comemora de novo. Com o efeito desligado (ajuste do jogo)
+ *  ou com movimento reduzido, tudo aparece parado. */
+export function ConclusaoAtividade({ acertos, total, assunto, acoes, aviso, tema, comemorar = true }) {
+  const [titulo, texto] = mensagem(acertos, total, assunto);
+  const [rodada, setRodada] = useState(0);
+  const pontos = usarContagem(acertos * PONTOS_POR_ACERTO, comemorar);
+  const Voador = tema === 'futebol' ? BolaPequena : tema === 'espaco' ? Rocket : null;
+
+  return (
+    <div className={`conclusao${comemorar ? ' conclusao--festa' : ''}`}>
+      {comemorar && <Confete key={rodada} />}
+
+      <div className="conclusao__palco">
+        {comemorar && Voador && (
+          <Voador key={`voo-${rodada}`} aria-hidden="true" className="conclusao__voo" />
+        )}
+        <button
+          type="button"
+          className="conclusao__trofeu-botao"
+          onClick={() => setRodada((n) => n + 1)}
+          disabled={!comemorar}
+        >
+          <span className="conclusao__brilho" aria-hidden="true" key={`brilho-${rodada}`} />
+          <Trophy aria-hidden="true" className="conclusao__trofeu" key={`trofeu-${rodada}`} />
+          <span className="apenas-leitor">Comemorar de novo</span>
+        </button>
+      </div>
       <h1 className="conclusao__titulo">Parabéns!</h1>
       <p className="conclusao__subtitulo">Você concluiu a atividade!</p>
 
@@ -70,7 +165,11 @@ export function ConclusaoAtividade({ acertos, total, assunto, acoes, aviso }) {
               <Star aria-hidden="true" className="pontos__estrela" />
               <span>pontos</span>
             </dt>
-            <dd>{acertos * PONTOS_POR_ACERTO}</dd>
+            {/* O leitor de tela recebe o valor final, não a contagem. */}
+            <dd>
+              <span aria-hidden="true">{pontos}</span>
+              <span className="apenas-leitor">{acertos * PONTOS_POR_ACERTO}</span>
+            </dd>
           </div>
           <div>
             <dt>

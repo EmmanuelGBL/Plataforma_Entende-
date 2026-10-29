@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import { ListChecks, Target } from 'lucide-react';
+import { ListChecks, Rocket } from 'lucide-react';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import {
   AtividadeIndisponivel,
@@ -10,7 +10,7 @@ import {
 /* Tela de escolha (RF22): jogar (RF21), em um dos temas, ou responder às
    perguntas (RF16). As questões são as mesmas em todas as opções.
 
-   O tema é preferência do estudante, e o neutro (Alvo) vem primeiro e é o
+   O tema é preferência do estudante, e o neutro (Espaço) vem primeiro e é o
    padrão (G07). Escolher o tema aqui abre o jogo já nele; dentro do jogo dá
    para trocar em "Como você quer jogar". */
 
@@ -35,12 +35,12 @@ function BolaFutebol(props) {
 
 const OPCOES = [
   {
-    chave: 'neutro',
-    titulo: 'Alvo',
-    texto: 'Mire no alvo e responda. Um tema calmo, sem barulho.',
-    Icone: Target,
+    chave: 'espaco',
+    titulo: 'Espaço',
+    texto: 'Escolha o planeta e responda para o foguete pousar.',
+    Icone: Rocket,
     caminho: 'jogo',
-    tema: 'neutro',
+    tema: 'espaco',
   },
   {
     chave: 'futebol',

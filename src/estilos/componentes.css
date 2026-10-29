@@ -1112,7 +1112,7 @@ table.dados--estreita { max-width: 46rem; }
   font-size: 1rem;
 }
 .escolha__figura svg { width: 5.5rem; height: 5.5rem; }
-.escolha__opcao--neutro .escolha__figura { background: linear-gradient(160deg, #dff0ff, #b9dcfb); color: var(--cor-primaria-escura); }
+.escolha__opcao--espaco .escolha__figura { background: linear-gradient(160deg, #e6ecfd, #c4d3f6); color: #1d3b6e; }
 .escolha__opcao--futebol .escolha__figura { background: linear-gradient(180deg, #bfe3ff 0 45%, #4caf68 45% 100%); color: #0f1f3d; }
 .escolha__opcao--perguntas .escolha__figura { background: linear-gradient(160deg, #f1ebff, #dcd0fb); color: #5b34a8; }
 .escolha__texto { justify-items: center; }
@@ -1128,7 +1128,6 @@ table.dados--estreita { max-width: 46rem; }
 
 /* --- Conclusão ----------------------------------------------------------- */
 .conclusao { position: relative; max-width: 46rem; margin-inline: auto; text-align: center; padding-block: var(--e5); }
-.conclusao__trofeu { width: 6rem; height: 6rem; margin: 0 auto var(--e2); color: #c98a08; fill: #f5c542; }
 .conclusao__titulo { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; }
 .conclusao__subtitulo { font-size: 1.5rem; font-weight: 700; margin: var(--e2) auto var(--e5); }
 .conclusao__cartao { background: var(--cor-superficie); border-radius: 20px; box-shadow: var(--sombra-alta); padding: var(--e5); text-align: left; }
@@ -1148,45 +1147,83 @@ table.dados--estreita { max-width: 46rem; }
 .conclusao__privacidade { margin: var(--e5) auto 0; font-size: 0.9375rem; color: var(--cor-texto-apoio); }
 
 /* Confete parado: reconhecimento visual silencioso (G08), sem animação. */
-.conclusao__confete { position: absolute; inset: 0 0 auto; height: 14rem; pointer-events: none; }
-.conclusao__confete span { position: absolute; width: 0.5rem; height: 1.25rem; border-radius: 3px; opacity: 0.85; }
-.conclusao__confete span:nth-child(4n+1) { background: #f5b82e; }
-.conclusao__confete span:nth-child(4n+2) { background: #1463d6; }
-.conclusao__confete span:nth-child(4n+3) { background: #e8663a; }
-.conclusao__confete span:nth-child(4n) { background: #3b9a4b; }
-.conclusao__confete span:nth-child(1) { left: 6%; top: 18%; transform: rotate(25deg); }
-.conclusao__confete span:nth-child(2) { left: 14%; top: 52%; transform: rotate(-35deg); }
-.conclusao__confete span:nth-child(3) { left: 22%; top: 10%; transform: rotate(60deg); }
-.conclusao__confete span:nth-child(4) { left: 16%; top: 78%; transform: rotate(-15deg); }
-.conclusao__confete span:nth-child(5) { left: 30%; top: 22%; transform: rotate(80deg); }
-.conclusao__confete span:nth-child(6) { left: 40%; top: 4%; transform: rotate(-50deg); }
-.conclusao__confete span:nth-child(7) { left: 58%; top: 8%; transform: rotate(40deg); }
-.conclusao__confete span:nth-child(8) { left: 72%; top: 34%; transform: rotate(-70deg); }
-.conclusao__confete span:nth-child(9) { left: 70%; top: 14%; transform: rotate(15deg); }
-.conclusao__confete span:nth-child(10) { left: 86%; top: 70%; transform: rotate(-25deg); }
-.conclusao__confete span:nth-child(11) { left: 82%; top: 26%; transform: rotate(55deg); }
-.conclusao__confete span:nth-child(12) { left: 88%; top: 6%; transform: rotate(-40deg); }
-.conclusao__confete span:nth-child(13) { left: 92%; top: 48%; transform: rotate(30deg); }
-.conclusao__confete span:nth-child(14) { left: 50%; top: 0; transform: rotate(-10deg); }
+/* --- Conclusão: comemoração ----------------------------------------------
+      O voo (bola ou foguete) chega em 0,8 s, o troféu entra com um pulo e o
+      confete cai uma vez. Com movimento reduzido nada disso se move: o
+      confete e o voo nem aparecem, e o troféu já está no lugar. */
+/* O confete cobre a tela inteira, por cima de tudo, sem pegar clique. */
+.conclusao__confete { position: fixed; inset: 0; z-index: 30; pointer-events: none; overflow: hidden; }
+.conclusao__confete span {
+  position: absolute; top: -2rem; left: var(--x);
+  width: 0.55rem; height: 1.2rem; border-radius: 3px;
+  animation: confete-cai 2.8s cubic-bezier(0.25, 0.4, 0.45, 1) calc(0.9s + var(--atraso)) 1 both;
+}
+.conclusao__confete span:nth-child(5n+1) { background: #1463d6; }
+.conclusao__confete span:nth-child(5n+2) { background: #3b9a4b; }
+.conclusao__confete span:nth-child(5n+3) { background: #5bc0d6; }
+.conclusao__confete span:nth-child(5n+4) { background: #8a6bd8; }
+.conclusao__confete span:nth-child(5n) { background: #f5b82e; }
+@keyframes confete-cai {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0); }
+  8% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--deriva), 85vh) rotate(var(--giro)); }
+}
+
+.conclusao__palco { position: relative; width: 9rem; height: 7rem; margin: 0 auto var(--e2); }
+.conclusao__trofeu-botao {
+  position: relative; display: grid; place-items: center;
+  width: 7rem; height: 7rem; margin: 0 auto;
+  border: 0; border-radius: 50%; background: transparent; cursor: pointer;
+}
+.conclusao__trofeu-botao:disabled { cursor: default; }
+.conclusao__trofeu { position: relative; width: 6rem; height: 6rem; color: #c98a08; fill: #f5c542; transition: transform 200ms ease-out; }
+.conclusao--festa .conclusao__trofeu { animation: trofeu-entra 650ms cubic-bezier(0.2, 1.5, 0.4, 1) 750ms 1 both; }
+.conclusao__trofeu-botao:hover:not(:disabled) .conclusao__trofeu { transform: rotate(-6deg); }
+@keyframes trofeu-entra {
+  from { transform: scale(0.2) translateY(1rem); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+/* Brilho atrás do troféu: um círculo que cresce e some, uma vez. */
+.conclusao__brilho {
+  position: absolute; inset: 0.5rem; border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 197, 66, 0.55), rgba(245, 197, 66, 0) 70%);
+  opacity: 0;
+}
+.conclusao--festa .conclusao__brilho { animation: brilho 1.1s ease-out 1.1s 1 both; }
+@keyframes brilho {
+  from { opacity: 0; transform: scale(0.4); }
+  40% { opacity: 1; }
+  to { opacity: 0; transform: scale(1.6); }
+}
+/* A bola ou o foguete do tema sai do canto e pousa no troféu. */
+.conclusao__voo {
+  position: absolute; left: 50%; top: 50%; z-index: 1;
+  width: 2.25rem; height: 2.25rem; margin: -1.125rem 0 0 -1.125rem;
+  color: var(--cor-primaria-escura); pointer-events: none;
+  animation: voo-ate-trofeu 800ms cubic-bezier(0.3, 0.6, 0.4, 1) 1 both;
+}
+@keyframes voo-ate-trofeu {
+  0% { transform: translate(-16rem, 6rem) rotate(-40deg) scale(1.2); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(0, -1rem) rotate(0) scale(0.4); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .conclusao__confete, .conclusao__voo, .conclusao__brilho { display: none; }
+  .conclusao--festa .conclusao__trofeu { animation: none; }
+}
+:root[data-movimento='reduzido'] .conclusao__confete,
+:root[data-movimento='reduzido'] .conclusao__voo,
+:root[data-movimento='reduzido'] .conclusao__brilho { display: none; }
+:root[data-movimento='reduzido'] .conclusao--festa .conclusao__trofeu { animation: none; }
 :root[data-contraste='alto'] .conclusao__confete { display: none; }
 :root[data-contraste='alto'] .conclusao__cartao,
 :root[data-contraste='alto'] .conclusao__numeros > div,
 :root[data-contraste='alto'] .conclusao__mensagem { border: 2px solid #fff; }
 .escolha__opcao--futebol .escolha__figura svg circle { fill: #ffffff; }
-/* A cena não passa de 44rem, para a pergunta aparecer junto (G10). */
-.jogo .jogo__cena { max-width: 44rem; margin-inline: auto; }
-
-/* --- Jogo: palco lado a lado ----------------------------------------------
-      Em tela larga, cena e pergunta dividem a linha, e as alternativas ficam
-      à vista sem rolar (G10). Em tela estreita, uma embaixo da outra. */
+/* Jogo: a cena é a peça principal e pode passar da largura das outras
+   telas do estudante. */
 .atividade.jogo { max-width: 80rem; }
-.jogo__palco { display: grid; gap: var(--e5); }
-@media (min-width: 64rem) {
-  .jogo__palco { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
-  .jogo .jogo__cena { max-width: none; margin-bottom: 0; }
-  .jogo__interacao .atividade__pergunta { text-align: left; font-size: 1.5rem; margin-bottom: var(--e4); }
-  .jogo__interacao .jogo__passo { margin-top: 0; }
-}
 
 /* --- Alto contraste: fundos claros fixos ---------------------------------
       Tudo que tem fundo claro escrito à mão (sem variável) vira preto com
