@@ -1,6 +1,21 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Aviso, AvisoConteudoDemo, Botao, Cartao, Etiqueta, Migalhas } from '../componentes/basicos.jsx';
+import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  CircleCheck,
+  Copy,
+  Eye,
+  FileText,
+  Info,
+  Link2Off,
+  Pencil,
+  Printer,
+  Send,
+  Trash2,
+} from 'lucide-react';
+import { Aviso, AvisoConteudoDemo, Botao, Etiqueta } from '../componentes/basicos.jsx';
 import { Dialogo } from '../componentes/Dialogo.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarAdaptacao, usarApp } from '../contextos/Aplicacao.jsx';
@@ -29,6 +44,16 @@ export function Atividade() {
   const [confirmandoPublicacao, setConfirmandoPublicacao] = useState(false);
   const [confirmandoRevogacao, setConfirmandoRevogacao] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [abertas, setAbertas] = useState(() => new Set());
+
+  function alternar(idQuestao) {
+    setAbertas((atuais) => {
+      const nova = new Set(atuais);
+      if (nova.has(idQuestao)) nova.delete(idQuestao);
+      else nova.add(idQuestao);
+      return nova;
+    });
+  }
 
   if (!dados) {
     return (
@@ -114,19 +139,16 @@ export function Atividade() {
 
   return (
     <>
-      <Migalhas
-        itens={[
-          { rotulo: 'Meus materiais', para: '/painel' },
-          { rotulo: dados.nome, para: `/materiais/${id}/adaptacao` },
-          { rotulo: 'Atividade' },
-        ]}
-      />
+      <Link to={`/materiais/${id}/adaptacao`} className="voltar">
+        <ArrowLeft aria-hidden="true" />
+        Voltar para a adaptação
+      </Link>
 
       <div className="cabecalho-pagina">
-        <h1>Atividade sobre {dados.nome}</h1>
+        <h1>Atividade</h1>
         <p>
-          As questões abaixo foram geradas a partir do conteúdo deste material, e só dele. Revise,
-          altere ou exclua o que quiser antes de publicar.
+          Revise as perguntas e publique a atividade para os estudantes. As perguntas foram geradas
+          a partir deste material, e só dele.
         </p>
       </div>
 
@@ -158,144 +180,222 @@ export function Atividade() {
         </Aviso>
       )}
 
-      {publicada && (
-        <Aviso tipo="boa" titulo="Atividade publicada" papel="status">
-          <p>
-            Código de acesso: <strong>{atividade.codigo}</strong>
-            {atividade.publicadaEm ? ` · publicada em ${atividade.publicadaEm}` : null}
-          </p>
-          <p style={{ wordBreak: 'break-all' }}>
-            <Link to={`/atividade/${atividade.codigo}`}>Abrir a atividade como o estudante vê</Link>
-          </p>
-          <div className="linha" style={{ marginTop: 'var(--e3)' }}>
-            <Botao variante="secundario" onClick={copiarLink}>
-              {copiado ? 'Link copiado ✓' : 'Copiar o link'}
-            </Botao>
-            <Botao variante="perigo" onClick={() => setConfirmandoRevogacao(true)}>
-              Revogar o link
-            </Botao>
-          </div>
-          <p className="campo__dica" style={{ marginTop: 'var(--e3)' }}>
-            O estudante entra pelo link, sem cadastro e sem senha. O sistema não guarda nome,
-            e-mail nem nota — nenhum dado que identifique a criança.
-          </p>
-        </Aviso>
-      )}
-
-      {atividade.estado === 'revogada' && (
-        <Aviso tipo="atencao" titulo="Link revogado">
-          <p>
-            O link desta atividade foi revogado e não abre mais para os estudantes. Publique de
-            novo para gerar um código novo.
-          </p>
-        </Aviso>
-      )}
-
-      <div className="linha" style={{ marginBottom: 'var(--e5)' }}>
-        <Etiqueta tom="neutra">
-          {questoes.length} {questoes.length === 1 ? 'questão' : 'questões'}
-        </Etiqueta>
-        <Etiqueta tom="info">Geradas do próprio material (RN04)</Etiqueta>
-      </div>
-
-      {/* RF23 — folha impressa das questões, disponível antes de publicar.
-         Só aparece quando há questões. */}
-      {questoes.length > 0 && (
-        <div className="linha" style={{ marginBottom: 'var(--e5)' }}>
-          <Botao como="link" para={`/materiais/${id}/questionario`} variante="secundario">
-            Imprimir as questões ou salvar em PDF
-          </Botao>
-        </div>
-      )}
-
-      {questoes.length === 0 ? (
-        <div className="cartao vazio">
-          <h2>{modoServidor ? 'Nenhuma questão nesta atividade' : 'Nenhuma questão restante'}</h2>
-          <p>
-            {modoServidor
-              ? 'As questões não foram geradas, ou todas foram excluídas. Não é possível publicar uma atividade vazia.'
-              : 'Você excluiu todas as questões. Não é possível publicar uma atividade vazia.'}
-          </p>
-          {modoServidor && adaptacao && (
-            <div className="linha" style={{ justifyContent: 'center', marginTop: 'var(--e4)' }}>
-              <Botao onClick={gerar} disabled={gerando}>
-                {gerando ? 'Gerando as questões…' : 'Gerar as questões a partir do material'}
+      <div className="atividade-grade">
+        <div className="pilha">
+          <section className="cartao origem" aria-labelledby="titulo-origem">
+            <h2 id="titulo-origem">Material de origem</h2>
+            <div className="origem__corpo">
+              <span className="material-resumo__icone" aria-hidden="true">
+                <FileText />
+              </span>
+              <div>
+                <p className="material-resumo__nome">{dados.nome}</p>
+                <p className="material-resumo__meta">
+                  {[dados.disciplina, `${dados.paginas} páginas`, `Enviado em ${dados.enviadoEm}`]
+                    .filter(Boolean)
+                    .join(' • ')}
+                </p>
+              </div>
+              <Botao como="link" para={`/materiais/${id}/adaptacao`} variante="secundario">
+                <FileText aria-hidden="true" />
+                Ver material adaptado
               </Botao>
             </div>
-          )}
-        </div>
-      ) : (
-        <ol className="questao-lista">
-          {questoes.map((questao, indice) => (
-            <li key={questao.id}>
-              {emEdicao?.id === questao.id ? (
-                <EditorQuestao
-                  questao={emEdicao}
-                  numero={indice + 1}
-                  aoMudar={setEmEdicao}
-                  aoSalvar={() => salvarQuestao(emEdicao)}
-                  aoCancelar={() => setEmEdicao(null)}
-                />
-              ) : (
-                <article className="questao">
-                  <div className="questao__topo">
-                    <span className="questao__numero">Questão {indice + 1}</span>
-                    <Etiqueta tom="neutra">{questao.mecanica}</Etiqueta>
-                    {questao.trecho && (
-                      <span className="campo__dica" style={{ marginBottom: 0 }}>
-                        Origem: {questao.trecho}
-                      </span>
-                    )}
+          </section>
+
+          <section className="cartao" aria-labelledby="titulo-perguntas">
+            <h2 id="titulo-perguntas">Perguntas da atividade</h2>
+            <p className="campo__dica">
+              {questoes.length === 0
+                ? 'Nenhuma pergunta nesta atividade.'
+                : `${questoes.length} ${questoes.length === 1 ? 'pergunta gerada' : 'perguntas geradas'} com base no seu material adaptado (RN04). Abra uma pergunta para ver as alternativas, editar ou excluir.`}
+            </p>
+
+            {questoes.length === 0 ? (
+              <div className="vazio" style={{ padding: 'var(--e5) var(--e4)' }}>
+                <p>
+                  {modoServidor
+                    ? 'As questões não foram geradas, ou todas foram excluídas. Não é possível publicar uma atividade vazia.'
+                    : 'Você excluiu todas as questões. Não é possível publicar uma atividade vazia.'}
+                </p>
+                {modoServidor && adaptacao && (
+                  <div className="linha" style={{ justifyContent: 'center', marginTop: 'var(--e4)' }}>
+                    <Botao onClick={gerar} disabled={gerando}>
+                      {gerando ? 'Gerando as questões…' : 'Gerar as questões a partir do material'}
+                    </Botao>
                   </div>
+                )}
+              </div>
+            ) : (
+              <ol className="perguntas-lista">
+                {questoes.map((questao, indice) => {
+                  const aberta = abertas.has(questao.id) || emEdicao?.id === questao.id;
+                  const idDetalhe = `pergunta-${questao.id}`;
+                  return (
+                    <li key={questao.id} className="pergunta" data-aberta={aberta ? 'sim' : undefined}>
+                      <h3 className="pergunta__cabecalho">
+                        <button
+                          type="button"
+                          className="pergunta__botao"
+                          aria-expanded={aberta}
+                          aria-controls={idDetalhe}
+                          onClick={() => alternar(questao.id)}
+                        >
+                          <span className="pergunta__numero" aria-hidden="true">
+                            {indice + 1}
+                          </span>
+                          <span className="apenas-leitor">Pergunta {indice + 1}: </span>
+                          <span className="pergunta__enunciado">{questao.enunciado}</span>
+                          <Etiqueta tom="neutra">{questao.mecanica}</Etiqueta>
+                          <ChevronDown className="pergunta__seta" aria-hidden="true" />
+                        </button>
+                      </h3>
 
-                  <p className="questao__enunciado">{questao.enunciado}</p>
-
-                  <ul className="questao__alternativas">
-                    {questao.alternativas.map((alternativa, i) => (
-                      <li key={alternativa}>
-                        <span aria-hidden="true">{String.fromCharCode(65 + i)})</span>
-                        <span>
-                          {alternativa}
-                          {i === questao.correta && (
+                      {aberta && (
+                        <div className="pergunta__detalhe" id={idDetalhe}>
+                          {emEdicao?.id === questao.id ? (
+                            <EditorQuestao
+                              questao={emEdicao}
+                              numero={indice + 1}
+                              aoMudar={setEmEdicao}
+                              aoSalvar={() => salvarQuestao(emEdicao)}
+                              aoCancelar={() => setEmEdicao(null)}
+                            />
+                          ) : (
                             <>
-                              {' '}
-                              <Etiqueta tom="boa">resposta correta</Etiqueta>
+                              <ul className="questao__alternativas">
+                                {questao.alternativas.map((alternativa, i) => (
+                                  <li
+                                    key={alternativa}
+                                    className={i === questao.correta ? 'questao__alternativa--correta' : undefined}
+                                  >
+                                    <span aria-hidden="true">{String.fromCharCode(65 + i)})</span>
+                                    <span>
+                                      {alternativa}
+                                      {i === questao.correta && (
+                                        <>
+                                          {' '}
+                                          <Etiqueta tom="boa" icone={CircleCheck}>
+                                            resposta correta
+                                          </Etiqueta>
+                                        </>
+                                      )}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                              {questao.trecho && (
+                                <p className="campo__dica" style={{ marginTop: 'var(--e3)' }}>
+                                  Origem no material: {questao.trecho}
+                                </p>
+                              )}
+                              <div className="questao__acoes">
+                                <Botao variante="secundario" onClick={() => setEmEdicao({ ...questao })}>
+                                  <Pencil aria-hidden="true" />
+                                  Editar
+                                  <span className="apenas-leitor"> a pergunta {indice + 1}</span>
+                                </Botao>
+                                <Botao
+                                  variante="discreto"
+                                  onClick={() => setAExcluir({ ...questao, numero: indice + 1 })}
+                                >
+                                  <Trash2 aria-hidden="true" />
+                                  Excluir
+                                  <span className="apenas-leitor"> a pergunta {indice + 1}</span>
+                                </Botao>
+                              </div>
                             </>
                           )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="questao__acoes">
-                    <Botao variante="secundario" onClick={() => setEmEdicao({ ...questao })}>
-                      Editar
-                      <span className="apenas-leitor"> a questão {indice + 1}</span>
-                    </Botao>
-                    <Botao variante="discreto" onClick={() => setAExcluir({ ...questao, numero: indice + 1 })}>
-                      Excluir
-                      <span className="apenas-leitor"> a questão {indice + 1}</span>
-                    </Botao>
-                  </div>
-                </article>
-              )}
-            </li>
-          ))}
-        </ol>
-      )}
-
-      <Cartao className="cartao--acao">
-        <h2>{publicada ? 'Republicar a atividade' : 'Publicar a atividade'}</h2>
-        <p>
-          Ao publicar, o sistema gera um link e um código de acesso. Você decide quando e como
-          entregar o link à turma, e pode revogá-lo a qualquer momento.
-        </p>
-        <div className="linha" style={{ marginTop: 'var(--e4)' }}>
-          <Botao onClick={() => setConfirmandoPublicacao(true)} disabled={questoes.length === 0}>
-            {publicada ? 'Publicar de novo com um código novo' : 'Publicar atividade'}
-          </Botao>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+          </section>
         </div>
-      </Cartao>
+
+        <aside className="pilha" aria-label="Publicação">
+          <section className="cartao" aria-labelledby="titulo-link">
+            <h2 id="titulo-link">Link para os estudantes</h2>
+
+            {publicada ? (
+              <>
+                <p className="campo__dica">Copie o link e compartilhe com a turma.</p>
+                <div className="link-copiar">
+                  <label htmlFor="link-atividade" className="apenas-leitor">
+                    Link da atividade
+                  </label>
+                  <input id="link-atividade" className="entrada" readOnly value={endereco} />
+                  <button type="button" className="link-copiar__botao" onClick={copiarLink}>
+                    {copiado ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+                    <span className="apenas-leitor">{copiado ? 'Link copiado' : 'Copiar o link'}</span>
+                  </button>
+                </div>
+                <p className="link-copiar__codigo">
+                  Código de acesso: <strong>{atividade.codigo}</strong>
+                  {atividade.publicadaEm ? ` · publicada em ${atividade.publicadaEm}` : null}
+                </p>
+              </>
+            ) : (
+              <p className="campo__dica">
+                {atividade.estado === 'revogada'
+                  ? 'O link anterior foi revogado e não abre mais. Publique de novo para gerar um código novo.'
+                  : 'O link aparece aqui depois que você publicar a atividade.'}
+              </p>
+            )}
+
+            <div className="nota-info">
+              <Info aria-hidden="true" />
+              <p>
+                <strong>Os estudantes não precisam de conta.</strong> A atividade abre direto no
+                link. O sistema não guarda nome, e-mail nem nota da criança.
+              </p>
+            </div>
+
+            <div className="pilha" style={{ marginTop: 'var(--e4)' }}>
+              <Botao
+                largo
+                onClick={() => setConfirmandoPublicacao(true)}
+                disabled={questoes.length === 0}
+              >
+                <Send aria-hidden="true" />
+                {publicada ? 'Publicar de novo com código novo' : 'Publicar atividade'}
+              </Botao>
+              {publicada && (
+                <>
+                  <Botao como="link" para={`/atividade/${atividade.codigo}`} variante="secundario" largo>
+                    <Eye aria-hidden="true" />
+                    Abrir como o estudante vê
+                  </Botao>
+                  <Botao variante="perigo" largo onClick={() => setConfirmandoRevogacao(true)}>
+                    <Link2Off aria-hidden="true" />
+                    Revogar o link
+                  </Botao>
+                </>
+              )}
+            </div>
+            <p className="campo__dica" style={{ marginTop: 'var(--e3)', marginBottom: 0 }}>
+              {publicada
+                ? 'Publicar de novo gera um código novo e o link antigo deixa de funcionar.'
+                : 'Depois de publicar, a atividade fica disponível para quem tiver o link.'}
+            </p>
+          </section>
+
+          {/* RF23 — folha impressa das questões, disponível antes de publicar. */}
+          {questoes.length > 0 && (
+            <section className="cartao cartao--compacto" aria-labelledby="titulo-impressao">
+              <h2 id="titulo-impressao">Versão impressa</h2>
+              <p className="campo__dica">Folha com as perguntas, com e sem gabarito (RF23).</p>
+              <Botao como="link" para={`/materiais/${id}/questionario`} variante="secundario" largo>
+                <Printer aria-hidden="true" />
+                Imprimir ou salvar em PDF
+              </Botao>
+            </section>
+          )}
+        </aside>
+      </div>
 
       {/* Publicar de novo gera código novo e invalida o link anterior; o diálogo
          avisa isso. */}
@@ -355,10 +455,7 @@ export function Atividade() {
 /** Edição da questão no próprio lugar, sem trocar de tela. */
 function EditorQuestao({ questao, numero, aoMudar, aoSalvar, aoCancelar }) {
   return (
-    <article className="questao" aria-label={`Editando a questão ${numero}`}>
-      <div className="questao__topo">
-        <span className="questao__numero">Editando a questão {numero}</span>
-      </div>
+    <div className="editor-questao" aria-label={`Editando a pergunta ${numero}`} role="group">
 
       <label className="campo" style={{ maxWidth: 'none' }}>
         <span className="campo__rotulo">Pergunta</span>
@@ -403,8 +500,8 @@ function EditorQuestao({ questao, numero, aoMudar, aoSalvar, aoCancelar }) {
         <Botao variante="discreto" onClick={aoCancelar}>
           Cancelar
         </Botao>
-        <Botao onClick={aoSalvar}>Salvar questão</Botao>
+        <Botao onClick={aoSalvar}>Salvar pergunta</Botao>
       </div>
-    </article>
+    </div>
   );
 }

@@ -907,3 +907,68 @@ table.dados--estreita { max-width: 46rem; }
   font: inherit; cursor: pointer;
 }
 .link-botao:hover { text-decoration-thickness: 2px; }
+
+/* --- Atividade do professor ---------------------------------------------- */
+.atividade-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+  gap: var(--e5);
+  align-items: start;
+}
+@media (max-width: 75rem) { .atividade-grade { grid-template-columns: minmax(0, 1fr); } }
+.atividade-grade .cartao > h2 { font-size: 1.25rem; }
+
+.origem__corpo { display: flex; gap: var(--e4); align-items: center; flex-wrap: wrap; }
+.origem__corpo > div { flex: 1 1 14rem; min-width: 0; }
+
+.perguntas-lista { list-style: none; padding: 0; margin: var(--e4) 0 0; display: grid; gap: var(--e3); }
+.pergunta { border: 1px solid var(--cor-borda); border-radius: var(--raio-g); background: var(--cor-superficie); }
+.pergunta[data-aberta] { border-color: var(--cor-primaria-escura); }
+.pergunta__cabecalho { font-size: 1rem; font-weight: 400; }
+.pergunta__botao {
+  width: 100%; min-height: 4rem;
+  display: flex; align-items: center; gap: var(--e3);
+  padding: var(--e3) var(--e4);
+  background: none; border: none; border-radius: var(--raio-g);
+  text-align: left; color: var(--cor-texto); cursor: pointer; font-size: 1.0625rem;
+}
+.pergunta__botao:hover { background: var(--cor-superficie-alt); }
+.pergunta__numero {
+  flex: none; width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--cor-primaria-clara); color: var(--cor-primaria-escura); font-weight: 700; font-size: 1.125rem;
+}
+.pergunta__enunciado { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.pergunta__botao .etiqueta { flex: none; }
+.pergunta__seta { width: 1.25rem; height: 1.25rem; flex: none; transition: transform var(--duracao) ease; }
+.pergunta__botao[aria-expanded='true'] .pergunta__seta { transform: rotate(180deg); }
+.pergunta__detalhe { padding: 0 var(--e4) var(--e4) calc(var(--e4) + 2.5rem + var(--e3)); }
+@media (max-width: 40rem) {
+  .pergunta__detalhe { padding-left: var(--e4); }
+  .pergunta__botao .etiqueta { display: none; }
+}
+.questao__alternativa--correta { font-weight: 600; }
+.editor-questao .campo { max-width: none; }
+
+.link-copiar { display: flex; gap: var(--e2); margin-top: var(--e3); }
+.link-copiar .entrada { font-size: 0.9375rem; min-width: 0; }
+.link-copiar__botao {
+  flex: none; width: 3rem; min-height: 3rem;
+  display: grid; place-items: center;
+  border: 1px solid var(--cor-borda-forte); border-radius: var(--raio);
+  background: var(--cor-superficie); color: var(--cor-primaria-escura); cursor: pointer;
+}
+.link-copiar__botao:hover { background: var(--cor-primaria-clara); }
+.link-copiar__botao svg { width: 1.375rem; height: 1.375rem; }
+.link-copiar__codigo { font-size: 0.9375rem; margin-top: var(--e2); }
+
+.nota-info {
+  display: flex; gap: var(--e3); align-items: flex-start;
+  margin-top: var(--e4);
+  padding: var(--e3) var(--e4);
+  background: var(--cor-info-fundo); border-radius: var(--raio);
+  font-size: 0.9375rem;
+}
+.nota-info svg { width: 1.375rem; height: 1.375rem; flex: none; color: var(--cor-primaria-escura); margin-top: 0.1em; }
+.nota-info p { margin: 0; }
+:root[data-contraste='alto'] .nota-info { border: 2px solid #fff; }
