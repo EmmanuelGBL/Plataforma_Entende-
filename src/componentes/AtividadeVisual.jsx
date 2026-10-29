@@ -90,9 +90,11 @@ function usarContagem(valor, ligado) {
 
 /* Confete: 28 peças com posição, atraso, giro e deriva próprios, que caem
    uma vez (cerca de 3 s) e somem. Não pisca e não se repete sozinho (WCAG
-   2.2.2 e 2.3.1); tocar no troféu lança de novo. */
+   2.2.2 e 2.3.1); tocar no troféu lança de novo. Caem dos dois lados do
+   troféu (metade em 0–26 %, metade em 74–100 % da largura), longe do troféu
+   e do "Parabéns!". */
 const PECAS = Array.from({ length: 28 }, (_, i) => ({
-  x: (i * 37) % 100,
+  x: (i % 2 ? 74 : 0) + ((i * 37) % 26),
   atraso: ((i * 53) % 900) / 1000,
   giro: ((i * 71) % 540) - 270,
   deriva: ((i * 29) % 80) - 40,
