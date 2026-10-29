@@ -888,9 +888,16 @@ table.dados--estreita { max-width: 46rem; }
   .etapas li:nth-child(3) { border-left: none; }
   .etapas li:nth-child(n+3) { border-top: 1px solid var(--cor-borda); }
 }
+.etapas__contagem { display: none; }
+/* Celular: só a etapa atual (ou a última, quando tudo foi concluído), com
+   "Etapa 1 de 4" à vista. As outras continuam para o leitor de tela no
+   computador; aqui o texto da contagem já diz onde se está. */
 @media (max-width: 40rem) {
   .etapas { grid-template-columns: minmax(0, 1fr); }
-  .etapas li + li { border-left: none; border-top: 1px solid var(--cor-borda); }
+  .etapas li { border: none !important; }
+  .etapas:has(li[data-estado='atual']) li:not([data-estado='atual']),
+  .etapas:not(:has(li[data-estado='atual'])) li:not(:last-child) { display: none; }
+  .etapas__contagem { display: block; font-size: 0.8125rem; font-weight: 600; color: var(--cor-primaria-escura); }
 }
 :root[data-contraste='alto'] .etapas li[data-estado='atual'] { outline: 2px solid #ffe600; outline-offset: -2px; }
 

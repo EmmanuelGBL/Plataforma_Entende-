@@ -60,6 +60,10 @@ function EtapasRevisao({ aprovado }) {
                   estado === 'concluida' ? ', concluída' : estado === 'atual' ? ', etapa atual' : ''
                 }: `}
               </span>
+              {/* Só aparece no celular, onde só a etapa atual fica à vista. */}
+              <span className="etapas__contagem" aria-hidden="true">
+                Etapa {indice + 1} de {ETAPAS.length}
+              </span>
               <span className="etapas__titulo">{titulo}</span>
               <span className="etapas__apoio">{apoio}</span>
             </span>
