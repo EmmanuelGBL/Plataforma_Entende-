@@ -63,7 +63,7 @@ function LinkAjuda() {
   return (
     <Link to="/ajuda" className="barra__acao">
       <CircleHelp aria-hidden="true" />
-      Ajuda
+      <span className="barra__rotulo">Ajuda</span>
     </Link>
   );
 }
@@ -109,7 +109,7 @@ function MenuProfessor() {
         onClick={() => setAberto((v) => !v)}
       >
         <CircleUserRound aria-hidden="true" className="menu-professor__avatar" />
-        {primeiroNome}
+        <span className="barra__rotulo">{primeiroNome}</span>
         <ChevronDown aria-hidden="true" className="menu-professor__seta" />
       </button>
       {aberto && (

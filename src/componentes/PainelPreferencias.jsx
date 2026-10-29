@@ -74,7 +74,7 @@ export function PainelPreferencias() {
         onClick={() => setAberto((v) => !v)}
       >
         <PersonStanding aria-hidden="true" />
-        Acessibilidade
+        <span className="barra__rotulo">Acessibilidade</span>
       </button>
 
       {aberto && (

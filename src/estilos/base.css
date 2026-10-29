@@ -330,3 +330,17 @@ kbd {
   .conteudo { padding: var(--e4) var(--e3) var(--e6); }
   h1 { font-size: 1.75rem; }
 }
+
+/* Celular: a barra fica numa linha só, com os botões só no ícone. O texto
+   continua lá para o leitor de tela. */
+@media (max-width: 40rem) {
+  .barra-interna { flex-wrap: nowrap; gap: var(--e2); padding-inline: var(--e3); }
+  .marca img { width: 36px; height: 36px; }
+  .marca__nome { font-size: 1.375rem; }
+  .barra__acoes { gap: 0; flex-wrap: nowrap; }
+  .barra__acao { padding-inline: var(--e2); }
+  .barra__rotulo {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+}
