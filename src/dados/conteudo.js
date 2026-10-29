@@ -233,21 +233,23 @@ export const METRICAS = [
 ];
 
 /* --- Questões geradas do mesmo material (RF13, RN04) --------------------- */
+/* Na demonstração a resposta certa é sempre a letra A, para a apresentação à
+   banca. Com o servidor, o gerador embaralha a posição (questoes.py). */
 export const QUESTOES = [
   {
     id: 'q1',
     mecanica: 'Escolha única',
     enunciado: 'Como se chama o processo em que a planta produz o próprio alimento?',
-    alternativas: ['Respiração', 'Fotossíntese', 'Digestão', 'Evaporação'],
-    correta: 1,
+    alternativas: ['Fotossíntese', 'Respiração', 'Digestão', 'Evaporação'],
+    correta: 0,
     trecho: 'Bloco 1 — O que é a fotossíntese',
   },
   {
     id: 'q2',
     mecanica: 'Escolha única',
     enunciado: 'Em que parte da planta a fotossíntese acontece principalmente?',
-    alternativas: ['Nas raízes', 'No caule', 'Nas folhas', 'Nas flores'],
-    correta: 2,
+    alternativas: ['Nas folhas', 'Nas raízes', 'No caule', 'Nas flores'],
+    correta: 0,
     trecho: 'Bloco 2 — Onde a fotossíntese acontece',
   },
   {
@@ -276,12 +278,12 @@ export const QUESTOES = [
     mecanica: 'Escolha única',
     enunciado: 'Por que a fotossíntese para durante a noite?',
     alternativas: [
-      'Porque a planta está dormindo',
       'Porque não há luz do Sol',
+      'Porque a planta está dormindo',
       'Porque falta água no solo',
       'Porque o ar fica mais frio',
     ],
-    correta: 1,
+    correta: 0,
     trecho: 'Bloco 4 — O que acontece de noite',
   },
 ];
