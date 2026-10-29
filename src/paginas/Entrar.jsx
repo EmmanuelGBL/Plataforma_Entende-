@@ -1,6 +1,17 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChartNoAxesColumnIncreasing, Eye, EyeOff, FileText, Gamepad2, Lock, Mail, UserPlus, UserRound } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  ChartNoAxesColumnIncreasing,
+  Eye,
+  EyeOff,
+  FileText,
+  Gamepad2,
+  Info,
+  Lock,
+  Mail,
+  UserPlus,
+  UserRound,
+} from 'lucide-react';
 import { Aviso, Botao, Campo } from '../componentes/basicos.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
@@ -36,7 +47,9 @@ function Apresentacao() {
           </li>
         ))}
       </ul>
-      <img className="entrada-apresentacao__ilustracao" src="./ilustracoes/entrada.webp" alt="" />
+      <div className="entrada-apresentacao__figura">
+        <img className="entrada-apresentacao__ilustracao" src="./ilustracoes/entrada.webp" alt="" />
+      </div>
     </section>
   );
 }
@@ -187,23 +200,20 @@ export function Entrar() {
               </Botao>
             </>
           )}
+
+          <p className="entrada-cartao__nota">
+            <Info aria-hidden="true" />
+            {modoServidor
+              ? 'Guardamos seu nome, seu e-mail, a senha cifrada e os materiais que você enviar. Só você vê seus materiais.'
+              : 'Demonstração: os campos já vêm preenchidos, qualquer senha é aceita e nada é enviado a servidor algum.'}
+          </p>
         </section>
 
-        {modoServidor ? (
-          <Aviso tipo="info" titulo="Sobre os seus dados" nivel={2}>
-            <p>
-              O Entende+ guarda o seu nome, o seu e-mail e a sua senha cifrada, e o texto dos
-              materiais que você enviar. Os materiais só podem ser vistos por você.
-            </p>
-          </Aviso>
-        ) : (
-          <Aviso tipo="info" titulo="Protótipo de demonstração" nivel={2}>
-            <p>
-              Os campos já vêm preenchidos e qualquer senha é aceita. Nenhum dado é enviado para
-              servidor algum.
-            </p>
-          </Aviso>
-        )}
+        <p className="entrada-formulario__rodape">
+          <Link to="/acessibilidade">Declaração de acessibilidade</Link>
+          <span aria-hidden="true"> · </span>
+          Protótipo acadêmico — TCC em Sistemas de Informação, CEUNI FAMETRO
+        </p>
       </div>
 
       <Apresentacao />

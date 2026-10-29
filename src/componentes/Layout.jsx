@@ -260,7 +260,7 @@ export function LayoutSimples() {
   usarFocoNaTroca(principal, true);
 
   return (
-    <div className="app">
+    <div className={naEntrada ? 'app app--tela-cheia' : 'app'}>
       <LinksDeSalto />
       <header className="barra">
         <div className="barra-interna">
@@ -274,7 +274,8 @@ export function LayoutSimples() {
       <main className="conteudo" id="conteudo" ref={principal} tabIndex={-1}>
         <Outlet />
       </main>
-      <Rodape />
+      {/* A entrada ocupa a tela inteira; o link da declaração fica sob o cartão. */}
+      {!naEntrada && <Rodape />}
     </div>
   );
 }
