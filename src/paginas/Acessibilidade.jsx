@@ -36,7 +36,7 @@ export function Acessibilidade() {
         <Cartao>
           <h2>O que você pode ajustar</h2>
           <p>
-            O botão <strong>Exibição</strong>, no alto de todas as telas, permite mudar quatro
+            O botão <strong>Acessibilidade</strong>, no alto de todas as telas, permite mudar quatro
             coisas. A escolha fica guardada no seu navegador e continua valendo na próxima vez.
           </p>
           <ul>

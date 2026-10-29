@@ -4,35 +4,36 @@
 
 :root {
   /* --- Cores da marca ---------------------------------------------------- */
-  --cor-petroleo: #10323a;  /* 13,85:1 sobre branco — texto principal        */
-  --cor-teal: #0e7c86;      /*  4,94:1 sobre branco — fundo de botão, ícone  */
-  --cor-teal-escuro: #0b5f67; /* 7,38:1 sobre branco — links e texto de apoio */
-  --cor-menta: #3bb6a6; /* 2,49:1 — não usar em texto; só traço e fundo */
-  --cor-ambar: #e0912b;     /*  2,54:1 sobre branco — só sobre petróleo      */
-  --cor-ambar-escuro: #8a5410; /* 5,72:1 sobre branco — texto de alerta      */
+  --cor-tinta: #0f1f3d;           /* 16,36:1 sobre branco — texto principal       */
+  --cor-primaria: #1463d6;        /*  5,55:1 sobre branco — fundo de botão, ícone */
+  --cor-primaria-escura: #0a4fb5; /*  7,50:1 sobre branco — links, foco           */
+  --cor-primaria-clara: #e8f1fe;  /* fundo do item ativo; 6,59:1 com a escura     */
+  --cor-destaque: #f5a524;        /*  2,04:1 sobre branco — só no logotipo e em
+                                      acentos decorativos; nunca texto          */
+  --cor-destaque-escuro: #8a5410; /*  6,26:1 sobre branco — texto de alerta       */
 
   /* --- Neutros ----------------------------------------------------------- */
-  --cor-fundo: #f7f9f9;
+  --cor-fundo: #f5f8fc;
   --cor-superficie: #ffffff;
-  --cor-superficie-alt: #eef4f4;
-  --cor-borda: #c7d5d7;
-  --cor-borda-forte: #7d9498;
-  --cor-texto: var(--cor-petroleo);
-  --cor-texto-apoio: #405c62;  /* 7,54:1 sobre branco                        */
+  --cor-superficie-alt: #eef3fa;
+  --cor-borda: #d3dceb;
+  --cor-borda-forte: #7b8aa3;     /*  3,50:1 — borda de campo (SC 1.4.11)         */
+  --cor-texto: var(--cor-tinta);
+  --cor-texto-apoio: #475569;     /*  7,58:1 sobre branco                         */
 
-  /* Barra superior com variáveis próprias: no alto contraste o petróleo vira
+  /* Barra superior com variáveis próprias: no alto contraste a tinta vira
      branco (cor de texto) e a barra ficaria branca com texto branco. */
-  --cor-barra-fundo: #10323a;
-  --cor-barra-texto: #ffffff;
+  --cor-barra-fundo: #ffffff;
+  --cor-barra-texto: var(--cor-tinta);
 
   /* --- Estados ----------------------------------------------------------- */
-  --cor-sucesso: #1a6b3c;   /* 5,86:1 sobre branco */
+  --cor-sucesso: #1a6b3c;   /* 6,54:1 sobre branco */
   --cor-sucesso-fundo: #e6f4ec;
-  --cor-erro: #a3161d;      /* 7,07:1 sobre branco */
+  --cor-erro: #a3161d;      /* 7,81:1 sobre branco */
   --cor-erro-fundo: #fdecec;
   --cor-atencao: #8a5410;
   --cor-atencao-fundo: #fdf3e3;
-  --cor-info-fundo: #e7f1f3;
+  --cor-info-fundo: #e8f1fe;
 
   /* --- Tipografia -------------------------------------------------------- */
   /* Fontes sem serifa do sistema (RNF05). Nenhuma fonte externa é carregada. */
@@ -56,11 +57,11 @@
   /* --- Forma ------------------------------------------------------------- */
   --raio: 8px;
   --raio-g: 14px;
-  --sombra: 0 1px 2px rgba(16, 50, 58, 0.08), 0 4px 12px rgba(16, 50, 58, 0.06);
-  --sombra-alta: 0 8px 28px rgba(16, 50, 58, 0.16);
+  --sombra: 0 1px 2px rgba(15, 31, 61, 0.08), 0 4px 12px rgba(15, 31, 61, 0.06);
+  --sombra-alta: 0 8px 28px rgba(15, 31, 61, 0.16);
 
   /* --- Foco (WCAG 2.2 SC 2.4.11 / 2.4.13) -------------------------------- */
-  --cor-foco: #0b5f67;
+  --cor-foco: #0a4fb5;
   --contorno-foco: 3px solid var(--cor-foco);
   --deslocamento-foco: 2px;
 
@@ -104,14 +105,14 @@
   --cor-borda-forte: #ffffff;
   --cor-texto: #ffffff;
   --cor-texto-apoio: #ffffff;
-  --cor-petroleo: #ffffff;
+  --cor-tinta: #ffffff;
   --cor-barra-fundo: #000000;
   --cor-barra-texto: #ffe600;
-  --cor-teal: #000000;
-  --cor-teal-escuro: #ffe600;
-  --cor-menta: #ffe600;
-  --cor-ambar: #ffe600;
-  --cor-ambar-escuro: #ffe600;
+  --cor-primaria: #000000;
+  --cor-primaria-escura: #ffe600;
+  --cor-primaria-clara: #000000;
+  --cor-destaque: #ffe600;
+  --cor-destaque-escuro: #ffe600;
   --cor-sucesso: #6cf58f;
   --cor-sucesso-fundo: #000000;
   --cor-erro: #ff8f8f;

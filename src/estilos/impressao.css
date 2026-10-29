@@ -178,7 +178,7 @@
   min-height: var(--alvo-minimo);
   cursor: pointer;
 }
-.opcao-impressao input { width: 1.15rem; height: 1.15rem; accent-color: var(--cor-teal); }
+.opcao-impressao input { width: 1.15rem; height: 1.15rem; accent-color: var(--cor-primaria); }
 
 @media print {
   /* O que é da tela não vai para o papel. */

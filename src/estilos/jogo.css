@@ -38,7 +38,7 @@
 .jogo__placar {
   margin: 0 0 var(--e3);
   font-size: 1.125rem;
-  color: var(--cor-teal-escuro);
+  color: var(--cor-primaria-escura);
 }
 .jogo__placar strong { font-size: 1.5rem; }
 
@@ -60,12 +60,12 @@
   background: var(--cor-superficie);
 }
 .jogo__trilha li[data-estado='feita'] {
-  background: var(--cor-teal);
-  border-color: var(--cor-teal-escuro);
+  background: var(--cor-primaria);
+  border-color: var(--cor-primaria-escura);
 }
 /* A rodada atual ganha anel externo, não só outra cor. */
 .jogo__trilha li[data-estado='atual'] {
-  border-color: var(--cor-teal-escuro);
+  border-color: var(--cor-primaria-escura);
   box-shadow: 0 0 0 3px var(--cor-info-fundo);
 }
 
@@ -114,7 +114,7 @@
   display: grid;
   place-items: center;
   padding: var(--e3);
-  background: rgba(16, 50, 58, 0.55);
+  background: rgba(15, 31, 61, 0.55);
 }
 
 .jogo__aviso-caixa {
@@ -271,7 +271,7 @@
 .jogo-g__camisa { fill: var(--jogo-camisa); }
 .jogo-g__camisa-faixa { fill: var(--jogo-camisa-escura); }
 .jogo-g__camisa-gola { fill: var(--jogo-camisa-escura); }
-.jogo-g__sombra { fill: rgba(16, 50, 58, 0.22); }
+.jogo-g__sombra { fill: rgba(15, 31, 61, 0.22); }
 .jogo-g__calcao { fill: var(--jogo-camisa-escura); }
 .jogo-g__meiao { fill: var(--jogo-camisa); }
 .jogo-g__calcado { fill: var(--jogo-calcado); }
@@ -351,7 +351,7 @@
   font-weight: 600;
   cursor: pointer;
 }
-.jogo__canto:hover { border-color: var(--cor-teal); background: var(--cor-info-fundo); }
+.jogo__canto:hover { border-color: var(--cor-primaria); background: var(--cor-info-fundo); }
 
 .jogo__mirou {
   margin-bottom: var(--e4);

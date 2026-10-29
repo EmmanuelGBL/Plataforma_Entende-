@@ -1,11 +1,21 @@
-import { useEffect, useRef } from 'react';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import {
+  ChevronDown,
+  CircleHelp,
+  CircleUserRound,
+  CloudUpload,
+  FileText,
+  Gamepad2,
+  House,
+  LogOut,
+} from 'lucide-react';
 import { PainelPreferencias } from './PainelPreferencias.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
-/* Esqueleto das telas do professor: link de salto, barra superior com menu,
-   painel de exibição e rodapé.
+/* Esqueleto das telas: link de salto, barra superior, menu lateral (só nas
+   telas do professor), conteúdo e rodapé.
 
    A cada troca de rota o <main> recebe o foco e o título da página muda,
    para que o leitor de tela perceba a nova tela. Atalhos: accesskey 1
@@ -30,15 +40,147 @@ function LinksDeSalto() {
   );
 }
 
-function Marca() {
-  return (
-    <Link to="/painel" className="marca">
+/** Logotipo. Com `para`, vira link (telas do professor); sem, é só a marca. */
+export function Marca({ para }) {
+  const conteudo = (
+    <>
       <img src="./marca/entende-mais-icone.svg" alt="" />
-      <span>
+      <span className="marca__nome">
         Entende<span className="mais">+</span>
       </span>
+    </>
+  );
+  if (!para) return <span className="marca">{conteudo}</span>;
+  return (
+    <Link to={para} className="marca">
+      {conteudo}
       <span className="apenas-leitor">— início</span>
     </Link>
+  );
+}
+
+function LinkAjuda() {
+  return (
+    <Link to="/ajuda" className="barra__acao">
+      <CircleHelp aria-hidden="true" />
+      Ajuda
+    </Link>
+  );
+}
+
+/** Menu do professor: nome e o botão Sair. */
+function MenuProfessor() {
+  const { professor, sair } = usarApp();
+  const navegar = useNavigate();
+  const [aberto, setAberto] = useState(false);
+  const area = useRef(null);
+  const gatilho = useRef(null);
+
+  useEffect(() => {
+    if (!aberto) return undefined;
+    function aoClicarFora(evento) {
+      if (!area.current?.contains(evento.target)) setAberto(false);
+    }
+    function aoTeclar(evento) {
+      if (evento.key === 'Escape') {
+        setAberto(false);
+        gatilho.current?.focus();
+      }
+    }
+    document.addEventListener('mousedown', aoClicarFora);
+    document.addEventListener('keydown', aoTeclar);
+    return () => {
+      document.removeEventListener('mousedown', aoClicarFora);
+      document.removeEventListener('keydown', aoTeclar);
+    };
+  }, [aberto]);
+
+  if (!professor) return null;
+  const primeiroNome = professor.nome?.split(' ')[0] ?? 'Professor';
+
+  return (
+    <div className="menu-professor" ref={area}>
+      <button
+        type="button"
+        ref={gatilho}
+        className="barra__acao"
+        aria-expanded={aberto}
+        aria-controls="menu-professor"
+        onClick={() => setAberto((v) => !v)}
+      >
+        <CircleUserRound aria-hidden="true" className="menu-professor__avatar" />
+        {primeiroNome}
+        <ChevronDown aria-hidden="true" className="menu-professor__seta" />
+      </button>
+      {aberto && (
+        <div className="menu-professor__painel" id="menu-professor">
+          <p className="menu-professor__nome">{professor.nome}</p>
+          {professor.email && <p className="menu-professor__email">{professor.email}</p>}
+          <button
+            type="button"
+            className="botao botao--secundario botao--largo"
+            onClick={() => {
+              sair();
+              navegar('/');
+            }}
+          >
+            <LogOut aria-hidden="true" />
+            Sair
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Menu lateral. Adaptação e Atividade dependem do material, então só
+ *  aparecem quando um material está aberto. */
+function MenuLateral() {
+  const rotaMaterial = useMatch('/materiais/:id/*');
+  const { material } = usarApp();
+  const id = rotaMaterial?.params.id;
+  const aberto = id ? material(id) : null;
+
+  return (
+    <nav className="menu-lateral" id="menu" aria-label="Navegação principal" accessKey="2">
+      <ul>
+        <li>
+          <NavLink to="/painel">
+            <House aria-hidden="true" />
+            Meus materiais
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/enviar">
+            <CloudUpload aria-hidden="true" />
+            Enviar material
+          </NavLink>
+        </li>
+      </ul>
+
+      {aberto && (
+        <>
+          <p className="menu-lateral__grupo" id="menu-material">
+            Material aberto
+            <span className="menu-lateral__material">{aberto.nome}</span>
+          </p>
+          <ul aria-labelledby="menu-material">
+            <li>
+              <NavLink to={`/materiais/${id}/adaptacao`}>
+                <FileText aria-hidden="true" />
+                Adaptação
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to={`/materiais/${id}/atividade`}>
+                <Gamepad2 aria-hidden="true" />
+                Atividade
+              </NavLink>
+            </li>
+          </ul>
+        </>
+      )}
+    </nav>
   );
 }
 
@@ -53,7 +195,7 @@ function Rodape() {
         </p>
         <ul>
           <li>
-            <Link to="/acessibilidade">Acessibilidade</Link>
+            <Link to="/acessibilidade">Declaração de acessibilidade</Link>
           </li>
           <li>
             <Link to="/ajuda">Ajuda</Link>
@@ -64,13 +206,10 @@ function Rodape() {
   );
 }
 
-export function Layout() {
-  const { professor, sair } = usarApp();
-  const navegar = useNavigate();
+/** Coloca o foco no <main> a cada troca de rota (menos na primeira carga). */
+function usarFocoNaTroca(principal, focarNaPrimeira) {
   const local = useLocation();
-  const principal = useRef(null);
-  const primeiraCarga = useRef(true);
-
+  const primeiraCarga = useRef(!focarNaPrimeira);
   useEffect(() => {
     if (primeiraCarga.current) {
       primeiraCarga.current = false;
@@ -78,7 +217,13 @@ export function Layout() {
     }
     principal.current?.focus();
     window.scrollTo(0, 0);
-  }, [local.pathname]);
+  }, [local.pathname, principal]);
+}
+
+export function Layout() {
+  const { professor } = usarApp();
+  const principal = useRef(null);
+  usarFocoNaTroca(principal, false);
 
   return (
     <div className="app">
@@ -86,35 +231,22 @@ export function Layout() {
 
       <header className="barra">
         <div className="barra-interna">
-          <Marca />
-
-          <nav className="navegacao" id="menu" aria-label="Navegação principal" accessKey="2">
-            <NavLink to="/painel">Meus materiais</NavLink>
-            <NavLink to="/enviar">Enviar material</NavLink>
-            <NavLink to="/ajuda">Ajuda</NavLink>
-          </nav>
-
-          <div className="barra-espaco linha">
+          <Marca para="/painel" />
+          <div className="barra__acoes">
+            <LinkAjuda />
             <PainelPreferencias />
-            {professor && (
-              <button
-                type="button"
-                className="preferencias__gatilho"
-                onClick={() => {
-                  sair();
-                  navegar('/');
-                }}
-              >
-                Sair
-              </button>
-            )}
+            <MenuProfessor />
           </div>
         </div>
       </header>
 
-      <main className="conteudo" id="conteudo" ref={principal} tabIndex={-1}>
-        <Outlet />
-      </main>
+      {/* Ajuda e Acessibilidade também abrem sem sessão: aí não há menu lateral. */}
+      <div className={professor ? 'corpo corpo--com-menu' : 'corpo'}>
+        {professor && <MenuLateral />}
+        <main className="conteudo" id="conteudo" ref={principal} tabIndex={-1}>
+          <Outlet />
+        </main>
+      </div>
 
       <Rodape />
     </div>
@@ -123,25 +255,16 @@ export function Layout() {
 
 /** Layout sem o menu do professor: entrada e telas do estudante. */
 export function LayoutSimples() {
-  const local = useLocation();
   const principal = useRef(null);
-
-  useEffect(() => {
-    principal.current?.focus();
-  }, [local.pathname]);
+  usarFocoNaTroca(principal, true);
 
   return (
     <div className="app">
       <LinksDeSalto />
       <header className="barra">
         <div className="barra-interna">
-          <span className="marca">
-            <img src="./marca/entende-mais-icone.svg" alt="" />
-            <span>
-              Entende<span className="mais">+</span>
-            </span>
-          </span>
-          <div className="barra-espaco">
+          <Marca />
+          <div className="barra__acoes">
             <PainelPreferencias />
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { PersonStanding } from 'lucide-react';
 import { usarPreferencias } from '../contextos/Preferencias.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
@@ -67,13 +68,13 @@ export function PainelPreferencias() {
       <button
         type="button"
         ref={gatilho}
-        className="preferencias__gatilho"
+        className="barra__acao"
         aria-expanded={aberto}
         aria-controls="painel-preferencias"
         onClick={() => setAberto((v) => !v)}
       >
-        <span aria-hidden="true">◑</span>
-        Exibição
+        <PersonStanding aria-hidden="true" />
+        Acessibilidade
       </button>
 
       {aberto && (

@@ -167,7 +167,7 @@ function usarSom(ligado) {
 }
 
 /** Tempo de espera antes de mostrar o cartão de resultado. Com movimento
- *  reduzido (painel Exibição ou sistema operacional), a espera é zero. */
+ *  reduzido (painel Acessibilidade ou sistema operacional), a espera é zero. */
 function esperaDoAviso(resultado) {
   const semMovimento =
     document.documentElement.dataset.movimento === 'reduzido' ||

@@ -63,7 +63,7 @@ h1, h2, h3, h4 {
   font-weight: 600;
   text-wrap: balance;
 }
-h1 { font-size: 1.75rem; }
+h1 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; }
 h2 { font-size: 1.375rem; }
 h3 { font-size: 1.125rem; }
 h4 { font-size: 1rem; }
@@ -74,7 +74,7 @@ p + p { margin-top: var(--espaco-paragrafos); }
 strong { font-weight: 600; }
 
 a {
-  color: var(--cor-teal-escuro);
+  color: var(--cor-primaria-escura);
   text-decoration: underline;
   text-underline-offset: 0.18em;
 }
@@ -177,12 +177,12 @@ kbd {
 .barra {
   background: var(--cor-barra-fundo);
   color: var(--cor-barra-texto);
-  border-bottom: 3px solid var(--cor-teal);
+  border-bottom: 1px solid var(--cor-borda);
+  box-shadow: 0 1px 3px rgba(15, 31, 61, 0.06);
 }
-:root[data-contraste='alto'] .barra { border-bottom-color: #ffe600; }
+:root[data-contraste='alto'] .barra { border-bottom: 2px solid #ffe600; }
 
 .barra-interna {
-  max-width: var(--largura-conteudo);
   margin-inline: auto;
   padding: var(--e3) var(--respiro-lateral);
   display: flex;
@@ -192,32 +192,102 @@ kbd {
 }
 
 .marca { display: flex; align-items: center; gap: var(--e2); text-decoration: none; color: inherit; }
-.marca img { width: 34px; height: 34px; }
-.marca span { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.01em; }
-.marca .mais { color: var(--cor-ambar); }
+.marca img { width: 44px; height: 44px; }
+.marca__nome { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+.marca .mais { color: var(--cor-primaria); }
 :root[data-contraste='alto'] .marca .mais { color: #ffe600; }
 
-.navegacao { display: flex; gap: var(--e1); flex-wrap: wrap; }
-.navegacao a {
-  color: inherit;
+.barra__acoes { margin-left: auto; display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap; }
+
+/* Botão e link da barra (Ajuda, Acessibilidade, menu do professor): mesma
+   aparência para os três, com ícone à esquerda. */
+.barra__acao {
+  min-height: var(--alvo-minimo);
+  display: inline-flex; align-items: center; gap: var(--e2);
+  padding: var(--e2) var(--e3);
+  background: transparent; color: inherit;
+  border: 2px solid transparent;
+  border-radius: var(--raio);
+  cursor: pointer; font-weight: 500; font-size: 1rem;
   text-decoration: none;
+}
+.barra__acao svg { width: 1.5rem; height: 1.5rem; flex: none; }
+.barra__acao:hover { background: var(--cor-superficie-alt); }
+.barra__acao[aria-expanded='true'] { border-color: var(--cor-primaria-escura); }
+:root[data-contraste='alto'] .barra__acao { border-color: #ffe600; }
+
+.menu-professor { position: relative; }
+.menu-professor__avatar { width: 2rem !important; height: 2rem !important; color: var(--cor-tinta); }
+.menu-professor__seta { width: 1.1rem !important; height: 1.1rem !important; }
+.menu-professor__painel {
+  position: absolute; right: 0; top: calc(100% + var(--e2));
+  width: min(18rem, calc(100vw - 2rem));
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-g);
+  box-shadow: var(--sombra-alta);
+  padding: var(--e4);
+  z-index: 40;
+}
+.menu-professor__nome { font-weight: 600; }
+.menu-professor__email { font-size: 0.9375rem; color: var(--cor-texto-apoio); margin: 0 0 var(--e4); overflow-wrap: anywhere; }
+
+/* --- Corpo com menu lateral ---------------------------------------------- */
+.corpo { flex: 1; display: flex; flex-direction: column; }
+.corpo--com-menu { flex-direction: row; align-items: stretch; }
+.corpo--com-menu > .conteudo { min-width: 0; margin-inline: 0; }
+
+.menu-lateral {
+  flex: none;
+  width: 17rem;
+  padding: var(--e5) var(--e3);
+  background: var(--cor-superficie);
+  border-right: 1px solid var(--cor-borda);
+}
+.menu-lateral ul { list-style: none; padding: 0; display: grid; gap: var(--e1); }
+.menu-lateral a {
+  display: flex; align-items: center; gap: var(--e3);
+  min-height: 3rem;
   padding: var(--e2) var(--e3);
   border-radius: var(--raio);
-  min-height: var(--alvo-minimo);
-  display: inline-flex;
-  align-items: center;
+  color: var(--cor-texto);
+  text-decoration: none;
+  font-size: 1.0625rem;
   border: 2px solid transparent;
 }
-.navegacao a:hover { background: rgba(255, 255, 255, 0.14); text-decoration: underline; }
-.navegacao a[aria-current='page'] {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: var(--cor-ambar);
+.menu-lateral a svg { width: 1.5rem; height: 1.5rem; flex: none; }
+.menu-lateral a:hover { background: var(--cor-superficie-alt); text-decoration: underline; }
+.menu-lateral a[aria-current='page'] {
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
   font-weight: 600;
 }
-:root[data-contraste='alto'] .navegacao a { border-color: #ffffff; }
-:root[data-contraste='alto'] .navegacao a[aria-current='page'] { border-color: #ffe600; color: #ffe600; }
+.menu-lateral a[aria-current='page'] svg { color: var(--cor-primaria); }
+:root[data-contraste='alto'] .menu-lateral a[aria-current='page'] { border-color: #ffe600; color: #ffe600; }
+:root[data-contraste='alto'] .menu-lateral a[aria-current='page'] svg { color: #ffe600; }
 
-.barra-espaco { margin-left: auto; }
+.menu-lateral__grupo {
+  margin: var(--e5) var(--e3) var(--e2);
+  padding-top: var(--e4);
+  border-top: 1px solid var(--cor-borda);
+  font-size: 0.8125rem; font-weight: 600;
+  color: var(--cor-texto-apoio);
+}
+.menu-lateral__material {
+  display: block;
+  font-size: 0.9375rem; font-weight: 600;
+  color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}
+
+/* Tela estreita: o menu lateral vira uma faixa horizontal acima do conteúdo. */
+@media (max-width: 62rem) {
+  .corpo--com-menu { flex-direction: column; }
+  .menu-lateral { width: auto; padding: var(--e2) var(--respiro-lateral); border-right: none; border-bottom: 1px solid var(--cor-borda); }
+  .menu-lateral ul { display: flex; flex-wrap: wrap; }
+  .menu-lateral__grupo { display: none; }
+}
 
 /* --- Rodapé -------------------------------------------------------------- */
 .rodape {
@@ -258,5 +328,5 @@ kbd {
 /* Tela estreita e zoom de 200%: tudo vira uma coluna. */
 @media (max-width: 40rem) {
   .conteudo { padding: var(--e4) var(--e3) var(--e6); }
-  h1 { font-size: 1.5rem; }
+  h1 { font-size: 1.75rem; }
 }
