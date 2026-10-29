@@ -33,8 +33,9 @@ export const ZONAS = [
 
 const LARGURA = 320;
 const ALTURA = 180;
-/* Diâmetro do círculo de mira, igual nas cinco áreas (unidades da cena). */
-const DIAMETRO_MIRA = 30;
+/* Diâmetro do círculo de mira, igual nas cinco áreas (unidades da cena). No
+   espaço ele envolve o planeta (raio 13), com folga. */
+const DIAMETRO_MIRA = { futebol: 30, espaco: 36 };
 /* Ponto de partida: a marca do pênalti, ou a base de lançamento. */
 const REPOUSO = { futebol: { x: 160, y: 156 }, espaco: { x: 160, y: 164 } };
 /* Altura onde o objeto passa no erro: acima da trave, ou acima dos planetas. */
@@ -148,7 +149,7 @@ export function CenaJogo({
             {convite}
           </p>
           <ul className="jogo__zonas" aria-label={convite}>
-            {ZONAS.map(({ area: [x, y, largura, altura] }, posicao) => (
+            {ZONAS.map(({ x: alvoX, y: alvoY, area: [x, y, largura, altura] }, posicao) => (
               <li key={cantos[posicao]}>
                 <button
                   type="button"
@@ -158,8 +159,11 @@ export function CenaJogo({
                     top: porcento(y, ALTURA),
                     width: porcento(largura, LARGURA),
                     height: porcento(altura, ALTURA),
-                    // O círculo é desenhado dentro da área, em % da altura dela.
-                    '--diametro': porcento(DIAMETRO_MIRA, altura),
+                    // O círculo fica no ponto-alvo da zona (onde a bola chega e
+                    // onde o planeta é desenhado), em % da área de clique.
+                    '--diametro': porcento(DIAMETRO_MIRA[espaco ? 'espaco' : 'futebol'], altura),
+                    '--centro-x': porcento(alvoX - x, largura),
+                    '--centro-y': porcento(alvoY - y, altura),
                   }}
                   onClick={() => aoMirar(posicao)}
                 >

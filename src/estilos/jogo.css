@@ -127,7 +127,7 @@
 .jogo__zona::before {
   content: '';
   position: absolute;
-  left: 50%; top: 50%;
+  left: var(--centro-x, 50%); top: var(--centro-y, 50%);
   height: var(--diametro, 80%);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
