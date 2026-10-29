@@ -295,19 +295,6 @@ kbd {
 :root[data-contraste='alto'] .menu-lateral__itens a[aria-current='page'] { border-color: #ffe600; color: #ffe600; }
 :root[data-contraste='alto'] .menu-lateral__itens a[aria-current='page'] svg { color: #ffe600; }
 
-.menu-lateral__grupo {
-  margin: var(--e5) var(--e3) var(--e2);
-  padding-top: var(--e4);
-  border-top: 1px solid var(--cor-borda);
-  font-size: 0.8125rem; font-weight: 600;
-  color: var(--cor-texto-apoio);
-}
-.menu-lateral__material {
-  display: block;
-  font-size: 0.9375rem; font-weight: 600;
-  color: var(--cor-texto);
-  overflow-wrap: anywhere;
-}
 
 /* Menu fechado em tela larga: coluna estreita só com os ícones. O texto sai
    da tela, mas continua sendo o nome do link para o leitor de tela. */
@@ -318,8 +305,6 @@ kbd {
   position: absolute; width: 1px; height: 1px; margin: -1px;
   overflow: hidden; clip-path: inset(50%); white-space: nowrap;
 }
-.app--menu-fechado .menu-lateral__grupo { font-size: 0; margin-inline: var(--e2); padding-top: 0; }
-.app--menu-fechado .menu-lateral__material { display: none; }
 
 /* Tela estreita: o menu vira uma faixa acima da barra, com o logo e, aberto,
    os itens lado a lado; fechado, fica só o símbolo. */
@@ -332,7 +317,6 @@ kbd {
   }
   .menu-lateral__topo { margin: 0 calc(-1 * var(--respiro-lateral)) var(--e2); padding-inline: var(--respiro-lateral) var(--e2); }
   .menu-lateral__itens ul { display: flex; flex-wrap: wrap; }
-  .menu-lateral__grupo { display: none; }
   .app--menu-fechado .menu-lateral { width: auto; padding-bottom: 0; }
   .app--menu-fechado .menu-lateral__topo { margin-bottom: 0; border-bottom: 0; justify-content: flex-start; padding-inline: var(--respiro-lateral); }
   .app--menu-fechado .menu-lateral__alternar--simbolo { margin-inline: 0; }

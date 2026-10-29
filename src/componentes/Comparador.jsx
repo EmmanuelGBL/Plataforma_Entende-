@@ -112,8 +112,7 @@ export function TabelaMetricas({ metricas }) {
       </h2>
       <p className="campo__dica">
         Comparação entre o texto original e o adaptado. As métricas aparecem sempre, inclusive
-        quando o resultado é desfavorável — é o que permite conferir a adaptação em vez de
-        confiar nela.
+        quando o resultado é desfavorável.
       </p>
 
       <TabelaEnvolvente rotulo="Métricas de legibilidade">

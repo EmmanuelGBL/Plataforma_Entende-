@@ -4,7 +4,6 @@ import {
   NavLink,
   Outlet,
   useLocation,
-  useMatch,
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
@@ -12,7 +11,6 @@ import {
   ChevronDown,
   CircleHelp,
   CircleUserRound,
-  FileText,
   FolderOpen,
   Gamepad2,
   ListChecks,
@@ -186,19 +184,15 @@ const ITENS_MENU = [
   ['/ajuda', CircleHelp, 'Ajuda'],
 ];
 
-/** Menu lateral, com o logo no topo. Adaptação e Atividade dependem do
- *  material, então só aparecem quando um material está aberto.
+/** Menu lateral, com o logo no topo. Adaptação e Atividade do material
+ *  aberto não entram aqui desde 29/10/2026: as duas telas já têm os botões
+ *  de ir de uma para a outra.
  *
  *  Fechado, o topo mostra só o símbolo do livro, que é também o botão de
  *  abrir; em tela larga os itens ficam só com o ícone (o nome aparece ao
  *  passar o mouse e continua para o leitor de tela), e em tela estreita
  *  somem. */
 function MenuLateral({ fechado, aoAlternar }) {
-  const rotaMaterial = useMatch('/materiais/:id/*');
-  const { material } = usarApp();
-  const id = rotaMaterial?.params.id;
-  const aberto = id ? material(id) : null;
-
   // O botão de abrir e o de recolher são elementos diferentes: depois de
   // alternar, o foco passa para o que apareceu, e não se perde.
   const botao = useRef(null);
@@ -259,29 +253,6 @@ function MenuLateral({ fechado, aoAlternar }) {
             </li>
           ))}
         </ul>
-
-        {aberto && (
-          <>
-            <p className="menu-lateral__grupo" id="menu-material">
-              Material aberto
-              <span className="menu-lateral__material">{aberto.nome}</span>
-            </p>
-            <ul aria-labelledby="menu-material">
-              <li>
-                <NavLink to={`/materiais/${id}/adaptacao`} title={fechado ? 'Adaptação' : undefined}>
-                  <FileText aria-hidden="true" />
-                  <span className="menu-lateral__rotulo">Adaptação</span>
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to={`/materiais/${id}/atividade`} title={fechado ? 'Atividade' : undefined}>
-                  <Gamepad2 aria-hidden="true" />
-                  <span className="menu-lateral__rotulo">Atividade</span>
-                </NavLink>
-              </li>
-            </ul>
-          </>
-        )}
       </div>
     </nav>
   );
