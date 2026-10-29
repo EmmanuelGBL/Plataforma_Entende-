@@ -16,9 +16,9 @@
   --jogo-rede-topo: #1a444d;
   --jogo-malha: rgba(255, 255, 255, 0.42);
   --jogo-trave: #ffffff;
-  --jogo-camisa: #0e7c86;
-  --jogo-camisa-escura: #0b5f67;
-  --jogo-calcado: #10323a;
+  --jogo-camisa: #1463d6;
+  --jogo-camisa-escura: #0a4fb5;
+  --jogo-calcado: #0f1f3d;
   --jogo-alvo: #8fe6da; /* o mais brilhante e saturado da cena */
 
   /* --- Tons quentes: só onde têm função ----------------------------------- */
@@ -33,40 +33,6 @@
   justify-content: space-between;
   gap: var(--e3);
   flex-wrap: wrap;
-}
-
-.jogo__placar {
-  margin: 0 0 var(--e3);
-  font-size: 1.125rem;
-  color: var(--cor-primaria-escura);
-}
-.jogo__placar strong { font-size: 1.5rem; }
-
-/* --- Trilha de progresso -------------------------------------------------
-      O progresso de "Rodada 2 de 5" em forma de bolinhas (G14). Mostra acerto
-      e pendência, nunca erro (G05). */
-.jogo__trilha {
-  display: flex;
-  gap: var(--e2);
-  list-style: none;
-  padding: 0;
-  margin: 0 0 var(--e4);
-}
-.jogo__trilha li {
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 50%;
-  border: 2px solid var(--cor-borda-forte);
-  background: var(--cor-superficie);
-}
-.jogo__trilha li[data-estado='feita'] {
-  background: var(--cor-primaria);
-  border-color: var(--cor-primaria-escura);
-}
-/* A rodada atual ganha anel externo, não só outra cor. */
-.jogo__trilha li[data-estado='atual'] {
-  border-color: var(--cor-primaria-escura);
-  box-shadow: 0 0 0 3px var(--cor-info-fundo);
 }
 
 /* --- Ajustes do jogo ----------------------------------------------------- */
@@ -378,7 +344,6 @@
 /* Botão de dica junto da pergunta (G11). */
 .jogo__pedir-dica { margin-bottom: var(--e4); }
 
-.jogo__resumo { font-size: 1.25rem; }
 
 /* --- Alto contraste ------------------------------------------------------
       O esquema preto e amarelo do e-MAG substitui a paleta inteira. */
@@ -432,8 +397,6 @@
 :root[data-contraste='alto'] .jogo-b__gomo { fill: #ffffff; }
 :root[data-contraste='alto'] .jogo-b__costura { stroke: #ffffff; opacity: 1; }
 :root[data-contraste='alto'] .jogo-b__contorno { stroke: #ffffff; }
-:root[data-contraste='alto'] .jogo__trilha li { background: #000000; border-color: #ffffff; }
-:root[data-contraste='alto'] .jogo__trilha li[data-estado='feita'] { background: #ffe600; }
 :root[data-contraste='alto'] .jogo__canto,
 :root[data-contraste='alto'] .jogo__ajustes-gatilho,
 :root[data-contraste='alto'] .jogo__dica { background: #000000; border-color: #ffffff; }

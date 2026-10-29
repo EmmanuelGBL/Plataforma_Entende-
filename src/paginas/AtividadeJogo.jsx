@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Aviso, Botao, Cartao } from '../componentes/basicos.jsx';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { House, Play, RotateCcw, Settings } from 'lucide-react';
+import { Aviso, Botao } from '../componentes/basicos.jsx';
+import { ConclusaoAtividade, Pontos, ProgressoPerguntas } from '../componentes/AtividadeVisual.jsx';
 import { CenaJogo } from '../componentes/CenaJogo.jsx';
 import { Dialogo } from '../componentes/Dialogo.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
@@ -192,6 +194,13 @@ export function AtividadeJogo() {
   const [ajustes, definirAjuste] = usarAjustesDoJogo();
   const [ajustesAbertos, setAjustesAbertos] = useState(false);
 
+  /* Tema escolhido na tela de escolha (G07). Vale como preferência: fica
+     guardado e pode ser trocado em "Como você quer jogar". */
+  const temaEscolhido = useLocation().state?.tema;
+  useEffect(() => {
+    if (temaEscolhido && TEMAS[temaEscolhido]) definirAjuste('tema', temaEscolhido);
+  }, [temaEscolhido, definirAjuste]);
+
   const tema = TEMAS[ajustes.tema] ?? TEMAS.neutro;
   const tocar = usarSom(ajustes.som === 'ligado');
 
@@ -318,46 +327,39 @@ export function AtividadeJogo() {
   if (fase === 'fim') {
     const pendentes = faltaram;
     return (
-      <div className="atividade">
-        <Cartao>
-          <h1>Você terminou o treino</h1>
-          <p className="jogo__resumo">
-            Você {tema.verboResumo} <strong>{acertos}</strong>{' '}
-            {acertos === 1 ? tema.ponto : tema.pontoPlural} em <strong>{total}</strong>{' '}
-            {total === 1 ? tema.unidade.toLowerCase() : tema.unidadePlural}.
-          </p>
-
-          {pendentes.length > 0 && (
-            <p>
+      <ConclusaoAtividade
+        acertos={acertos}
+        total={total}
+        assunto={assuntoDaAtividade(material)}
+        aviso={
+          pendentes.length > 0 && (
+            <p className="conclusao__pendentes">
               {pendentes.length === 1
                 ? 'Ficou uma pergunta para depois.'
                 : `Ficaram ${pendentes.length} perguntas para depois.`}{' '}
-              Você pode treinar só ela agora, se quiser.
+              Você pode treinar só {pendentes.length === 1 ? 'ela' : 'elas'} agora, se quiser.
             </p>
-          )}
-
-          <div className="linha" style={{ marginTop: 'var(--e5)' }}>
+          )
+        }
+        acoes={
+          <>
+            <Botao como="link" para={`/atividade/${codigo}`} variante="secundario">
+              <House aria-hidden="true" />
+              Escolher outro tema
+            </Botao>
             {pendentes.length > 0 && (
-              <Botao onClick={() => recomecar(pendentes)}>
+              <Botao variante="secundario" onClick={() => recomecar(pendentes)}>
+                <RotateCcw aria-hidden="true" />
                 Treinar {pendentes.length === 1 ? 'a que faltou' : 'as que faltaram'}
               </Botao>
             )}
-            <Botao
-              variante={pendentes.length > 0 ? 'secundario' : 'principal'}
-              onClick={() => recomecar(questoes.map((_, posicao) => posicao))}
-            >
-              Treinar tudo de novo
+            <Botao onClick={() => recomecar(questoes.map((_, posicao) => posicao))}>
+              <Play aria-hidden="true" />
+              Jogar novamente
             </Botao>
-            <Botao como="link" para={`/atividade/${codigo}`} variante="discreto">
-              Voltar para a escolha
-            </Botao>
-          </div>
-        </Cartao>
-
-        <p className="campo__dica" style={{ marginTop: 'var(--e4)' }}>
-          Nada do que você respondeu foi guardado. O Entende+ não registra nome, e-mail nem nota.
-        </p>
-      </div>
+          </>
+        }
+      />
     );
   }
 
@@ -368,32 +370,19 @@ export function AtividadeJogo() {
         {tema.nome} — atividade sobre {assuntoDaAtividade(material)}
       </h1>
 
+      {/* G05 — só progresso e pontos de acerto; não há contador de erro nem de
+         tempo. G14 — o progresso também em segmentos. */}
       <div className="jogo__topo">
-        {/* G05 — só progresso e acertos; não há contador de erro nem de tempo. */}
-        <p className="atividade__contador">
-          {tema.unidade} {passo + 1} de {total}
-        </p>
-        <p className="jogo__placar">
-          <strong>{acertos}</strong> {acertos === 1 ? tema.ponto : tema.pontoPlural}
-        </p>
+        <Pontos acertos={acertos} />
+        <ProgressoPerguntas
+          total={total}
+          atual={passo}
+          unidade={tema.unidade}
+          feitas={ordem
+            .map((indice, posicao) => (posicao < passo && !faltaram.includes(indice) ? posicao : -1))
+            .filter((posicao) => posicao >= 0)}
+        />
       </div>
-
-      {/* G14 — o progresso em bolinhas. aria-hidden, porque o contador acima já
-         diz o mesmo em texto. */}
-      <ul className="jogo__trilha" aria-hidden="true">
-        {ordem.map((indice, posicao) => (
-          <li
-            key={indice}
-            data-estado={
-              posicao === passo
-                ? 'atual'
-                : posicao < passo && !faltaram.includes(ordem[posicao])
-                  ? 'feita'
-                  : 'pendente'
-            }
-          />
-        ))}
-      </ul>
 
       <AjustesDoJogo
         aberto={ajustesAbertos}
@@ -507,7 +496,7 @@ export function AtividadeJogo() {
 
           {/* Na nova tentativa a lista volta inteira e na mesma ordem; a marcação de
              erro só aparece enquanto o resultado está na tela. */}
-          <ul className="atividade__opcoes">
+          <ul className="atividade__opcoes atividade__opcoes--grade">
             {questao.alternativas.map((alternativa, posicao) => {
               const respondido = fase === 'resultado';
               const foiEscolhida = posicao === escolhida;
@@ -590,7 +579,7 @@ function AjustesDoJogo({ aberto, aoAbrir, aoFechar, ajustes, aoDefinir }) {
         aria-haspopup="dialog"
         onClick={aoAbrir}
       >
-        <span aria-hidden="true">⚙</span> Como você quer jogar
+        <Settings aria-hidden="true" /> Como você quer jogar
       </button>
 
       <Dialogo

@@ -447,7 +447,6 @@ table.dados--estreita { max-width: 46rem; }
 .atividade__marca { margin-left: auto; font-weight: 700; flex: none; }
 
 .atividade__retorno { margin-top: var(--e5); }
-.atividade__contador { color: var(--cor-texto-apoio); font-weight: 600; margin-bottom: var(--e3); }
 
 /* Link de troca de forma no pé das duas telas do estudante. */
 .atividade__troca { margin-top: var(--e6); }
@@ -972,3 +971,148 @@ table.dados--estreita { max-width: 46rem; }
 .nota-info svg { width: 1.375rem; height: 1.375rem; flex: none; color: var(--cor-primaria-escura); margin-top: 0.1em; }
 .nota-info p { margin: 0; }
 :root[data-contraste='alto'] .nota-info { border: 2px solid #fff; }
+
+/* --- Telas do estudante ---------------------------------------------------
+      Fundo de céu claro e silencioso (G13); nada compete com o enunciado
+      (G10). */
+.conteudo:has(> .escolha-tela),
+.conteudo:has(> .conclusao),
+.conteudo:has(> .atividade) {
+  max-width: none;
+  background: linear-gradient(180deg, #d9ecfd 0%, #eef6fe 45%, var(--cor-fundo) 100%);
+}
+:root[data-contraste='alto'] .conteudo:has(> .escolha-tela),
+:root[data-contraste='alto'] .conteudo:has(> .conclusao),
+:root[data-contraste='alto'] .conteudo:has(> .atividade) { background: #000; }
+
+.atividade { max-width: 60rem; }
+.atividade__cartao { padding: var(--e5); margin-bottom: var(--e4); }
+.atividade__pergunta { font-size: 1.625rem; font-weight: 700; text-align: center; }
+.atividade__opcoes--grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e4); }
+@media (max-width: 40rem) { .atividade__opcoes--grade { grid-template-columns: minmax(0, 1fr); } }
+.atividade__opcoes--grade .atividade__opcao { min-height: 5rem; height: 100%; font-size: 1.1875rem; font-weight: 500; }
+.atividade__letra {
+  width: 2.75rem; height: 2.75rem; font-size: 1.25rem;
+  background: var(--cor-primaria-clara); color: var(--cor-primaria-escura); border-color: transparent;
+}
+.atividade__opcao { border-width: 2px; border-color: var(--cor-borda); box-shadow: var(--sombra); }
+.atividade__opcao:hover:not(:disabled) { border-color: var(--cor-primaria); }
+
+/* Topo comum ao jogo e à lista: pontos e progresso. */
+.jogo__topo { align-items: center; margin-bottom: var(--e4); }
+.pontos {
+  display: inline-flex; align-items: center; gap: var(--e3);
+  margin: 0;
+  padding: var(--e2) var(--e5) var(--e2) var(--e4);
+  background: var(--cor-superficie); border-radius: 999px; box-shadow: var(--sombra);
+}
+.pontos__estrela { width: 2.25rem; height: 2.25rem; color: #e8a10c; fill: #f5b82e; flex: none; }
+.pontos__texto { display: grid; line-height: 1.1; text-align: center; }
+.pontos__rotulo { font-size: 0.875rem; color: var(--cor-texto-apoio); }
+.pontos__texto strong { font-size: 1.625rem; }
+
+.progresso-perguntas {
+  flex: 1 1 18rem; max-width: 36rem;
+  display: flex; align-items: center; gap: var(--e4);
+  padding: var(--e3) var(--e5);
+  background: var(--cor-superficie); border-radius: 999px; box-shadow: var(--sombra);
+}
+.progresso-perguntas__segmentos { flex: 1; display: flex; gap: 4px; list-style: none; padding: 0; margin: 0; }
+.progresso-perguntas__segmentos li { flex: 1; height: 0.875rem; border-radius: 4px; background: #d6deea; }
+.progresso-perguntas__segmentos li[data-estado='feita'] { background: #3b9a4b; }
+/* A atual se distingue também pelo contorno, não só pela cor. */
+.progresso-perguntas__segmentos li[data-estado='atual'] { background: var(--cor-primaria); outline: 2px solid var(--cor-primaria-escura); outline-offset: 1px; }
+.progresso-perguntas__texto { margin: 0; white-space: nowrap; color: var(--cor-texto-apoio); font-size: 1.0625rem; }
+.progresso-perguntas__texto strong { color: var(--cor-texto); }
+:root[data-contraste='alto'] .pontos,
+:root[data-contraste='alto'] .progresso-perguntas { border: 2px solid #fff; }
+:root[data-contraste='alto'] .progresso-perguntas__segmentos li { background: #000; border: 2px solid #fff; }
+:root[data-contraste='alto'] .progresso-perguntas__segmentos li[data-estado='feita'],
+:root[data-contraste='alto'] .progresso-perguntas__segmentos li[data-estado='atual'] { background: #ffe600; }
+
+/* --- Escolha (RF22 e G07) ------------------------------------------------ */
+.escolha-tela { max-width: 72rem; margin-inline: auto; padding-block: var(--e5); }
+.escolha-tela__cabecalho { text-align: center; margin-bottom: var(--e6); }
+.escolha-tela__cabecalho h1 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); font-weight: 800; }
+.escolha-tela__cabecalho p { margin-inline: auto; font-size: 1.1875rem; color: var(--cor-texto-apoio); margin-top: var(--e3); }
+.escolha-tela__cabecalho .escolha-tela__assunto { font-weight: 600; color: var(--cor-primaria-escura); font-size: 1rem; margin: 0 auto var(--e2); }
+
+.escolha { grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr)); gap: var(--e5); }
+.escolha__opcao {
+  flex-direction: column; align-items: stretch; gap: var(--e4);
+  padding: var(--e4);
+  border: 3px solid transparent;
+  border-radius: 20px;
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-alta);
+  text-align: center;
+}
+.escolha__opcao:hover { border-color: var(--cor-primaria); background: var(--cor-superficie); }
+.escolha__figura {
+  width: 100%; height: 11rem; border-radius: 14px; border: none;
+  font-size: 1rem;
+}
+.escolha__figura svg { width: 5.5rem; height: 5.5rem; }
+.escolha__opcao--neutro .escolha__figura { background: linear-gradient(160deg, #dff0ff, #b9dcfb); color: var(--cor-primaria-escura); }
+.escolha__opcao--futebol .escolha__figura { background: linear-gradient(180deg, #bfe3ff 0 45%, #4caf68 45% 100%); color: #0f1f3d; }
+.escolha__opcao--perguntas .escolha__figura { background: linear-gradient(160deg, #f1ebff, #dcd0fb); color: #5b34a8; }
+.escolha__texto { justify-items: center; }
+.escolha__titulo { font-size: 1.5rem; text-decoration: none; }
+.escolha__texto > span { color: var(--cor-texto-apoio); }
+.escolha__botao {
+  margin-top: auto;
+  min-height: 3rem; display: grid; place-items: center;
+  border-radius: var(--raio); background: var(--cor-primaria); color: #fff; font-weight: 700; font-size: 1.125rem;
+}
+.escolha__opcao:hover .escolha__titulo { text-decoration: underline; }
+:root[data-contraste='alto'] .escolha__botao { background: #000; color: #ffe600; border: 2px solid #ffe600; }
+
+/* --- Conclusão ----------------------------------------------------------- */
+.conclusao { position: relative; max-width: 46rem; margin-inline: auto; text-align: center; padding-block: var(--e5); }
+.conclusao__trofeu { width: 6rem; height: 6rem; margin: 0 auto var(--e2); color: #c98a08; fill: #f5c542; }
+.conclusao__titulo { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; }
+.conclusao__subtitulo { font-size: 1.5rem; font-weight: 700; margin: var(--e2) auto var(--e5); }
+.conclusao__cartao { background: var(--cor-superficie); border-radius: 20px; box-shadow: var(--sombra-alta); padding: var(--e5); text-align: left; }
+.conclusao__numeros { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--e3); margin-bottom: var(--e4); }
+.conclusao__numeros > div { display: flex; flex-direction: row-reverse; justify-content: flex-end; align-items: center; gap: var(--e3); background: var(--cor-superficie-alt); border-radius: 14px; padding: var(--e4); }
+.conclusao__numeros dt { display: flex; align-items: center; gap: var(--e2); color: var(--cor-texto-apoio); }
+.conclusao__numeros dt svg { width: 2.25rem; height: 2.25rem; flex: none; }
+.conclusao__numeros dd { margin: 0; font-size: 2.75rem; font-weight: 800; line-height: 1; }
+.conclusao__certo { color: #fff; fill: #3b9a4b; }
+.conclusao__mensagem { display: flex; gap: var(--e4); align-items: center; background: var(--cor-primaria-clara); border-radius: 14px; padding: var(--e4); }
+.conclusao__mensagem svg { width: 3rem; height: 3rem; flex: none; color: var(--cor-primaria); }
+.conclusao__mensagem p { margin: 0; display: grid; }
+.conclusao__mensagem strong { color: var(--cor-primaria-escura); font-size: 1.1875rem; }
+.conclusao__pendentes { margin: var(--e4) auto 0; }
+.conclusao__acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--e3); margin-top: var(--e5); }
+.conclusao__acoes .botao { min-height: 3.25rem; font-size: 1.125rem; min-width: 14rem; }
+.conclusao__privacidade { margin: var(--e5) auto 0; font-size: 0.9375rem; color: var(--cor-texto-apoio); }
+
+/* Confete parado: reconhecimento visual silencioso (G08), sem animação. */
+.conclusao__confete { position: absolute; inset: 0 0 auto; height: 14rem; pointer-events: none; }
+.conclusao__confete span { position: absolute; width: 0.5rem; height: 1.25rem; border-radius: 3px; opacity: 0.85; }
+.conclusao__confete span:nth-child(4n+1) { background: #f5b82e; }
+.conclusao__confete span:nth-child(4n+2) { background: #1463d6; }
+.conclusao__confete span:nth-child(4n+3) { background: #e8663a; }
+.conclusao__confete span:nth-child(4n) { background: #3b9a4b; }
+.conclusao__confete span:nth-child(1) { left: 6%; top: 18%; transform: rotate(25deg); }
+.conclusao__confete span:nth-child(2) { left: 14%; top: 52%; transform: rotate(-35deg); }
+.conclusao__confete span:nth-child(3) { left: 22%; top: 10%; transform: rotate(60deg); }
+.conclusao__confete span:nth-child(4) { left: 28%; top: 70%; transform: rotate(-15deg); }
+.conclusao__confete span:nth-child(5) { left: 34%; top: 30%; transform: rotate(80deg); }
+.conclusao__confete span:nth-child(6) { left: 40%; top: 4%; transform: rotate(-50deg); }
+.conclusao__confete span:nth-child(7) { left: 58%; top: 8%; transform: rotate(40deg); }
+.conclusao__confete span:nth-child(8) { left: 64%; top: 40%; transform: rotate(-70deg); }
+.conclusao__confete span:nth-child(9) { left: 70%; top: 14%; transform: rotate(15deg); }
+.conclusao__confete span:nth-child(10) { left: 76%; top: 62%; transform: rotate(-25deg); }
+.conclusao__confete span:nth-child(11) { left: 82%; top: 26%; transform: rotate(55deg); }
+.conclusao__confete span:nth-child(12) { left: 88%; top: 6%; transform: rotate(-40deg); }
+.conclusao__confete span:nth-child(13) { left: 92%; top: 48%; transform: rotate(30deg); }
+.conclusao__confete span:nth-child(14) { left: 50%; top: 0; transform: rotate(-10deg); }
+:root[data-contraste='alto'] .conclusao__confete { display: none; }
+:root[data-contraste='alto'] .conclusao__cartao,
+:root[data-contraste='alto'] .conclusao__numeros > div,
+:root[data-contraste='alto'] .conclusao__mensagem { border: 2px solid #fff; }
+.escolha__opcao--futebol .escolha__figura svg circle { fill: #ffffff; }
+/* A cena não passa de 44rem, para a pergunta aparecer junto (G10). */
+.jogo .jogo__cena { max-width: 44rem; margin-inline: auto; }
