@@ -59,7 +59,7 @@ apontar a variável para ele; as tabelas são criadas na primeira partida.
 ### Testes e ferramentas
 
 ```
-.venv\Scripts\python -m pytest                 # 111 testes, sem rede e sem custo
+.venv\Scripts\python -m pytest                 # 119 testes, sem rede e sem custo
 .venv\Scripts\python extrair.py material.pdf   # ver a extração de um arquivo real
 ```
 
@@ -175,8 +175,18 @@ o modelo recebe o bloco, não encontra passiva, não muda nada, e o registro fic
 4. **O arquivo enviado não é guardado — só o texto extraído.** Material com página só de imagem é
    recusado inteiro (RN09). O formato é decidido pelo conteúdo, não pela extensão.
 5. **Material de outro professor responde 404, não 403** (RNF12). Entrar com e-mail inexistente e
-   com senha errada dá a mesma resposta, no mesmo tempo.
-6. **Não existe tabela de estudante** (RN05, RNF11). A rota da criança devolve as questões com a
+   com senha errada dá a mesma resposta, no mesmo tempo. Depois de 5 senhas erradas seguidas para
+   o mesmo e-mail, a entrada com ele fica bloqueada por até 15 minutos (429), exista a conta ou
+   não, para o bloqueio também não revelar quais e-mails têm conta. A contagem fica em memória e
+   não guarda IP; acertar a senha a zera. Os limites são `ENTENDE_TENTATIVAS_ENTRADA` e
+   `ENTENDE_BLOQUEIO_ENTRADA_MINUTOS`.
+6. **O material é dado, nunca instrução para o modelo.** O pedido põe o material entre marcadores
+   (`<trecho>`, `<texto>`), e o prompt manda não seguir ordem que esteja lá dentro ("ignore as
+   regras..."). Marcador escrito no próprio material é trocado por um sinal parecido, para o
+   material não conseguir fechar o marcador e falar como se fosse o sistema. O resto da defesa é
+   de arquitetura: o modelo não tem ferramenta nem acesso ao banco, o registro só aceita regra que
+   o código marcou, e nada sai sem a aprovação do professor (RN02).
+7. **Não existe tabela de estudante** (RN05, RNF11). A rota da criança devolve as questões com a
    resposta certa — a atividade é formativa, sem nota nem registro de resposta, e as duas telas da
    criança mostram a resposta certa depois de responder —, mas **não** devolve o trecho de origem,
    que é a frase da resposta. A dica vai no lugar dele.
@@ -205,5 +215,6 @@ o modelo recebe o bloco, não encontra passiva, não muda nada, e o registro fic
   isso.
 - Sem ferramenta de migração: `create_all` cria tabela que falta, mas não altera tabela
   existente. Banco SQLite de desenvolvimento criado antes de 05/10/2026 precisa ser apagado.
-- **HTTPS (RNF10)** depende de onde o servidor for publicado; localmente é HTTP. Sem limite de
-  tentativas de entrada.
+- **HTTPS (RNF10)** depende de onde o servidor for publicado; localmente é HTTP. O bloqueio de
+  entrada é por e-mail: quem souber o e-mail de um professor pode bloqueá-lo por 15 minutos
+  errando a senha de propósito. É a troca aceita para não guardar IP.

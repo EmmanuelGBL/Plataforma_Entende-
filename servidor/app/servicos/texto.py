@@ -26,6 +26,15 @@ class Bloco:
 _TITULO = re.compile(r"^(#{1,6})\s+(.*)$")
 
 
+def sem_marcador(texto: str, marca: str) -> str:
+    """Troca "<marca>" e "</marca>" escritos no próprio material por sinais
+    parecidos, para o material não fechar o marcador que o delimita no pedido
+    ao modelo e passar a falar como se fosse o sistema."""
+    return re.sub(
+        rf"<(/?)\s*{marca}\s*>", lambda m: f"‹{m.group(1)}{marca}›", texto, flags=re.IGNORECASE
+    )
+
+
 def ler(texto: str) -> list[Bloco]:
     blocos = []
     for parte in re.split(r"\n\s*\n", texto.replace("\r\n", "\n")):

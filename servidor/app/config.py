@@ -22,6 +22,10 @@ class Configuracao(BaseSettings):
     banco_url: str = f"sqlite:///{(PASTA_SERVIDOR / 'entende.db').as_posix()}"
     segredo_token: str = ""
     validade_token_horas: int = 8  # 8 horas
+    # Força bruta na entrada: depois de N senhas erradas seguidas para o mesmo
+    # e-mail, a entrada com esse e-mail fica bloqueada por alguns minutos.
+    tentativas_entrada: int = 5
+    bloqueio_entrada_minutos: int = 15
     origens: str = "http://localhost:5173,http://127.0.0.1:5173,https://emmanuelgbl.github.io"
 
     # RNF08 — limites de envio. A interface valida antes de enviar; aqui é a

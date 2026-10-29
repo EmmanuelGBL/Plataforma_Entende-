@@ -46,9 +46,22 @@ def cadastrar(dados: Cadastro, request: Request, sessao: Session = Depends(obter
 
 @rotas.post("/entrar", response_model=Sessao)
 def entrar(dados: Entrada, request: Request, sessao: Session = Depends(obter_sessao)):
-    professor = sessao.scalar(select(Professor).where(Professor.email == dados.email.strip().lower()))
+    email = dados.email.strip().lower()
+    limite = request.app.state.limite_entrada
+    # Conferido antes da senha: bloqueado, nem a senha certa entra.
+    if limite.bloqueado(email):
+        minutos = request.app.state.configuracao.bloqueio_entrada_minutos
+        raise ErroDeNegocio(
+            "Entrada bloqueada por alguns minutos",
+            f"Houve {limite.maximo} tentativas seguidas com senha errada para este e-mail.",
+            f"Espere até {minutos} minutos e tente de novo, com calma.",
+            "RF01",
+            status=429,
+        )
+    professor = sessao.scalar(select(Professor).where(Professor.email == email))
     # Mesma mensagem para e-mail inexistente e senha errada.
     if not conferir_senha(dados.senha, professor.senha_hash if professor else None):
+        limite.registrar_erro(email)
         raise ErroDeNegocio(
             "E-mail ou senha não conferem",
             "Não encontramos uma conta com esse e-mail e essa senha.",
@@ -56,6 +69,7 @@ def entrar(dados: Entrada, request: Request, sessao: Session = Depends(obter_ses
             "RF01",
             status=401,
         )
+    limite.registrar_acerto(email)
     return _abrir_sessao(request, professor)
 
 

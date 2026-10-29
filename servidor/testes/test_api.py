@@ -5,6 +5,7 @@ da senha (RNF09) e acesso cruzado entre duas contas (RNF12).
 from sqlalchemy import select
 
 from app.modelos import Material, Professor
+from app.seguranca import LimiteDeTentativas
 
 from . import amostras
 from .conftest import cadastrar
@@ -73,6 +74,61 @@ def test_senha_errada_e_email_inexistente_tem_a_mesma_resposta(cliente):
     )
     assert senha_errada.status_code == sem_conta.status_code == 401
     assert senha_errada.json() == sem_conta.json()
+
+
+def _entrar(cliente, senha, email="ana@escola.am.gov.br"):
+    return cliente.post("/api/autenticacao/entrar", json={"email": email, "senha": senha})
+
+
+def test_entrada_bloqueada_depois_de_cinco_senhas_erradas(cliente):
+    cadastrar(cliente)
+    for _ in range(5):
+        assert _entrar(cliente, "errada-000").status_code == 401
+    # Bloqueado: nem a senha certa entra.
+    bloqueio = _entrar(cliente, "senha-forte-123")
+    assert bloqueio.status_code == 429
+    assert bloqueio.json()["erro"]["regra"] == "RF01"
+
+
+def test_bloqueio_nao_revela_se_a_conta_existe(cliente):
+    cadastrar(cliente)
+    for _ in range(5):
+        _entrar(cliente, "errada-000")
+        _entrar(cliente, "errada-000", email="ninguem@escola.am.gov.br")
+    com_conta = _entrar(cliente, "errada-000")
+    sem_conta = _entrar(cliente, "errada-000", email="ninguem@escola.am.gov.br")
+    assert com_conta.status_code == sem_conta.status_code == 429
+    assert com_conta.json() == sem_conta.json()
+
+
+def test_acertar_a_senha_zera_a_contagem(cliente):
+    cadastrar(cliente)
+    for _ in range(4):
+        _entrar(cliente, "errada-000")
+    assert _entrar(cliente, "senha-forte-123").status_code == 200
+    for _ in range(4):
+        assert _entrar(cliente, "errada-000").status_code == 401
+    assert _entrar(cliente, "senha-forte-123").status_code == 200
+
+
+def test_bloqueio_de_um_email_nao_afeta_outro(cliente):
+    cadastrar(cliente)
+    cadastrar(cliente, email="bia@escola.am.gov.br")
+    for _ in range(5):
+        _entrar(cliente, "errada-000")
+    assert _entrar(cliente, "senha-forte-123", email="bia@escola.am.gov.br").status_code == 200
+
+
+def test_bloqueio_termina_depois_do_prazo():
+    agora = [0.0]
+    limite = LimiteDeTentativas(maximo=3, bloqueio_segundos=900, relogio=lambda: agora[0])
+    for _ in range(3):
+        limite.registrar_erro("ana@escola.am.gov.br")
+    assert limite.bloqueado("ana@escola.am.gov.br")
+    agora[0] = 899
+    assert limite.bloqueado("ana@escola.am.gov.br")
+    agora[0] = 901
+    assert not limite.bloqueado("ana@escola.am.gov.br")
 
 
 def test_rota_protegida_sem_token_ou_com_token_falso(cliente):
