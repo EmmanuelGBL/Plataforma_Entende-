@@ -240,7 +240,7 @@ kbd {
 
 .menu-lateral {
   flex: none;
-  width: 17rem;
+  width: 15rem;
   padding: var(--e5) var(--e3);
   background: var(--cor-superficie);
   border-right: 1px solid var(--cor-borda);
