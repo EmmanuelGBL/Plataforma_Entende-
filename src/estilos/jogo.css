@@ -115,32 +115,44 @@
 }
 
 .jogo__zonas { list-style: none; margin: 0; padding: 0; }
+/* A área de clique é o retângulo inteiro, invisível (alvo grande para a
+   criança); o que se vê é um círculo no centro dele, igual nas cinco. */
 .jogo__zona {
   position: absolute;
   padding: 0;
-  border: 2px dashed rgba(255, 255, 255, 0.8);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
+  border: 0;
+  background: transparent;
   cursor: pointer;
+}
+.jogo__zona::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  height: var(--diametro, 80%);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 2px dashed rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
   transition: background-color 150ms ease-out, border-color 150ms ease-out;
 }
-.jogo__cena[data-tema='espaco'] .jogo__zona {
+.jogo__cena[data-tema='espaco'] .jogo__zona::before {
   border-color: rgba(29, 59, 110, 0.28);
-  border-radius: 16px;
   background: transparent;
 }
-.jogo__zona:hover,
-.jogo__zona:focus-visible {
+.jogo__zona:hover::before,
+.jogo__zona:focus-visible::before {
   border-style: solid;
   border-color: var(--jogo-alvo);
   background: rgba(143, 230, 218, 0.32);
 }
-.jogo__cena[data-tema='espaco'] .jogo__zona:hover,
-.jogo__cena[data-tema='espaco'] .jogo__zona:focus-visible {
+.jogo__cena[data-tema='espaco'] .jogo__zona:hover::before,
+.jogo__cena[data-tema='espaco'] .jogo__zona:focus-visible::before {
   border-color: var(--jogo-traco);
   background: rgba(255, 255, 255, 0.45);
 }
-.jogo__zona:focus-visible { outline: var(--contorno-foco); outline-offset: 2px; }
+.jogo__zona:focus-visible { outline: none; }
+.jogo__zona:focus-visible::before { outline: var(--contorno-foco); outline-offset: 3px; }
 
 /* --- Janela da pergunta e do resultado, dentro da cena ------------------- */
 .jogo__janela-fundo {
@@ -184,16 +196,16 @@
 .jogo__janela .atividade__pergunta {
   margin: var(--e2) 0 var(--e3);
   font-size: clamp(1.125rem, 2.1vw, 1.5rem);
-  text-align: left;
+  text-align: center;
+  text-wrap: balance; /* linhas de tamanho parecido, sem palavra sozinha embaixo */
 }
 .jogo__janela .atividade__pergunta:focus { outline: none; }
 .jogo__janela .atividade__opcoes--grade { gap: var(--e3); }
 .jogo__janela .atividade__opcoes--grade .atividade__opcao { min-height: 3.5rem; font-size: 1.0625rem; }
 
-/* Resultado na base da cena, com véu leve, para o desenho continuar à vista:
-   a criança vê onde a bola ou o foguete parou. */
+/* Resultado no meio da cena, como a pergunta (desde 29/10/2026; antes ficava
+   na base). O véu é mais leve que o da pergunta: o desenho continua à vista. */
 .jogo__janela-fundo--resultado {
-  align-items: end;
   background: rgba(15, 31, 61, 0.18);
 }
 .jogo__janela-fundo--resultado .jogo__janela { width: min(100%, 38rem); padding: var(--e3) var(--e4); }
@@ -441,7 +453,7 @@
 .jogo__dica-titulo svg { width: 1.125rem; height: 1.125rem; }
 
 /* Botão de dica junto da pergunta (G11). */
-.jogo__pedir-dica { margin-bottom: var(--e3); }
+.jogo__pedir-dica { margin-bottom: var(--e3); display: flex; justify-content: center; }
 
 /* --- Alto contraste ------------------------------------------------------
       O esquema preto e amarelo do e-MAG substitui a paleta inteira. */
@@ -469,7 +481,7 @@
 :root[data-contraste='alto'] .jogo__cena { border-color: #ffffff; }
 :root[data-contraste='alto'] .jogo__planeta circle:first-child,
 :root[data-contraste='alto'] .jogo-f__corpo { fill: #000000; }
-:root[data-contraste='alto'] .jogo__zona { border-color: #ffe600 !important; }
+:root[data-contraste='alto'] .jogo__zona::before { border-color: #ffe600 !important; }
 :root[data-contraste='alto'] .jogo__convite { background: #000000; color: #ffe600; border-color: #ffe600; }
 /* No alto contraste não há vermelho utilizável: o erro é dito pela borda
    grossa e pelo símbolo. */

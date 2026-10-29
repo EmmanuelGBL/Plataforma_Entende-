@@ -201,8 +201,7 @@ function textoDaDica(questao) {
 function JanelaDoJogo({ rotulo, tipo, aoEscape, focoInicial, children }) {
   const caixa = useRef(null);
   usarFocoPreso(caixa, true, aoEscape, focoInicial);
-  // O resultado fica na base da cena, com véu leve: a criança vê onde o
-  // objeto parou.
+  // O resultado fica no meio da cena, como a pergunta, com véu mais leve.
   return (
     <div className={`jogo__janela-fundo${tipo ? ' jogo__janela-fundo--resultado' : ''}`}>
       <div

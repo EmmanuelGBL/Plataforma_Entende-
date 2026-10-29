@@ -33,6 +33,8 @@ export const ZONAS = [
 
 const LARGURA = 320;
 const ALTURA = 180;
+/* Diâmetro do círculo de mira, igual nas cinco áreas (unidades da cena). */
+const DIAMETRO_MIRA = 30;
 /* Ponto de partida: a marca do pênalti, ou a base de lançamento. */
 const REPOUSO = { futebol: { x: 160, y: 156 }, espaco: { x: 160, y: 164 } };
 /* Altura onde o objeto passa no erro: acima da trave, ou acima dos planetas. */
@@ -156,6 +158,8 @@ export function CenaJogo({
                     top: porcento(y, ALTURA),
                     width: porcento(largura, LARGURA),
                     height: porcento(altura, ALTURA),
+                    // O círculo é desenhado dentro da área, em % da altura dela.
+                    '--diametro': porcento(DIAMETRO_MIRA, altura),
                   }}
                   onClick={() => aoMirar(posicao)}
                 >
