@@ -110,15 +110,6 @@
   line-height: 1.5;
 }
 
-/* Quadrado de marcar desenhado com borda, e não com o caractere ☐, que
-   depende da fonte da máquina. */
-.folha__caixa {
-  flex: none;
-  width: 0.95em;
-  height: 0.95em;
-  margin-top: 0.28em;
-  border: 1pt solid #000000;
-}
 .folha__letra { flex: none; font-weight: 600; }
 
 .folha__ficha {

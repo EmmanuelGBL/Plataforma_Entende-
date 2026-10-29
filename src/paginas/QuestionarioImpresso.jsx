@@ -103,7 +103,6 @@ export function QuestionarioImpresso() {
                 <ul className="folha__alternativas">
                   {questao.alternativas.map((alternativa, posicao) => (
                     <li key={alternativa}>
-                      <span className="folha__caixa" aria-hidden="true" />
                       <span className="folha__letra">{String.fromCharCode(65 + posicao)})</span>
                       <span>{alternativa}</span>
                     </li>
