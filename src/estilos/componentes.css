@@ -622,6 +622,19 @@ table.dados--estreita { max-width: 46rem; }
 }
 .entrada-cartao__nota svg { width: 1.125rem; height: 1.125rem; flex: none; margin-top: 0.15em; color: var(--cor-primaria-escura); }
 .entrada-cartao .aviso { max-width: none; }
+/* Só com servidor no build: qual modo está aberto e o botão para trocar. */
+.entrada-modo {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e2) var(--e3);
+  margin-top: var(--e4); padding: var(--e3);
+  border: 1px solid var(--cor-borda); border-radius: 12px;
+  font-size: 0.875rem; color: var(--cor-texto-apoio);
+}
+.entrada-modo p { display: flex; gap: var(--e2); align-items: flex-start; max-width: none; margin: 0; flex: 1 1 14rem; }
+.entrada-modo svg { width: 1.125rem; height: 1.125rem; flex: none; margin-top: 0.15em; }
+.entrada-modo strong { color: var(--cor-texto); }
+.entrada-modo--ao-vivo { border-color: var(--cor-sucesso); }
+.entrada-modo--ao-vivo svg { color: var(--cor-sucesso); }
+.entrada-cartao .entrada-modo .botao { min-height: 2.75rem; font-size: 1rem; margin-top: 0; }
 .entrada-formulario__rodape {
   max-width: none; margin-top: var(--e4);
   text-align: center; font-size: 0.875rem; color: var(--cor-texto-apoio);

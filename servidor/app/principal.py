@@ -65,7 +65,12 @@ def criar_app(configuracao: Configuracao | None = None, cliente_llm: ClienteLLM 
         allow_origins=config.lista_origens,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Authorization", "Content-Type"],
+        # Apresentação pelo GitHub Pages com o servidor no próprio computador:
+        # o navegador pergunta antes se a página pública pode falar com a rede
+        # local (Private Network Access). Só as origens acima recebem o sim.
+        allow_private_network=True,
     )
+
     app.add_exception_handler(ErroDeNegocio, tratar_erro_de_negocio)
     app.add_exception_handler(RequestValidationError, tratar_erro_de_validacao)
 

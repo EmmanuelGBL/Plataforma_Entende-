@@ -214,3 +214,25 @@ def test_rnf12_professor_nao_ve_nem_exclui_material_de_outro(cliente):
     assert cliente.delete(f"/api/materiais/{material_da_ana}", headers=bruno).status_code == 404
     # e o material continua lá para quem o enviou
     assert cliente.get(f"/api/materiais/{material_da_ana}", headers=ana).status_code == 200
+
+
+# --- Apresentação pelo GitHub Pages com o servidor no computador ------------
+
+def test_pages_pode_chamar_o_servidor_da_rede_local(cliente):
+    resposta = cliente.options(
+        "/api/autenticacao/entrar",
+        headers={
+            "Origin": "https://emmanuelgbl.github.io",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+            "Access-Control-Request-Private-Network": "true",
+        },
+    )
+    assert resposta.status_code == 200
+    assert resposta.headers["access-control-allow-origin"] == "https://emmanuelgbl.github.io"
+    assert resposta.headers["access-control-allow-private-network"] == "true"
+
+
+def test_sem_o_pedido_de_rede_local_o_cabecalho_nao_vai(cliente):
+    resposta = cliente.get("/api/saude", headers={"Origin": "https://emmanuelgbl.github.io"})
+    assert "access-control-allow-private-network" not in resposta.headers

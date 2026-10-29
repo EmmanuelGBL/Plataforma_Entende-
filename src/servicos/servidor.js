@@ -4,8 +4,55 @@
 
 import { ErroDeNegocio } from './api.js';
 
-export const URL_API = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
-export const modoServidor = Boolean(URL_API);
+const URL_DO_BUILD = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+
+/* Apresentação pelo GitHub Pages: o Pages não tem servidor, mas o computador
+   de quem apresenta pode ter um (servidor/apresentar.cmd). Aberto com
+   ?servidor=local, o navegador passa a oferecer esse servidor — e lembra
+   disso até abrir com ?servidor=nenhum. Sem o parâmetro, o visitante comum
+   nunca recebe o pedido de "acessar a rede local" do navegador. */
+const URL_LOCAL = 'http://127.0.0.1:8000';
+const CHAVE_LOCAL = 'entende.servidor-local';
+
+function servidorLocalPedido() {
+  try {
+    const pedido = new URLSearchParams(window.location.search).get('servidor');
+    if (pedido === 'local') window.localStorage.setItem(CHAVE_LOCAL, 'sim');
+    if (pedido === 'nenhum') window.localStorage.removeItem(CHAVE_LOCAL);
+    return window.localStorage.getItem(CHAVE_LOCAL) === 'sim';
+  } catch {
+    return false;
+  }
+}
+
+export const URL_API = URL_DO_BUILD || (servidorLocalPedido() ? URL_LOCAL : '');
+
+/* Com servidor, a tela de entrada deixa escolher entre ele ("ao vivo") e a
+   demonstração com os dados prontos — na apresentação, mostra-se o
+   protótipo e depois a API funcionando. A escolha é só preferência deste
+   navegador. */
+export const servidorDisponivel = Boolean(URL_API);
+const CHAVE_MODO = 'entende.modo';
+
+function lerModo() {
+  try {
+    return window.localStorage.getItem(CHAVE_MODO);
+  } catch {
+    return null;
+  }
+}
+
+export const modoServidor = servidorDisponivel && lerModo() !== 'demonstracao';
+
+/** Troca o modo e recarrega: os dados de cada modo não se misturam. */
+export function escolherModo(aoVivo) {
+  try {
+    window.localStorage.setItem(CHAVE_MODO, aoVivo ? 'servidor' : 'demonstracao');
+  } catch {
+    return; // sem armazenamento não há como lembrar a escolha
+  }
+  window.location.reload();
+}
 
 const CHAVE_TOKEN = 'entende.token';
 

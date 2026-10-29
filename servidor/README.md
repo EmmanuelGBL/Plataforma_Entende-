@@ -37,6 +37,27 @@ $env:VITE_API_URL = "http://localhost:8000"; npm run dev
 Sem `VITE_API_URL`, a interface roda no **modo de demonstração**, em memória e com dados fixos —
 que é o que o GitHub Pages e o arquivo offline publicam, porque nenhum dos dois tem servidor.
 
+Com `VITE_API_URL`, a tela de entrada mostra qual modo está aberto e um botão para trocar
+("Abrir a demonstração" / "Usar o servidor ao vivo"). Na apresentação, dá para mostrar o protótipo
+com os dados prontos e, em seguida, a API funcionando. A escolha fica no `localStorage` do
+navegador (`entende.modo`), e a troca recarrega a página.
+
+### Apresentar pelo GitHub Pages, com o servidor no notebook
+
+O Pages não tem servidor, mas aberto com **`?servidor=local`** ele passa a oferecer o servidor do
+próprio computador (`http://127.0.0.1:8000`). Sem o parâmetro, o visitante comum continua só na
+demonstração e nunca recebe o pedido de "acessar a rede local" do navegador; com ele, o navegador
+lembra até abrir com `?servidor=nenhum`. O servidor responde à pergunta de rede local do
+navegador (`allow_private_network` no CORS), só para as origens de `ENTENDE_ORIGENS`.
+
+No computador de quem apresenta, com Python 3.11+, numa **pasta de caminho curto** (`C:\Entende`:
+o Windows recusa caminho com mais de 260 caracteres e a instalação quebra):
+
+1. `preparar.cmd` uma vez — cria o `.venv` e instala as dependências;
+2. o `.env` nesta pasta, recebido em particular (nunca pelo repositório);
+3. `apresentar.cmd` — liga o servidor sem registro de acesso, cria a conta de apresentação no
+   banco local (`admin@admin.com` / `admin123`; o servidor só escuta `127.0.0.1`) e abre o Pages.
+
 ### Chave da API do modelo de linguagem
 
 Desde 29/10/2026 o motor de adaptação e o gerador de questões usam o **GPT-6.1 Sol**
@@ -46,7 +67,8 @@ escolhido (`OPENAI_API_KEY` no padrão), conta, envio e extração funcionam, e
 adaptar responde 503 com a explicação. O motor é híbrido (ver abaixo): cada adaptação faz uma
 chamada por seção **que tem algo a reescrever** — seção sem nada marcado pelo código não gera
 chamada —, e mais uma para as questões. O terminal do servidor mostra, a cada adaptação, quantos
-blocos foram ao modelo e em quantos pedidos. O modelo usado fica registrado em cada adaptação (RN08); para trocar,
+blocos foram ao modelo e em quantos pedidos, e cada chamada à OpenAI registra no log os tokens de
+entrada e de saída e o tempo (nada do texto do material). O modelo usado fica registrado em cada adaptação (RN08); para trocar,
 `ENTENDE_MODELO` no `.env`.
 
 Com a Anthropic, os pedidos usam o **fallback do lado do servidor** (`fallbacks="default"`): se o
@@ -61,9 +83,18 @@ apontar a variável para ele; as tabelas são criadas na primeira partida.
 ### Testes e ferramentas
 
 ```
-.venv\Scripts\python -m pytest                 # 128 testes, sem rede e sem custo
+.venv\Scripts\python -m pytest                 # 130 testes, sem rede e sem custo
 .venv\Scripts\python extrair.py material.pdf   # ver a extração de um arquivo real
+.venv\Scripts\python medir.py material.md pasta 3   # adaptar de verdade 3 vezes e medir
 ```
+
+`medir.py` usa a chave do `.env` e **gasta**: roda a adaptação e as questões como o servidor, sem
+gravar no banco, e grava em `pasta/` o `relatorio.md` e o `medicao.json` com o texto adaptado, as
+questões, as métricas e, por chamada, tokens, tempo e custo. O preço por token e o dólar estão
+fixos no início do script, com a data da consulta: conferir antes de medir de novo. A primeira
+medição (29/10/2026, texto de exemplo da demonstração, 231 palavras, 3 execuções) deu 2 chamadas
+por execução, 46 a 52 s e US$ 0,035 a 0,039 cada (cerca de R$ 0,20); o relatório fica fora deste
+repositório, em `TCC/Artigo/medicoes/`.
 
 Os testes usam um cliente falso no lugar do modelo de linguagem (`testes/cliente_falso.py`), e
 PDFs e DOCX gerados por código (`testes/amostras.py`) — nenhum arquivo de terceiros no repositório.
@@ -213,8 +244,12 @@ o modelo recebe o bloco, não encontra passiva, não muda nada, e o registro fic
 - **PDF em duas colunas** sai com as colunas misturadas. **Tabela de PDF** sai como texto corrido;
   a de DOCX sai como tabela. **Caixa de texto do Word** não é lida. O nível dos títulos do PDF é
   **inferido** pelo tamanho da fonte e pelo negrito.
-- **Falta passar material real do 5º ano** pelo extrator e pelo motor — `extrair.py` existe para
-  isso.
+- **Trocar a metáfora pode deixar uma ressalva sem referente.** Na medição de 29/10, nas três
+  execuções, "as florestas são o pulmão do mundo, expressão que [...] deve ser compreendida com
+  cautela" virou uma afirmação literal seguida de "devemos compreendê-la com cautela". As métricas
+  não pegam isso; é o que a revisão do professor (RN02) e a validação existem para pegar.
+- **Falta passar material real do 5º ano** pelo extrator e pelo motor — `extrair.py` e `medir.py`
+  existem para isso. Até aqui, só o texto de exemplo da demonstração foi adaptado de verdade.
 - Sem ferramenta de migração: `create_all` cria tabela que falta, mas não altera tabela
   existente. Banco SQLite de desenvolvimento criado antes de 05/10/2026 precisa ser apagado.
 - **HTTPS (RNF10)** depende de onde o servidor for publicado; localmente é HTTP. O bloqueio de

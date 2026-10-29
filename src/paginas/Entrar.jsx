@@ -9,12 +9,14 @@ import {
   Info,
   Lock,
   Mail,
+  Radio,
   UserPlus,
   UserRound,
 } from 'lucide-react';
 import { Aviso, Botao, Campo } from '../componentes/basicos.jsx';
 import { LogoEntende, usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
+import { escolherModo, servidorDisponivel } from '../servicos/servidor.js';
 
 /* Tela de entrada e criação de conta (RF01): apresentação à esquerda e
    formulário à direita; em tela estreita, o formulário vem primeiro.
@@ -194,6 +196,27 @@ export function Entrar() {
                 {criando ? 'Já tenho conta: entrar' : 'Criar uma nova conta'}
               </Botao>
             </>
+          )}
+
+          {servidorDisponivel && (
+            <div className={'entrada-modo' + (modoServidor ? ' entrada-modo--ao-vivo' : '')}>
+              <p>
+                <Radio aria-hidden="true" />
+                {modoServidor ? (
+                  <span>
+                    <strong>Ao vivo.</strong> Envio, adaptação e questões passam pelo servidor e
+                    pelo modelo de linguagem.
+                  </span>
+                ) : (
+                  <span>
+                    <strong>Demonstração.</strong> Materiais e adaptações prontos, sem servidor.
+                  </span>
+                )}
+              </p>
+              <Botao variante="discreto" onClick={() => escolherModo(!modoServidor)}>
+                {modoServidor ? 'Abrir a demonstração' : 'Usar o servidor ao vivo'}
+              </Botao>
+            </div>
           )}
 
           {modoServidor && (
