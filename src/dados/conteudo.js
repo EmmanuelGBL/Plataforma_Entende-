@@ -4,8 +4,8 @@
 
 export const CONJUNTO_REGRAS = {
   identificador: 'TEA',
-  versao: '1.5',
-  publicadoEm: '15/10/2026',
+  versao: '1.6',
+  publicadoEm: '29/10/2026',
   descricao:
     'Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. ' +
     'Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho ' +
@@ -20,7 +20,7 @@ export const REGRAS = [
     codigo: 'TEA-01',
     nome: 'Períodos curtos',
     descricao: 'Dividir períodos com mais de 20 palavras em orações independentes.',
-    base: 'WCAG 2.2 — SC 3.1.5 Reading Level (AAA)',
+    base: 'WCAG 2.2 — SC 3.1.5 Reading Level (AAA); W3C COGA — Keep Text Succinct',
     justificativa:
       'Período longo exige manter várias informações na memória de trabalho ao mesmo tempo. ' +
       'Dividir em frases curtas reduz essa carga sem tirar conteúdo do texto.',
@@ -30,7 +30,7 @@ export const REGRAS = [
     codigo: 'TEA-02',
     nome: 'Uma ideia por bloco',
     descricao: 'Separar em parágrafos distintos ideias que estavam no mesmo bloco.',
-    base: 'W3C COGA — Make Each Step Clear; DUA 3.2 (CAST, 2024)',
+    base: 'W3C COGA — Keep Text Succinct; DUA 3.2 (CAST, 2024)',
     justificativa:
       'Blocos com várias ideias dificultam localizar onde uma informação começa e termina.',
     ocorrencias: 5,
@@ -40,7 +40,7 @@ export const REGRAS = [
     nome: 'Linguagem literal',
     descricao:
       'Substituir metáfora, comparação figurada e expressão idiomática por descrição literal.',
-    base: 'W3C COGA — Use Literal Language',
+    base: 'W3C COGA — Use Literal Language; Explain Implied Content',
     justificativa:
       'A compreensão literal é uma característica frequente no perfil TEA. Chamar a folha de ' +
       '"fábrica" pode ser entendido ao pé da letra e produzir erro de conceito.',
@@ -50,7 +50,7 @@ export const REGRAS = [
     codigo: 'TEA-04',
     nome: 'Voz ativa e ordem direta',
     descricao: 'Reescrever orações na voz passiva em voz ativa, na ordem sujeito-verbo-objeto.',
-    base: 'W3C COGA — Use a Simple Sentence Structure',
+    base: 'W3C COGA — Use a Simple Tense and Voice; Avoid Double Negatives or Nested Clauses',
     justificativa: 'A ordem direta reduz o esforço de identificar quem faz a ação.',
     ocorrencias: 6,
   },
@@ -70,7 +70,7 @@ export const REGRAS = [
     codigo: 'TEA-06',
     nome: 'Conectivos explícitos',
     descricao: 'Tornar explícita a relação de causa, consequência e sequência entre as frases.',
-    base: 'W3C COGA — Make the Relationship Between Ideas Clear',
+    base: 'DUA 3.2 — Destacar padrões, ideias principais e relações (CAST, 2024)',
     justificativa:
       'Relação implícita obriga o leitor a inferir. A inferência é justamente o ponto de maior ' +
       'dificuldade descrito na literatura sobre compreensão leitora no autismo.',
@@ -101,7 +101,7 @@ export const REGRAS = [
     codigo: 'TEA-09',
     nome: 'Antecipação da estrutura',
     descricao: 'Abrir o material com a lista do que será lido, na ordem em que aparece.',
-    base: 'DUA 3.1 — Ativar conhecimento prévio (CAST, 2024)',
+    base: 'DUA 3.1 — Conectar o conhecimento prévio à nova aprendizagem (CAST, 2024)',
     justificativa:
       'Saber de antemão o que vem pela frente reduz a ansiedade diante do imprevisto e ajuda ' +
       'a organizar a leitura.',
@@ -112,7 +112,7 @@ export const REGRAS = [
     nome: 'Remoção de ruído visual',
     descricao:
       'Remover elemento decorativo que não carrega informação e concorre com o texto pela atenção.',
-    base: 'W3C COGA — Avoid Visual Clutter; DUA 7.3 (CAST, 2024)',
+    base: 'W3C COGA — Avoid Too Much Content; DUA 7.4 (CAST, 2024)',
     justificativa:
       'Nenhuma informação é perdida: o que sai é ornamento, não conteúdo.',
     ocorrencias: 2,
@@ -376,7 +376,7 @@ export const ARQUIVOS_DEMO = [
 export const ETAPAS_PROCESSAMENTO = [
   'Lendo o arquivo enviado',
   'Extraindo o texto e a ordem de leitura',
-  'Aplicando o conjunto de regras TEA v1.5',
+  'Aplicando o conjunto de regras TEA v1.6',
   'Calculando as métricas de legibilidade',
   'Gerando as questões a partir do mesmo material',
 ];

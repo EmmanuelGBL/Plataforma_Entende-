@@ -98,7 +98,7 @@ resposta sem traduzir nada:
 ## Onde está cada coisa
 
 ```
-regras/tea.json           Conjunto de regras TEA v1.5, com gatilhos e glossário — RNF13
+regras/tea.json           Conjunto de regras TEA v1.6, com gatilhos e glossário — RNF13
 app/
   principal.py            Monta a aplicação (criar_app)
   config.py               Variáveis ENTENDE_*, OPENAI_API_KEY e ANTHROPIC_API_KEY
