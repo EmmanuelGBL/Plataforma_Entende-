@@ -1,0 +1,18 @@
+# Entende+ — configuração do Caddy, instalada por implantar/instalar.sh.
+# O Caddy obtém e renova sozinho o certificado HTTPS do domínio (RNF10).
+# Sem diretiva "log": o Caddy não grava log de acesso, e nenhum IP de quem abre
+# a atividade da criança fica registrado (RN05).
+DOMINIO_AQUI {
+	encode zstd gzip
+
+	# A API do servidor (FastAPI, só escuta em 127.0.0.1).
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	# A interface já construída, ligada a esta API.
+	handle {
+		root * /opt/entende/app/dist
+		file_server
+	}
+}

@@ -1,0 +1,23 @@
+# Servidor do Entende+ como serviço do sistema, instalado por implantar/instalar.sh.
+# --no-access-log: o log de acesso gravaria o IP de quem abre a atividade da
+# criança, o que fere a RN05.
+[Unit]
+Description=Entende+ (servidor de aplicação)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=entende
+Group=entende
+WorkingDirectory=/opt/entende/app/servidor
+ExecStart=/opt/entende/app/servidor/.venv/bin/python -m uvicorn app.principal:app --host 127.0.0.1 --port 8000 --no-access-log
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/entende/app/servidor
+
+[Install]
+WantedBy=multi-user.target
