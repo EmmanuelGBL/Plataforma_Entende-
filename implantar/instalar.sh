@@ -86,7 +86,8 @@ if [ ! -f "$ENV" ]; then
   cat > "$ENV" <<FIM
 # Gerado por implantar/instalar.sh. Não versionar.
 ENTENDE_SEGREDO_TOKEN=$segredo
-ENTENDE_ORIGENS=https://$DOMINIO
+# A interface fica no GitHub Pages e chama esta API de lá.
+ENTENDE_ORIGENS=https://emmanuelgbl.github.io,https://$DOMINIO
 ENTENDE_PROVEDOR=openai
 # Chave da API da OpenAI, com limite de gasto definido no painel da OpenAI.
 OPENAI_API_KEY=
