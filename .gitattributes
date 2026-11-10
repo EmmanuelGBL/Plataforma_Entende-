@@ -1,3 +1,6 @@
+# Arquivos de lote do Windows precisam de CRLF, inclusive no ZIP do GitHub.
+*.cmd text eol=crlf
+
 # Scripts que rodam no Linux da VPS precisam de fim de linha LF.
 *.sh text eol=lf
 implantar/Caddyfile text eol=lf
