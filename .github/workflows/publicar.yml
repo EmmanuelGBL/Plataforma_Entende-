@@ -32,8 +32,12 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      # Com VITE_API_URL o Pages abre ligado ao servidor da VPS; a demonstração
+      # continua na troca de modo da tela de entrada. Sem a variável, só ela.
       - name: Construir
         run: npm run build
+        env:
+          VITE_API_URL: https://srv1121242.hstgr.cloud
 
       # enablement: true habilita o Pages no repositório, se ainda não estiver.
       - uses: actions/configure-pages@v5

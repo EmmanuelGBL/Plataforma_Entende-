@@ -224,8 +224,9 @@ da criança.
   servidor roda como serviço do systemd e só escuta em `127.0.0.1`. A chave da API fica no `.env`
   da VPS, que nunca entra neste repositório.
 
-Sem `VITE_API_URL` na construção, o Pages publica o modo demonstração. Com ela, abre ligado ao
-servidor, e a demonstração continua disponível pela troca de modo na tela de entrada.
+O Pages é construído com `VITE_API_URL` e abre ligado ao servidor: para entrar, é preciso uma conta
+criada pela administração. A demonstração, que não pede conta, continua disponível na tela de
+entrada, em "Abrir a demonstração".
 
 ## Acessibilidade
 

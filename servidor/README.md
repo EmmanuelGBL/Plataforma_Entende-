@@ -35,7 +35,7 @@ $env:VITE_API_URL = "http://localhost:8000"; npm run dev
 ```
 
 Sem `VITE_API_URL`, a interface roda no **modo de demonstração**, em memória e com dados fixos —
-que é o que o GitHub Pages e o arquivo offline publicam, porque nenhum dos dois tem servidor.
+que é o que o arquivo offline publica. O GitHub Pages, desde 23/11/2026, é construído com ela.
 
 Com `VITE_API_URL`, a tela de entrada mostra qual modo está aberto e um botão para trocar
 ("Abrir a demonstração" / "Usar o servidor ao vivo"). Na apresentação, dá para mostrar o protótipo
@@ -44,7 +44,8 @@ navegador (`entende.modo`), e a troca recarrega a página.
 
 ### Apresentar pelo GitHub Pages, com o servidor no notebook
 
-O Pages não tem servidor, mas aberto com **`?servidor=local`** ele passa a oferecer o servidor do
+**Vale só para um Pages construído sem `VITE_API_URL`**; com ela, o Pages usa o servidor da VPS e
+ignora o parâmetro. O Pages não tem servidor, mas aberto com **`?servidor=local`** ele passa a oferecer o servidor do
 próprio computador (`http://127.0.0.1:8000`). Sem o parâmetro, o visitante comum continua só na
 demonstração e nunca recebe o pedido de "acessar a rede local" do navegador; com ele, o navegador
 lembra até abrir com `?servidor=nenhum`. O servidor responde à pergunta de rede local do
