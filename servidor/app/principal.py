@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .banco import criar_fabrica, criar_motor, preparar_banco
 from .config import Configuracao
 from .erros import ErroDeNegocio, tratar_erro_de_negocio, tratar_erro_de_validacao
-from .rotas import adaptacoes, atividades, autenticacao, materiais
+from .rotas import adaptacoes, administracao, atividades, autenticacao, materiais
 from .seguranca import LimiteDeTentativas
 from .servicos.cliente_llm import ClienteLLM, criar_cliente
 
@@ -74,6 +74,7 @@ def criar_app(configuracao: Configuracao | None = None, cliente_llm: ClienteLLM 
     app.add_exception_handler(RequestValidationError, tratar_erro_de_validacao)
 
     app.include_router(autenticacao.rotas)
+    app.include_router(administracao.rotas)
     app.include_router(materiais.rotas)
     app.include_router(adaptacoes.rotas)
     app.include_router(atividades.rotas)

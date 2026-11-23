@@ -54,7 +54,7 @@ with criar_fabrica(motor)() as sessao:
     else:
         # Conta de antes da cota (RN13) não tem cota definida e não adaptaria.
         if conta.cota_tokens == 0:
-            contas.definir_cota(sessao, CONTA.email, CONTA.cota)
+            contas.definir_cota(sessao, conta, CONTA.cota)
         print("Conta de apresentação já existia.")
 motor.dispose()
 

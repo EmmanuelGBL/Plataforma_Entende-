@@ -58,6 +58,10 @@ class Professor(Base):
     # RN13 — cota definida pela administração. Sem cota definida, nada é gasto.
     cota_tokens: Mapped[int] = mapped_column(Integer, default=0)
     tokens_consumidos: Mapped[int] = mapped_column(Integer, default=0)
+    # Administra as contas pela tela Contas. Só o comando administrar.py liga.
+    administrador: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Vai dentro do token: aumentar derruba as sessões abertas da conta.
+    versao_sessao: Mapped[int] = mapped_column(Integer, default=0)
 
     materiais: Mapped[list["Material"]] = relationship(
         back_populates="professor", cascade="all, delete-orphan", passive_deletes=True

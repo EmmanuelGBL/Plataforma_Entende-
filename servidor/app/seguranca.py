@@ -82,9 +82,10 @@ class LimiteDeTentativas:
             self._erros.pop(email, None)
 
 
-def emitir_token(professor_id: uuid.UUID, segredo: str, horas: int) -> tuple[str, datetime]:
+def emitir_token(professor: Professor, segredo: str, horas: int) -> tuple[str, datetime]:
     expira_em = datetime.now(timezone.utc) + timedelta(hours=horas)
-    token = jwt.encode({"sub": str(professor_id), "exp": expira_em}, segredo, algorithm="HS256")
+    dados = {"sub": str(professor.id), "exp": expira_em, "versao": professor.versao_sessao}
+    token = jwt.encode(dados, segredo, algorithm="HS256")
     return token, expira_em
 
 
@@ -113,7 +114,19 @@ def professor_atual(
     except (jwt.PyJWTError, KeyError, ValueError):
         raise SESSAO_INVALIDA from None
     professor = sessao.get(Professor, professor_id)
-    # RF24: desativar a conta derruba também a sessão que estava aberta.
-    if professor is None or not professor.ativo:
+    # RF24: desativar a conta ou redefinir a senha derruba a sessão que estava
+    # aberta. Token emitido antes de existir a versão vale como versão 0.
+    if professor is None or not professor.ativo or dados.get("versao", 0) != professor.versao_sessao:
         raise SESSAO_INVALIDA
+    return professor
+
+
+def administrador_atual(professor: Professor = Depends(professor_atual)) -> Professor:
+    if not professor.administrador:
+        raise ErroDeNegocio(
+            "Esta área é só da administração",
+            "A sua conta não administra as contas do Entende+.",
+            "Volte para Meus materiais.",
+            status=403,
+        )
     return professor

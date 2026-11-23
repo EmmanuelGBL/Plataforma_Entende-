@@ -18,7 +18,9 @@ from .modelos import EtapaEscolar, FormatoArquivo, PerfilAdaptacao
 
 
 class NovaConta(BaseModel):
-    """Dados do comando administrar.py criar (RF24)."""
+    """Dados de uma conta de professor, na criação e na edição (RF24)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
 
     nome: str = Field(min_length=2, max_length=120)
     email: EmailStr
@@ -39,6 +41,23 @@ class ProfessorPublico(BaseModel):
     # RF25 — uso da cota, mostrado no painel.
     cota_tokens: int
     tokens_consumidos: int
+    administrador: bool
+
+
+class ContaPublica(ProfessorPublico):
+    """Uma conta na tela Contas. Dos materiais, só a quantidade: o conteúdo é do
+    professor (RNF12)."""
+
+    ativo: bool
+    criado_em: DataHora
+    quantidade_materiais: int
+
+
+class ContaComSenha(BaseModel):
+    """A senha em texto claro só existe nesta resposta (RNF09)."""
+
+    conta: ContaPublica
+    senha: str
 
 
 class Sessao(BaseModel):

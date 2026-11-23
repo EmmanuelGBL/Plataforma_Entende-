@@ -26,7 +26,7 @@ def test_entrar_devolve_token_e_professor(cliente):
     corpo = _entrar(cliente, "senha-forte-123", email="ANA@escola.am.gov.br").json()
     assert corpo["token"]
     # Nada de hash na resposta.
-    assert set(corpo["professor"]) == {"id", "nome", "email", "cota_tokens", "tokens_consumidos"}
+    assert set(corpo["professor"]) == {"id", "nome", "email", "cota_tokens", "tokens_consumidos", "administrador"}
     assert corpo["professor"]["email"] == "ana@escola.am.gov.br"
     assert (corpo["professor"]["cota_tokens"], corpo["professor"]["tokens_consumidos"]) == (40_000, 0)
 

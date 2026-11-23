@@ -132,9 +132,9 @@ export function ProvedorAplicacao({ children }) {
     [abrirSessao],
   );
 
-  /** RF25 — relê o uso da cota depois de uma operação que chama o modelo. Se a
-   *  leitura falhar, o painel fica com o valor anterior. */
-  const atualizarCota = useCallback(async () => {
+  /** Relê o professor: o uso da cota muda a cada operação que chama o modelo
+   *  (RF25). Se a leitura falhar, fica o valor anterior. */
+  const atualizarProfessor = useCallback(async () => {
     try {
       setProfessor(await servidor.eu());
     } catch {
@@ -224,10 +224,10 @@ export function ProvedorAplicacao({ children }) {
         await carregarMateriais();
       } finally {
         // Também na falha: a chamada que deu errado pode ter consumido cota.
-        await atualizarCota();
+        await atualizarProfessor();
       }
     },
-    [atualizarMaterial, guardarAdaptacao, carregarMateriais, atualizarCota],
+    [atualizarMaterial, guardarAdaptacao, carregarMateriais, atualizarProfessor],
   );
 
   /** RF09. No modo servidor o texto vai em Markdown; na demonstração, em blocos. */
@@ -284,10 +284,10 @@ export function ProvedorAplicacao({ children }) {
           [id]: { ...atuais[id], questoes: geradas.map(converterQuestao) },
         }));
       } finally {
-        await atualizarCota();
+        await atualizarProfessor();
       }
     },
-    [atualizarCota],
+    [atualizarProfessor],
   );
 
   const publicar = useCallback(
@@ -340,6 +340,10 @@ export function ProvedorAplicacao({ children }) {
       pronto,
       professor,
       autenticado: Boolean(professor),
+      administrador: Boolean(professor?.administrador),
+      // A demonstração não tem contas para administrar.
+      administracao: modoServidor ? servidor.contas : null,
+      atualizarProfessor,
       entrar,
       sair: encerrarSessao,
       materiais,
@@ -361,7 +365,7 @@ export function ProvedorAplicacao({ children }) {
       excluir,
     }),
     [
-      pronto, professor, entrar, encerrarSessao, materiais, material,
+      pronto, professor, atualizarProfessor, entrar, encerrarSessao, materiais, material,
       materialPorCodigo, adaptacao, carregarAdaptacao, catalogo, carregarCatalogo,
       acrescentarMaterial, enviarArquivo, adaptarMaterial, salvarTexto, aprovar,
       salvarQuestoes, gerarQuestoes, publicar, revogar, excluir,

@@ -155,6 +155,17 @@ export const servidor = {
   publicar: (id) => pedir(`/api/materiais/${id}/atividade`, { metodo: 'POST' }),
   revogar: (id) => pedir(`/api/materiais/${id}/atividade`, { metodo: 'DELETE' }),
   atividade: (codigo) => pedir(`/api/atividades/${encodeURIComponent(codigo)}`),
+
+  /* --- Contas de professor, só para administrador (RF24, RN13) --- */
+  contas: {
+    listar: () => pedir('/api/administracao/contas'),
+    criar: (dados) => pedir('/api/administracao/contas', { metodo: 'POST', corpo: dados }),
+    editar: (id, dados) => pedir(`/api/administracao/contas/${id}`, { metodo: 'PUT', corpo: dados }),
+    redefinirSenha: (id) => pedir(`/api/administracao/contas/${id}/senha`, { metodo: 'POST' }),
+    desativar: (id) => pedir(`/api/administracao/contas/${id}/desativacao`, { metodo: 'POST' }),
+    reativar: (id) => pedir(`/api/administracao/contas/${id}/reativacao`, { metodo: 'POST' }),
+    excluir: (id) => pedir(`/api/administracao/contas/${id}`, { metodo: 'DELETE' }),
+  },
 };
 
 /* Conversão do formato da API para o formato usado pelas telas. */

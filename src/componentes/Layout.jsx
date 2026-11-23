@@ -16,6 +16,7 @@ import {
   ListChecks,
   LogOut,
   PanelLeftClose,
+  UsersRound,
 } from 'lucide-react';
 import { PainelPreferencias } from './PainelPreferencias.jsx';
 import { JanelaEnviar } from './JanelaEnviar.jsx';
@@ -184,6 +185,8 @@ const ITENS_MENU = [
   ['/ajuda', CircleHelp, 'Ajuda'],
 ];
 
+const ITEM_CONTAS = ['/contas', UsersRound, 'Contas'];
+
 /** Menu lateral, com o logo no topo. Adaptação e Atividade do material
  *  aberto não entram aqui desde 29/10/2026: as duas telas já têm os botões
  *  de ir de uma para a outra.
@@ -193,6 +196,8 @@ const ITENS_MENU = [
  *  passar o mouse e continua para o leitor de tela), e em tela estreita
  *  somem. */
 function MenuLateral({ fechado, aoAlternar }) {
+  const { administrador } = usarApp();
+  const itens = administrador ? [...ITENS_MENU, ITEM_CONTAS] : ITENS_MENU;
   // O botão de abrir e o de recolher são elementos diferentes: depois de
   // alternar, o foco passa para o que apareceu, e não se perde.
   const botao = useRef(null);
@@ -244,7 +249,7 @@ function MenuLateral({ fechado, aoAlternar }) {
 
       <div className="menu-lateral__itens" id="menu-itens">
         <ul>
-          {ITENS_MENU.map(([caminho, Icone, rotulo]) => (
+          {itens.map(([caminho, Icone, rotulo]) => (
             <li key={caminho}>
               <NavLink to={caminho} title={fechado ? rotulo : undefined}>
                 <Icone aria-hidden="true" />

@@ -36,6 +36,8 @@ COLUNAS_NOVAS = {
         "ativo": "BOOLEAN NOT NULL DEFAULT TRUE",
         "cota_tokens": "INTEGER NOT NULL DEFAULT 0",
         "tokens_consumidos": "INTEGER NOT NULL DEFAULT 0",
+        "administrador": "BOOLEAN NOT NULL DEFAULT FALSE",
+        "versao_sessao": "INTEGER NOT NULL DEFAULT 0",
     },
 }
 

@@ -76,6 +76,11 @@ exemplo foram escritos pela dupla.
 - Ver no painel quanto da cota de adaptação já foi usado; esgotada a cota, só o que chama o modelo
   de linguagem para de funcionar.
 
+**Para o administrador**
+
+- Criar, editar, desativar e excluir contas de professor, redefinir senha e definir a cota de cada uma.
+  Não vê o conteúdo dos materiais.
+
 **Para o estudante**
 
 - Abrir a atividade pelo link, **sem conta**.

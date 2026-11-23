@@ -1,7 +1,7 @@
 """RF01 — entrar e consultar quem está autenticado.
 
 Não há rota de cadastro (RN12): a conta é criada pela administração, com o
-comando administrar.py (RF24).
+comando administrar.py (RF24) ou pela tela Contas (rotas/administracao.py).
 """
 
 from fastapi import APIRouter, Depends, Request
@@ -19,7 +19,7 @@ rotas = APIRouter(prefix="/api/autenticacao", tags=["Autenticação"])
 
 def _abrir_sessao(request: Request, professor: Professor) -> Sessao:
     config = request.app.state.configuracao
-    token, expira_em = emitir_token(professor.id, config.segredo_token, config.validade_token_horas)
+    token, expira_em = emitir_token(professor, config.segredo_token, config.validade_token_horas)
     return Sessao(
         token=token, expira_em=expira_em, professor=ProfessorPublico.model_validate(professor)
     )

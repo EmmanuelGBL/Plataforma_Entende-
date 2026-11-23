@@ -256,6 +256,16 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 :root[data-contraste='alto'] .cota__aviso { color: #ffffff; }
 :root[data-contraste='alto'] .cota--esgotada .progresso__barra { background: #ffe600; }
 
+/* --- Contas (administrador) ------------------------------------------------ */
+.contas-totais { margin: 0 0 var(--e5); }
+.contas-totais .bloco { background: var(--cor-superficie); border: 1px solid var(--cor-borda); }
+.item-conta__meta { overflow-wrap: anywhere; }
+.item-conta__sem-menu { width: var(--alvo-minimo); }
+.acesso-conta { margin: var(--e4) 0 0; }
+.acesso-conta dt { font-size: 0.875rem; font-weight: 600; color: var(--cor-texto-apoio); margin-top: var(--e2); }
+.acesso-conta dd { margin: 0; overflow-wrap: anywhere; }
+.acesso-conta__senha { font-family: var(--fonte-mono); font-size: 1.25rem; font-weight: 700; user-select: all; }
+
 /* --- Comparação original × adaptado --------------------------------------- */
 .comparador { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e4); }
 @media (max-width: 62rem) { .comparador { grid-template-columns: minmax(0, 1fr); } }

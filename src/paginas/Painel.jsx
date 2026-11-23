@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CircleCheck,
   CircleSlash,
   Clock,
   CloudUpload,
-  EllipsisVertical,
   FileText,
   Gamepad2,
   LoaderCircle,
@@ -17,6 +16,7 @@ import {
 import { Aviso, Botao, Etiqueta } from '../componentes/basicos.jsx';
 import { Dialogo } from '../componentes/Dialogo.jsx';
 import { IconeDisciplina } from '../componentes/IconeDisciplina.jsx';
+import { MenuAcoes } from '../componentes/MenuAcoes.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
@@ -49,72 +49,6 @@ function partesDoNome(nome) {
   const ponto = nome.lastIndexOf('.');
   if (ponto <= 0) return { titulo: nome, formato: 'Arquivo' };
   return { titulo: nome.slice(0, ponto), formato: nome.slice(ponto + 1).toUpperCase() };
-}
-
-/** Menu ⋮ de um material: botão que abre e fecha uma lista de ações. */
-function MenuAcoes({ material, aoExcluir }) {
-  const [aberto, setAberto] = useState(false);
-  const area = useRef(null);
-  const gatilho = useRef(null);
-  const id = `acoes-${material.id}`;
-
-  useEffect(() => {
-    if (!aberto) return undefined;
-    function aoClicarFora(evento) {
-      if (!area.current?.contains(evento.target)) setAberto(false);
-    }
-    function aoTeclar(evento) {
-      if (evento.key === 'Escape') {
-        setAberto(false);
-        gatilho.current?.focus();
-      }
-    }
-    document.addEventListener('mousedown', aoClicarFora);
-    document.addEventListener('keydown', aoTeclar);
-    return () => {
-      document.removeEventListener('mousedown', aoClicarFora);
-      document.removeEventListener('keydown', aoTeclar);
-    };
-  }, [aberto]);
-
-  return (
-    <div className="menu-acoes" ref={area}>
-      <button
-        type="button"
-        ref={gatilho}
-        className="menu-acoes__gatilho"
-        aria-expanded={aberto}
-        aria-controls={id}
-        onClick={() => setAberto((v) => !v)}
-      >
-        <EllipsisVertical aria-hidden="true" />
-        <span className="apenas-leitor">Mais ações para {material.nome}</span>
-      </button>
-      {aberto && (
-        <ul className="menu-acoes__lista" id={id}>
-          <li>
-            <Link to={`/materiais/${material.id}/atividade`}>
-              <Gamepad2 aria-hidden="true" />
-              Ver atividade
-            </Link>
-          </li>
-          <li>
-            <button
-              type="button"
-              className="menu-acoes__perigo"
-              onClick={() => {
-                setAberto(false);
-                aoExcluir(material);
-              }}
-            >
-              <Trash2 aria-hidden="true" />
-              Excluir material
-            </button>
-          </li>
-        </ul>
-      )}
-    </div>
-  );
 }
 
 /** RF25 — quanto da cota de tokens já foi usado, em texto e em barra. O 100%
@@ -359,7 +293,24 @@ export function Painel() {
                           {material.estado === 'aprovado' ? 'Ver material' : 'Revisar'}
                           <span className="apenas-leitor">: {titulo}</span>
                         </Botao>
-                        <MenuAcoes material={material} aoExcluir={setAExcluir} />
+                        <MenuAcoes rotulo={`Mais ações para ${material.nome}`}>
+                          <li>
+                            <Link to={`/materiais/${material.id}/atividade`}>
+                              <Gamepad2 aria-hidden="true" />
+                              Ver atividade
+                            </Link>
+                          </li>
+                          <li>
+                            <button
+                              type="button"
+                              className="menu-acoes__perigo"
+                              onClick={() => setAExcluir(material)}
+                            >
+                              <Trash2 aria-hidden="true" />
+                              Excluir material
+                            </button>
+                          </li>
+                        </MenuAcoes>
                       </div>
                     </article>
                   </li>

@@ -2,9 +2,12 @@
 
     python administrar.py criar "Ana Souza" ana@escola.br 40000
     python administrar.py desativar ana@escola.br
+    python administrar.py reativar ana@escola.br
     python administrar.py redefinir-senha ana@escola.br
     python administrar.py cota ana@escola.br 60000
     python administrar.py listar
+    python administrar.py tornar-admin emmanuel@exemplo.com
+    python administrar.py remover-admin emmanuel@exemplo.com
 
 O número é a cota de tokens da conta. A senha é aleatória e aparece uma única
 vez; no banco fica só o hash (RNF09).
@@ -48,6 +51,15 @@ def _argumentos(argumentos: list[str] | None) -> argparse.Namespace:
     desativar = comandos.add_parser("desativar", help="impede a entrada; os materiais ficam no banco")
     desativar.add_argument("email")
 
+    reativar = comandos.add_parser("reativar", help="libera de novo a entrada")
+    reativar.add_argument("email")
+
+    for nome, ajuda in (
+        ("tornar-admin", "dá acesso à tela Contas"),
+        ("remover-admin", "tira o acesso à tela Contas"),
+    ):
+        comandos.add_parser(nome, help=ajuda).add_argument("email")
+
     senha = comandos.add_parser("redefinir-senha", help="troca a senha e mostra a nova uma única vez")
     senha.add_argument("email")
 
@@ -77,14 +89,29 @@ def principal(argumentos: list[str] | None = None, configuracao: Configuracao | 
                 print(f"Conta criada para {professor.nome}, com cota de {_numero(professor.cota_tokens)} tokens.")
                 _mostrar_senha(professor.email, senha)
             elif pedido.comando == "desativar":
-                professor = contas.desativar(sessao, pedido.email)
+                professor = contas.por_email(sessao, pedido.email)
+                contas.desativar(sessao, professor)
                 print(f"Conta de {professor.nome} desativada. Os materiais continuam no banco.")
+            elif pedido.comando == "reativar":
+                professor = contas.por_email(sessao, pedido.email)
+                contas.reativar(sessao, professor)
+                print(f"Conta de {professor.nome} reativada, com a mesma senha.")
+            elif pedido.comando in ("tornar-admin", "remover-admin"):
+                professor = contas.por_email(sessao, pedido.email)
+                contas.definir_administrador(sessao, professor, pedido.comando == "tornar-admin")
+                print(
+                    f"{professor.nome} agora administra as contas."
+                    if professor.administrador
+                    else f"{professor.nome} não administra mais as contas."
+                )
             elif pedido.comando == "redefinir-senha":
-                professor, senha = contas.redefinir_senha(sessao, pedido.email)
+                professor = contas.por_email(sessao, pedido.email)
+                senha = contas.redefinir_senha(sessao, professor)
                 print(f"Senha de {professor.nome} redefinida.")
                 _mostrar_senha(professor.email, senha)
             elif pedido.comando == "cota":
-                professor = contas.definir_cota(sessao, pedido.email, pedido.cota)
+                professor = contas.por_email(sessao, pedido.email)
+                contas.definir_cota(sessao, professor, pedido.cota)
                 print(
                     f"Cota de {professor.nome}: {_numero(professor.cota_tokens)} tokens "
                     f"({_numero(professor.tokens_consumidos)} já consumidos)."
@@ -95,7 +122,7 @@ def principal(argumentos: list[str] | None = None, configuracao: Configuracao | 
                     print(
                         f"{'ativa     ' if p.ativo else 'desativada'}  "
                         f"{_numero(p.tokens_consumidos)} de {_numero(p.cota_tokens)} tokens  "
-                        f"{p.nome} <{p.email}>"
+                        f"{p.nome} <{p.email}>{' (administrador)' if p.administrador else ''}"
                     )
                 print(f"{len(todas)} conta(s).")
     except ErroDeNegocio as erro:

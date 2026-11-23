@@ -14,6 +14,7 @@ import { QuestionarioImpresso } from './paginas/QuestionarioImpresso.jsx';
 import { Ajuda } from './paginas/Ajuda.jsx';
 import { Regras } from './paginas/Regras.jsx';
 import { Atividades } from './paginas/Atividades.jsx';
+import { Contas } from './paginas/Contas.jsx';
 import { Acessibilidade } from './paginas/Acessibilidade.jsx';
 import { NaoEncontrada } from './paginas/NaoEncontrada.jsx';
 
@@ -32,6 +33,14 @@ function ExigeSessao({ children }) {
     );
   }
   return autenticado ? children : <Navigate to="/" replace />;
+}
+
+/** A tela Contas é só do administrador; o servidor confere de novo a cada pedido. */
+function ExigeAdministrador({ children }) {
+  const { administrador } = usarApp();
+  return (
+    <ExigeSessao>{administrador ? children : <Navigate to="/painel" replace />}</ExigeSessao>
+  );
 }
 
 export default function App() {
@@ -103,6 +112,14 @@ export default function App() {
             <ExigeSessao>
               <Atividades />
             </ExigeSessao>
+          }
+        />
+        <Route
+          path="/contas"
+          element={
+            <ExigeAdministrador>
+              <Contas />
+            </ExigeAdministrador>
           }
         />
         {/* A tela Configurações saiu em 29/10/2026: tudo o que ela mostrava já

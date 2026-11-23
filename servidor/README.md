@@ -78,15 +78,18 @@ recusa vira erro explicado ao professor (422), como a resposta cortada por taman
 
 ### Contas de professor e cota
 
-Não há cadastro pela interface nem pela API (RN12). A conta é criada no servidor, com o comando
-`administrar.py` (RF24); o número é a cota de tokens da conta (RN13):
+Não há autocadastro (RN12). A conta é criada pela administração (RF24), na **tela Contas** da
+interface ou no servidor, com o comando `administrar.py`; o número é a cota de tokens (RN13):
 
 ```
 .venv\Scripts\python administrar.py criar "Ana Souza" ana@escola.br 40000
 .venv\Scripts\python administrar.py desativar ana@escola.br
+.venv\Scripts\python administrar.py reativar ana@escola.br
 .venv\Scripts\python administrar.py redefinir-senha ana@escola.br
 .venv\Scripts\python administrar.py cota ana@escola.br 60000
 .venv\Scripts\python administrar.py listar
+.venv\Scripts\python administrar.py tornar-admin emmanuel@exemplo.com
+.venv\Scripts\python administrar.py remover-admin emmanuel@exemplo.com
 ```
 
 A senha é aleatória e aparece uma única vez no terminal; no banco fica só o hash. Conta desativada
@@ -96,6 +99,13 @@ usuário do serviço, para o banco não mudar de dono:
 ```
 cd /opt/entende/app/servidor && sudo -u entende .venv/bin/python administrar.py listar
 ```
+
+A tela Contas só aparece para administrador, e o servidor confere isso em cada pedido. Ela cria,
+edita, redefine senha, desativa, reativa e exclui conta de professor. Três limites são de propósito:
+**ninguém vira administrador pela web**, só por `tornar-admin`; a conta de um administrador não é
+desativada, excluída nem tem senha ou e-mail trocados pela web, para uma sessão tomada não trancar a
+dupla para fora; e o administrador **não vê o conteúdo** dos materiais, só a quantidade (RNF12).
+Redefinir a senha e desativar derrubam a sessão aberta (`versao_sessao`, dentro do token).
 
 Cada chamada ao modelo soma os tokens de entrada e de saída ao consumo do professor (RF25),
 inclusive a que termina em recusa ou resposta cortada. A cota é conferida no começo da adaptação,
@@ -133,6 +143,7 @@ PDFs e DOCX gerados por código (`testes/amostras.py`) — nenhum arquivo de ter
 | --- | --- | --- |
 | `POST /api/autenticacao/entrar` | Entra; devolve o token | RF01 |
 | `GET /api/autenticacao/eu` | Professor autenticado e o uso da cota | RF01, RF25 |
+| `/api/administracao/contas` (só administrador) | Lista, cria, edita, redefine senha, desativa, reativa e exclui contas | RF24 |
 | `POST /api/materiais` | Envia PDF ou DOCX; extrai e grava o texto | RF02–RF04 |
 | `GET /api/materiais` | Lista, com estado da adaptação e da atividade | RF19 |
 | `GET /api/materiais/{id}` | Material com o texto extraído | RF03 |
@@ -278,8 +289,6 @@ o modelo recebe o bloco, não encontra passiva, não muda nada, e o registro fic
   não pegam isso; é o que a revisão do professor (RN02) e a validação existem para pegar.
 - **Falta passar material real do 5º ano** pelo extrator e pelo motor — `extrair.py` e `medir.py`
   existem para isso. Até aqui, só o texto de exemplo da demonstração foi adaptado de verdade.
-- **Redefinir a senha não derruba a sessão aberta**, que vale até 8 horas. Para cortar o acesso na
-  hora, desativar a conta. Não há comando para reativar.
 - Sem ferramenta de migração: `create_all` cria tabela que falta, e as colunas novas em tabela
   existente são só as de `COLUNAS_NOVAS` (`banco.py`). Conta criada antes da cota fica com cota
   zero e precisa de `administrar.py cota` para adaptar. Banco SQLite de desenvolvimento criado antes de 05/10/2026 precisa ser apagado.
