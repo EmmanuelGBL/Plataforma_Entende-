@@ -2,7 +2,7 @@
 # Python 3.11 ou mais recente.
 
 fastapi>=0.115,<1
-uvicorn[standard]>=0.30
+uvicorn>=0.30            # sem [standard]: os extras (pyyaml, watchfiles...) nao sao usados
 python-multipart>=0.0.9      # envio de arquivo (RF02)
 pydantic-settings>=2.4
 email-validator>=2.2
