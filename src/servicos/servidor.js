@@ -126,8 +126,6 @@ async function pedir(caminho, { metodo = 'GET', corpo, formulario, sinal } = {})
 /* --- Conta (RF01) -------------------------------------------------------- */
 
 export const servidor = {
-  cadastrar: (nome, email, senha) =>
-    pedir('/api/autenticacao/cadastro', { metodo: 'POST', corpo: { nome, email, senha } }),
   entrar: (email, senha) =>
     pedir('/api/autenticacao/entrar', { metodo: 'POST', corpo: { email, senha } }),
   eu: () => pedir('/api/autenticacao/eu'),

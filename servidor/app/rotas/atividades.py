@@ -20,7 +20,7 @@ from ..esquemas import (
 )
 from ..modelos import AtividadePublicada, Professor, agora
 from ..seguranca import professor_atual
-from ..servicos import processamento
+from ..servicos import cota, processamento
 from .materiais import material_do_professor
 
 rotas = APIRouter(prefix="/api", tags=["Atividade"])
@@ -89,9 +89,8 @@ def gerar_questoes(
             "RF13",
             status=409,
         )
-    processamento.gerar_questoes(
-        sessao, material, adaptacao.texto_adaptado, request.app.state.cliente_llm
-    )
+    cliente = cota.cliente_do_professor(request.app.state, professor)
+    processamento.gerar_questoes(sessao, material, adaptacao.texto_adaptado, cliente)
     sessao.commit()
     return [questao_professor(q) for q in material.questoes]
 

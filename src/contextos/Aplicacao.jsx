@@ -132,10 +132,15 @@ export function ProvedorAplicacao({ children }) {
     [abrirSessao],
   );
 
-  const cadastrar = useCallback(
-    async (nome, email, senha) => abrirSessao(await servidor.cadastrar(nome, email, senha)),
-    [abrirSessao],
-  );
+  /** RF25 — relê o uso da cota depois de uma operação que chama o modelo. Se a
+   *  leitura falhar, o painel fica com o valor anterior. */
+  const atualizarCota = useCallback(async () => {
+    try {
+      setProfessor(await servidor.eu());
+    } catch {
+      /* o servidor confere a cota de qualquer forma */
+    }
+  }, []);
 
   /* --- Leitura ------------------------------------------------------------ */
 
@@ -213,11 +218,16 @@ export function ProvedorAplicacao({ children }) {
         });
         return;
       }
-      const dados = await comProgresso(servidor.adaptar(id, sinal?.controle?.signal), aoProgredir);
-      guardarAdaptacao(id, dados, await servidor.questoes(id));
-      await carregarMateriais();
+      try {
+        const dados = await comProgresso(servidor.adaptar(id, sinal?.controle?.signal), aoProgredir);
+        guardarAdaptacao(id, dados, await servidor.questoes(id));
+        await carregarMateriais();
+      } finally {
+        // Também na falha: a chamada que deu errado pode ter consumido cota.
+        await atualizarCota();
+      }
     },
-    [atualizarMaterial, guardarAdaptacao, carregarMateriais],
+    [atualizarMaterial, guardarAdaptacao, carregarMateriais, atualizarCota],
   );
 
   /** RF09. No modo servidor o texto vai em Markdown; na demonstração, em blocos. */
@@ -265,13 +275,20 @@ export function ProvedorAplicacao({ children }) {
     [mudarDemo],
   );
 
-  const gerarQuestoes = useCallback(async (id) => {
-    const geradas = await servidor.gerarQuestoes(id);
-    setAdaptacoes((atuais) => ({
-      ...atuais,
-      [id]: { ...atuais[id], questoes: geradas.map(converterQuestao) },
-    }));
-  }, []);
+  const gerarQuestoes = useCallback(
+    async (id) => {
+      try {
+        const geradas = await servidor.gerarQuestoes(id);
+        setAdaptacoes((atuais) => ({
+          ...atuais,
+          [id]: { ...atuais[id], questoes: geradas.map(converterQuestao) },
+        }));
+      } finally {
+        await atualizarCota();
+      }
+    },
+    [atualizarCota],
+  );
 
   const publicar = useCallback(
     async (id) => {
@@ -324,7 +341,6 @@ export function ProvedorAplicacao({ children }) {
       professor,
       autenticado: Boolean(professor),
       entrar,
-      cadastrar,
       sair: encerrarSessao,
       materiais,
       material,
@@ -345,7 +361,7 @@ export function ProvedorAplicacao({ children }) {
       excluir,
     }),
     [
-      pronto, professor, entrar, cadastrar, encerrarSessao, materiais, material,
+      pronto, professor, entrar, encerrarSessao, materiais, material,
       materialPorCodigo, adaptacao, carregarAdaptacao, catalogo, carregarCatalogo,
       acrescentarMaterial, enviarArquivo, adaptarMaterial, salvarTexto, aprovar,
       salvarQuestoes, gerarQuestoes, publicar, revogar, excluir,

@@ -6,20 +6,26 @@ import re
 
 from app.erros import ErroDeNegocio
 from app.servicos import texto as md
+from app.servicos.cliente_llm import Consumo
 
 QUESTAO_FORA_DO_TEXTO = "Qual é a capital da França?"
 
 
 class ClienteFalso:
     modelo = "modelo-falso-de-teste"
+    # Consumo informado em cada chamada: 100 de entrada e 50 de saída.
+    TOKENS = 150
 
     def __init__(self, falhar_em: str | None = None, regra_extra: str | None = None):
         self.falhar_em = falhar_em
         self.regra_extra = regra_extra
         self.chamadas: list[dict] = []
 
-    def gerar_json(self, tarefa: str, sistema: str, conteudo: str, esquema: dict) -> dict:
+    def gerar_json(self, tarefa: str, sistema: str, conteudo: str, esquema: dict, ao_consumir=None) -> dict:
         self.chamadas.append({"tarefa": tarefa, "sistema": sistema, "conteudo": conteudo, "esquema": esquema})
+        # Como no cliente de verdade, a chamada que termina em erro também gasta.
+        if ao_consumir is not None:
+            ao_consumir(Consumo(tarefa, 100, 0, 50, 0, 0.0))
         if self.falhar_em and tarefa.startswith(self.falhar_em):
             raise ErroDeNegocio("O serviço de adaptação está indisponível agora", status=503)
         if tarefa.startswith("adaptacao"):

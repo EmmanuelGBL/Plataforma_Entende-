@@ -4,11 +4,14 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.config import PASTA_SERVIDOR, Configuracao
+from app.esquemas import NovaConta
 from app.principal import criar_app
+from app.servicos import contas
 
 from .cliente_falso import ClienteFalso
 
 ARQUIVO_REGRAS = PASTA_SERVIDOR / "regras" / "tea.json"
+SENHA = "senha-forte-123"
 
 
 def _cliente(tmp_path, cliente_llm=None, **ajustes) -> TestClient:
@@ -53,11 +56,10 @@ def fabrica_cliente(tmp_path):
         c.__exit__(None, None, None)
 
 
-def cadastrar(cliente: TestClient, email: str = "ana@escola.am.gov.br") -> dict:
-    """Cria conta e devolve o cabeçalho de autorização."""
-    resposta = cliente.post(
-        "/api/autenticacao/cadastro",
-        json={"nome": "Ana Professora", "email": email, "senha": "senha-forte-123"},
-    )
-    assert resposta.status_code == 201, resposta.text
+def cadastrar(cliente: TestClient, email: str = "ana@escola.am.gov.br", cota: int = 1_000_000) -> dict:
+    """Cria a conta como a administração (RF24) e devolve o cabeçalho de autorização."""
+    with cliente.app.state.fabrica_sessao() as sessao:
+        contas.criar(sessao, NovaConta(nome="Ana Professora", email=email, cota=cota), SENHA)
+    resposta = cliente.post("/api/autenticacao/entrar", json={"email": email, "senha": SENHA})
+    assert resposta.status_code == 200, resposta.text
     return {"Authorization": f"Bearer {resposta.json()['token']}"}

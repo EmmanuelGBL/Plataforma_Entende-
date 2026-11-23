@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from .banco import Base, criar_fabrica, criar_motor
+from .banco import criar_fabrica, criar_motor, preparar_banco
 from .config import Configuracao
 from .erros import ErroDeNegocio, tratar_erro_de_negocio, tratar_erro_de_validacao
 from .rotas import adaptacoes, atividades, autenticacao, materiais
@@ -42,8 +42,7 @@ def criar_app(configuracao: Configuracao | None = None, cliente_llm: ClienteLLM 
 
     @asynccontextmanager
     async def ciclo_de_vida(_: FastAPI):
-        # Cria as tabelas que faltam. Não altera tabela existente.
-        Base.metadata.create_all(motor)
+        preparar_banco(motor)
         yield
         motor.dispose()
 

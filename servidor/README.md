@@ -2,7 +2,7 @@
 
 API em Python (FastAPI) do Entende+: conta do professor, envio e extração do material, motor de
 adaptação com regras versionadas, métricas de legibilidade, questões e publicação da atividade.
-Cobre RF01 a RF23 do lado do servidor; o jogo e as folhas impressas rodam no navegador.
+Cobre RF01 a RF25 do lado do servidor; o jogo e as folhas impressas rodam no navegador.
 
 Este repositório é **público**. Chave da API, senha de banco e segredo do token vão no `.env`,
 que não é versionado — nunca no código.
@@ -75,6 +75,33 @@ Com a Anthropic, os pedidos usam o **fallback do lado do servidor** (`fallbacks=
 modelo principal recusar um trecho, o próprio serviço tenta o modelo reserva. Com a OpenAI, a
 recusa vira erro explicado ao professor (422), como a resposta cortada por tamanho.
 
+### Contas de professor e cota
+
+Não há cadastro pela interface nem pela API (RN12). A conta é criada no servidor, com o comando
+`administrar.py` (RF24); o número é a cota de tokens da conta (RN13):
+
+```
+.venv\Scripts\python administrar.py criar "Ana Souza" ana@escola.br 40000
+.venv\Scripts\python administrar.py desativar ana@escola.br
+.venv\Scripts\python administrar.py redefinir-senha ana@escola.br
+.venv\Scripts\python administrar.py cota ana@escola.br 60000
+.venv\Scripts\python administrar.py listar
+```
+
+A senha é aleatória e aparece uma única vez no terminal; no banco fica só o hash. Conta desativada
+não entra, a sessão aberta cai e os materiais continuam no banco. Na VPS, o comando roda com o
+usuário do serviço, para o banco não mudar de dono:
+
+```
+cd /opt/entende/app/servidor && sudo -u entende .venv/bin/python administrar.py listar
+```
+
+Cada chamada ao modelo soma os tokens de entrada e de saída ao consumo do professor (RF25),
+inclusive a que termina em recusa ou resposta cortada. A cota é conferida no começo da adaptação,
+do reprocessamento e da geração de questões; esgotada, o pedido é recusado (403) sem chamar o
+modelo, e o resto do sistema continua funcionando. Como a conferência é no começo, a última
+operação, ou duas pedidas ao mesmo tempo, podem ultrapassar a cota.
+
 ### Banco
 
 Sem `ENTENDE_BANCO_URL`, o banco é um SQLite em `entende.db`, nesta pasta. Para PostgreSQL, basta
@@ -83,7 +110,7 @@ apontar a variável para ele; as tabelas são criadas na primeira partida.
 ### Testes e ferramentas
 
 ```
-.venv\Scripts\python -m pytest                 # 130 testes, sem rede e sem custo
+.venv\Scripts\python -m pytest                 # sem rede e sem custo
 .venv\Scripts\python extrair.py material.pdf   # ver a extração de um arquivo real
 .venv\Scripts\python medir.py material.md pasta 3   # adaptar de verdade 3 vezes e medir
 ```
@@ -103,8 +130,8 @@ PDFs e DOCX gerados por código (`testes/amostras.py`) — nenhum arquivo de ter
 
 | Método e rota | O que faz | Requisito |
 | --- | --- | --- |
-| `POST /api/autenticacao/cadastro` · `/entrar` | Cria conta / entra; devolve o token | RF01 |
-| `GET /api/autenticacao/eu` | Professor autenticado | RF01 |
+| `POST /api/autenticacao/entrar` | Entra; devolve o token | RF01 |
+| `GET /api/autenticacao/eu` | Professor autenticado e o uso da cota | RF01, RF25 |
 | `POST /api/materiais` | Envia PDF ou DOCX; extrai e grava o texto | RF02–RF04 |
 | `GET /api/materiais` | Lista, com estado da adaptação e da atividade | RF19 |
 | `GET /api/materiais/{id}` | Material com o texto extraído | RF03 |
@@ -250,8 +277,11 @@ o modelo recebe o bloco, não encontra passiva, não muda nada, e o registro fic
   não pegam isso; é o que a revisão do professor (RN02) e a validação existem para pegar.
 - **Falta passar material real do 5º ano** pelo extrator e pelo motor — `extrair.py` e `medir.py`
   existem para isso. Até aqui, só o texto de exemplo da demonstração foi adaptado de verdade.
-- Sem ferramenta de migração: `create_all` cria tabela que falta, mas não altera tabela
-  existente. Banco SQLite de desenvolvimento criado antes de 05/10/2026 precisa ser apagado.
+- **Redefinir a senha não derruba a sessão aberta**, que vale até 8 horas. Para cortar o acesso na
+  hora, desativar a conta. Não há comando para reativar.
+- Sem ferramenta de migração: `create_all` cria tabela que falta, e as colunas novas em tabela
+  existente são só as de `COLUNAS_NOVAS` (`banco.py`). Conta criada antes da cota fica com cota
+  zero e precisa de `administrar.py cota` para adaptar. Banco SQLite de desenvolvimento criado antes de 05/10/2026 precisa ser apagado.
 - **HTTPS (RNF10)** depende de onde o servidor for publicado; localmente é HTTP. O bloqueio de
   entrada é por e-mail: quem souber o e-mail de um professor pode bloqueá-lo por 15 minutos
   errando a senha de propósito. É a troca aceita para não guardar IP.

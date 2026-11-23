@@ -17,10 +17,12 @@ DataHora = Annotated[datetime, AfterValidator(_em_utc)]
 from .modelos import EtapaEscolar, FormatoArquivo, PerfilAdaptacao
 
 
-class Cadastro(BaseModel):
+class NovaConta(BaseModel):
+    """Dados do comando administrar.py criar (RF24)."""
+
     nome: str = Field(min_length=2, max_length=120)
     email: EmailStr
-    senha: str = Field(min_length=8, max_length=128)
+    cota: int = Field(ge=1, le=100_000_000)
 
 
 class Entrada(BaseModel):
@@ -34,6 +36,9 @@ class ProfessorPublico(BaseModel):
     id: uuid.UUID
     nome: str
     email: str
+    # RF25 — uso da cota, mostrado no painel.
+    cota_tokens: int
+    tokens_consumidos: int
 
 
 class Sessao(BaseModel):

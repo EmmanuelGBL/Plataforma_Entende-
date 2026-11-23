@@ -5,7 +5,7 @@ muda só ENTENDE_BANCO_URL.
 from collections.abc import Iterator
 
 from fastapi import Request
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -27,6 +27,29 @@ def criar_motor(url: str) -> Engine:
             cursor.close()
 
     return motor
+
+
+# Colunas acrescentadas depois que já havia banco em uso: create_all cria
+# tabela que falta, mas não altera tabela existente.
+COLUNAS_NOVAS = {
+    "professor": {
+        "ativo": "BOOLEAN NOT NULL DEFAULT TRUE",
+        "cota_tokens": "INTEGER NOT NULL DEFAULT 0",
+        "tokens_consumidos": "INTEGER NOT NULL DEFAULT 0",
+    },
+}
+
+
+def preparar_banco(motor: Engine) -> None:
+    """Cria as tabelas que faltam e acrescenta as COLUNAS_NOVAS."""
+    Base.metadata.create_all(motor)
+    inspetor = inspect(motor)
+    with motor.begin() as conexao:
+        for tabela, colunas in COLUNAS_NOVAS.items():
+            existentes = {c["name"] for c in inspetor.get_columns(tabela)}
+            for coluna, tipo in colunas.items():
+                if coluna not in existentes:
+                    conexao.execute(text(f"ALTER TABLE {tabela} ADD COLUMN {coluna} {tipo}"))
 
 
 def criar_fabrica(motor: Engine) -> sessionmaker[Session]:

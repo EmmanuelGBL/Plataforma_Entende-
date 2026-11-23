@@ -10,16 +10,15 @@ import {
   Lock,
   Mail,
   Radio,
-  UserPlus,
-  UserRound,
 } from 'lucide-react';
 import { Aviso, Botao, Campo } from '../componentes/basicos.jsx';
 import { LogoEntende, usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { escolherModo, servidorDisponivel } from '../servicos/servidor.js';
 
-/* Tela de entrada e criação de conta (RF01): apresentação à esquerda e
-   formulário à direita; em tela estreita, o formulário vem primeiro.
+/* Tela de entrada (RF01): apresentação à esquerda e formulário à direita; em
+   tela estreita, o formulário vem primeiro. Não cria conta: quem cria é a
+   administração, no servidor (RF24, RN12).
 
    O campo de senha aceita colar (gerenciador de senhas) e tem o botão
    "Mostrar senha". Os erros aparecem em um resumo no topo do cartão, que
@@ -57,11 +56,9 @@ function Apresentacao() {
 }
 
 export function Entrar() {
-  const { entrar, cadastrar, modoServidor } = usarApp();
-  const [criando, setCriando] = useState(false);
-  usarTituloDaPagina(criando ? 'Criar conta' : 'Entrar');
+  const { entrar, modoServidor } = usarApp();
+  usarTituloDaPagina('Entrar');
   const navegar = useNavigate();
-  const [nome, setNome] = useState('');
   const [email, setEmail] = useState(modoServidor ? '' : 'professor@escola.manaus.br');
   const [senha, setSenha] = useState(modoServidor ? '' : 'demonstracao');
   const [erros, setErros] = useState({});
@@ -76,11 +73,9 @@ export function Entrar() {
   async function enviar(evento) {
     evento.preventDefault();
     const novos = {};
-    if (criando && nome.trim().length < 2) novos.nome = 'Digite o seu nome, com pelo menos 2 letras.';
-    if (!email.trim()) novos.email = 'Digite o e-mail com que você criou a conta.';
+    if (!email.trim()) novos.email = 'Digite o e-mail da sua conta.';
     else if (!email.includes('@')) novos.email = 'O e-mail precisa ter @. Exemplo: nome@escola.br';
     if (!senha) novos.senha = 'Digite sua senha para entrar.';
-    else if (criando && senha.length < 8) novos.senha = 'A senha precisa ter pelo menos 8 caracteres.';
 
     setErros(novos);
     if (Object.keys(novos).length > 0) {
@@ -90,8 +85,7 @@ export function Entrar() {
 
     setEnviando(true);
     try {
-      if (criando) await cadastrar(nome.trim(), email.trim(), senha);
-      else await entrar(email.trim(), senha);
+      await entrar(email.trim(), senha);
       navegar('/painel');
     } catch (erro) {
       // Mostra o motivo devolvido pelo servidor, que diz qual campo foi recusado.
@@ -102,11 +96,6 @@ export function Entrar() {
     }
   }
 
-  function alternarModo() {
-    setCriando((atual) => !atual);
-    setErros({});
-  }
-
   const listaErros = Object.entries(erros);
 
   return (
@@ -114,13 +103,13 @@ export function Entrar() {
       <div className="entrada-formulario">
         <section className="cartao entrada-cartao" aria-labelledby="titulo-entrada">
           <LogoEntende className="entrada-cartao__logo" />
-          <h1 id="titulo-entrada">{criando ? 'Crie sua conta de professor' : 'Acesse sua conta de professor'}</h1>
+          <h1 id="titulo-entrada">Acesse sua conta de professor</h1>
 
           {listaErros.length > 0 && (
             <div ref={resumo} tabIndex={-1}>
               <Aviso
                 tipo="erro"
-                titulo={criando ? 'Não foi possível criar a conta' : 'Não foi possível entrar'}
+                titulo="Não foi possível entrar"
                 papel="alert"
                 nivel={2}
               >
@@ -134,18 +123,6 @@ export function Entrar() {
           )}
 
           <form onSubmit={enviar} noValidate>
-            {criando && (
-              <Campo
-                rotulo="Nome"
-                icone={UserRound}
-                autoComplete="name"
-                obrigatorio
-                placeholder="Seu nome completo"
-                value={nome}
-                erro={erros.nome}
-                onChange={(e) => setNome(e.target.value)}
-              />
-            )}
             <Campo
               rotulo="E-mail"
               tipo="email"
@@ -161,12 +138,11 @@ export function Entrar() {
               rotulo="Senha"
               tipo={senhaVisivel ? 'text' : 'password'}
               icone={Lock}
-              autoComplete={criando ? 'new-password' : 'current-password'}
+              autoComplete="current-password"
               obrigatorio
               placeholder="Sua senha"
               value={senha}
               erro={erros.senha}
-              dica={criando ? 'Pelo menos 8 caracteres.' : undefined}
               onChange={(e) => setSenha(e.target.value)}
               final={
                 <button
@@ -182,21 +158,9 @@ export function Entrar() {
             />
 
             <Botao type="submit" largo disabled={enviando}>
-              {enviando ? 'Aguarde…' : criando ? 'Criar conta' : 'Entrar'}
+              {enviando ? 'Aguarde…' : 'Entrar'}
             </Botao>
           </form>
-
-          {modoServidor && (
-            <>
-              <p className="entrada-cartao__ou">
-                <span>ou</span>
-              </p>
-              <Botao variante="secundario" largo onClick={alternarModo}>
-                {!criando && <UserPlus aria-hidden="true" />}
-                {criando ? 'Já tenho conta: entrar' : 'Criar uma nova conta'}
-              </Botao>
-            </>
-          )}
 
           {servidorDisponivel && (
             <div className={'entrada-modo' + (modoServidor ? ' entrada-modo--ao-vivo' : '')}>
@@ -222,8 +186,9 @@ export function Entrar() {
           {modoServidor && (
             <p className="entrada-cartao__nota">
               <Info aria-hidden="true" />
-              Guardamos seu nome, seu e-mail, a senha cifrada e os materiais que você enviar. Só você
-              vê seus materiais.
+              A conta é criada pela equipe do Entende+. Guardamos seu nome, seu e-mail, a senha
+              cifrada, os materiais que você enviar e quanto da sua cota foi usado. Só você vê seus
+              materiais.
             </p>
           )}
         </section>

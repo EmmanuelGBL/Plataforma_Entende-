@@ -53,6 +53,11 @@ class Professor(Base):
     # RNF09 — Argon2id: o sal é gerado por senha e vai dentro do próprio hash.
     senha_hash: Mapped[str] = mapped_column(String(255))
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=agora)
+    # RF24 — conta desativada não entra; os materiais continuam no banco.
+    ativo: Mapped[bool] = mapped_column(Boolean, default=True)
+    # RN13 — cota definida pela administração. Sem cota definida, nada é gasto.
+    cota_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    tokens_consumidos: Mapped[int] = mapped_column(Integer, default=0)
 
     materiais: Mapped[list["Material"]] = relationship(
         back_populates="professor", cascade="all, delete-orphan", passive_deletes=True

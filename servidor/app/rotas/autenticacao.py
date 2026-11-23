@@ -1,15 +1,18 @@
-"""RF01 — conta do professor: criar, entrar, consultar quem está autenticado."""
+"""RF01 — entrar e consultar quem está autenticado.
 
-from fastapi import APIRouter, Depends, Request, status
+Não há rota de cadastro (RN12): a conta é criada pela administração, com o
+comando administrar.py (RF24).
+"""
+
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..banco import obter_sessao
 from ..erros import ErroDeNegocio
-from ..esquemas import Cadastro, Entrada, ProfessorPublico, Sessao
+from ..esquemas import Entrada, ProfessorPublico, Sessao
 from ..modelos import Professor
-from ..seguranca import conferir_senha, emitir_token, gerar_hash, professor_atual
+from ..seguranca import conferir_senha, emitir_token, professor_atual
 
 rotas = APIRouter(prefix="/api/autenticacao", tags=["Autenticação"])
 
@@ -20,28 +23,6 @@ def _abrir_sessao(request: Request, professor: Professor) -> Sessao:
     return Sessao(
         token=token, expira_em=expira_em, professor=ProfessorPublico.model_validate(professor)
     )
-
-
-@rotas.post("/cadastro", response_model=Sessao, status_code=status.HTTP_201_CREATED)
-def cadastrar(dados: Cadastro, request: Request, sessao: Session = Depends(obter_sessao)):
-    professor = Professor(
-        nome=dados.nome.strip(),
-        email=dados.email.strip().lower(),
-        senha_hash=gerar_hash(dados.senha),
-    )
-    sessao.add(professor)
-    try:
-        sessao.commit()
-    except IntegrityError:
-        sessao.rollback()
-        raise ErroDeNegocio(
-            "Já existe uma conta com este e-mail",
-            "O e-mail informado já está cadastrado no Entende+.",
-            "Entre com esse e-mail e sua senha, ou use outro e-mail para criar a conta.",
-            "RF01",
-            status=409,
-        ) from None
-    return _abrir_sessao(request, professor)
 
 
 @rotas.post("/entrar", response_model=Sessao)
@@ -65,9 +46,18 @@ def entrar(dados: Entrada, request: Request, sessao: Session = Depends(obter_ses
         raise ErroDeNegocio(
             "E-mail ou senha não conferem",
             "Não encontramos uma conta com esse e-mail e essa senha.",
-            "Confira se o e-mail está escrito como no cadastro e digite a senha de novo.",
+            "Confira o e-mail e digite de novo a senha que você recebeu.",
             "RF01",
             status=401,
+        )
+    # Só depois da senha certa: quem não a sabe não descobre a situação da conta.
+    if not professor.ativo:
+        raise ErroDeNegocio(
+            "Esta conta foi desativada",
+            "A administração do Entende+ encerrou o acesso desta conta.",
+            "Se você ainda precisa dela, fale com quem enviou o seu acesso.",
+            "RF24",
+            status=403,
         )
     limite.registrar_acerto(email)
     return _abrir_sessao(request, professor)

@@ -14,6 +14,7 @@ import json
 import logging
 import os
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -25,12 +26,38 @@ from ..erros import ErroDeNegocio
 log = logging.getLogger("entende")
 
 
+@dataclass
+class Consumo:
+    """Tokens e tempo de uma chamada ao modelo. Não guarda nada do material."""
+
+    tarefa: str
+    entrada: int
+    entrada_em_cache: int
+    saida: int
+    # Parte da saída gasta em raciocínio, que é cobrada como saída.
+    raciocinio: int
+    segundos: float
+
+    @property
+    def total(self) -> int:
+        return self.entrada + self.saida
+
+
+AoConsumir = Callable[[Consumo], None]
+
+
 class ClienteLLM(Protocol):
     modelo: str
 
-    def gerar_json(self, tarefa: str, sistema: str, conteudo: str, esquema: dict) -> dict:
+    def gerar_json(
+        self, tarefa: str, sistema: str, conteudo: str, esquema: dict, ao_consumir: AoConsumir | None = None
+    ) -> dict:
         """Devolve um objeto que obedece a `esquema`. `tarefa` só identifica a
-        chamada (log e testes); não é enviada ao modelo."""
+        chamada (log e testes); não é enviada ao modelo.
+
+        `ao_consumir` recebe o Consumo assim que o modelo responde, antes de a
+        resposta ser conferida: recusa e resposta cortada também gastam (RF25).
+        """
         ...
 
 
@@ -53,7 +80,10 @@ class ClienteClaude:
         # Sem chave explícita, o SDK procura sozinho (ANTHROPIC_API_KEY etc.).
         self._cliente = anthropic.Anthropic(api_key=chave) if chave else anthropic.Anthropic()
 
-    def gerar_json(self, tarefa: str, sistema: str, conteudo: str, esquema: dict) -> dict:
+    def gerar_json(
+        self, tarefa: str, sistema: str, conteudo: str, esquema: dict, ao_consumir: AoConsumir | None = None
+    ) -> dict:
+        inicio = time.perf_counter()
         try:
             # Streaming: a resposta de um trecho longo pode passar do tempo
             # limite de uma requisição comum.
@@ -93,6 +123,10 @@ class ClienteClaude:
                 "RF05",
                 status=503,
             ) from None
+
+        if ao_consumir is not None:
+            uso = getattr(resposta, "usage", None)
+            ao_consumir(_consumo_anthropic(tarefa, uso, time.perf_counter() - inicio))
 
         if resposta.stop_reason == "refusal":
             raise ErroDeNegocio(
@@ -147,17 +181,18 @@ _CORTADA = ErroDeNegocio(
 )
 
 
-@dataclass
-class Consumo:
-    """Tokens e tempo de uma chamada ao modelo. Não guarda nada do material."""
-
-    tarefa: str
-    entrada: int
-    entrada_em_cache: int
-    saida: int
-    # Parte da saída gasta em raciocínio, que é cobrada como saída.
-    raciocinio: int
-    segundos: float
+def _consumo_anthropic(tarefa: str, uso, segundos: float) -> Consumo:
+    # Na Anthropic, os tokens de cache vêm à parte de input_tokens.
+    lidos = getattr(uso, "cache_read_input_tokens", 0) or 0
+    gravados = getattr(uso, "cache_creation_input_tokens", 0) or 0
+    return Consumo(
+        tarefa=tarefa,
+        entrada=(getattr(uso, "input_tokens", 0) or 0) + lidos + gravados,
+        entrada_em_cache=lidos,
+        saida=getattr(uso, "output_tokens", 0) or 0,
+        raciocinio=0,
+        segundos=segundos,
+    )
 
 
 def _consumo(tarefa: str, uso, segundos: float) -> Consumo:
@@ -195,10 +230,12 @@ class ClienteGPT:
         else:
             self._cliente = None
         # Com uma lista aqui, cada chamada registra o seu Consumo (medir.py).
-        # O servidor deixa None: o consumo só vai para o log.
+        # O servidor deixa None: ele usa `ao_consumir` (RF25) e o log.
         self.consumo: list[Consumo] | None = None
 
-    def gerar_json(self, tarefa: str, sistema: str, conteudo: str, esquema: dict) -> dict:
+    def gerar_json(
+        self, tarefa: str, sistema: str, conteudo: str, esquema: dict, ao_consumir: AoConsumir | None = None
+    ) -> dict:
         if self._cliente is None:
             raise _sem_configuracao("OPENAI_API_KEY")
         inicio = time.perf_counter()
@@ -237,6 +274,8 @@ class ClienteGPT:
         )
         if self.consumo is not None:
             self.consumo.append(consumo)
+        if ao_consumir is not None:
+            ao_consumir(consumo)
 
         if getattr(resposta, "status", None) == "incomplete":
             motivo = getattr(getattr(resposta, "incomplete_details", None), "reason", None)

@@ -44,6 +44,9 @@ def adaptar_material(
             status=500,
         )
     registro = regras.registrar(sessao, conjunto, impressao)
+    # Solta o banco antes de chamar o modelo: o consumo de cada chamada é gravado
+    # por outra sessão (cota.py), e o SQLite só aceita uma escrita por vez.
+    sessao.commit()
 
     resultado = motor.adaptar(material.texto_extraido, conjunto, cliente)
     log.info(

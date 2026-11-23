@@ -62,7 +62,8 @@ exemplo foram escritos pela dupla.
 
 **Para o professor**
 
-- Criar conta e entrar. A senha é guardada com hash Argon2, e cinco tentativas erradas seguidas
+- Entrar com a conta criada pela administração; não há cadastro aberto. A senha é guardada com hash
+  Argon2, e cinco tentativas erradas seguidas
   bloqueiam a entrada por até 15 minutos.
 - Enviar material em PDF ou DOCX; o texto é extraído no servidor.
 - Receber a versão adaptada, com o registro de quais regras foram aplicadas em cada trecho.
@@ -72,6 +73,8 @@ exemplo foram escritos pela dupla.
 - Revisar as perguntas geradas a partir do material e publicar a atividade com link e código;
   revogar o link ou publicar de novo com código novo.
 - Imprimir a folha de questões, com gabarito opcional em página separada.
+- Ver no painel quanto da cota de adaptação já foi usado; esgotada a cota, só o que chama o modelo
+  de linguagem para de funcionar.
 
 **Para o estudante**
 

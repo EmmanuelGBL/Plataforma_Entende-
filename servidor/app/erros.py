@@ -41,8 +41,7 @@ async def tratar_erro_de_negocio(_: Request, erro: ErroDeNegocio) -> JSONRespons
 
 EXPLICACAO_CAMPOS = {
     "email": "o e-mail precisa estar num formato válido, como nome@escola.com",
-    "senha": "a senha precisa ter entre 8 e 128 caracteres",
-    "nome": "o nome precisa ter entre 2 e 120 caracteres",
+    "senha": "a senha precisa ter entre 1 e 128 caracteres",
     "arquivo": "é preciso anexar um arquivo",
 }
 

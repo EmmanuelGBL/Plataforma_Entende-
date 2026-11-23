@@ -12,7 +12,7 @@ from ..erros import ErroDeNegocio
 from ..esquemas import AdaptacaoDetalhe, ConjuntoPublico, EdicaoTexto
 from ..modelos import Adaptacao, Professor, StatusAdaptacao, agora
 from ..seguranca import professor_atual
-from ..servicos import processamento, regras
+from ..servicos import cota, processamento, regras
 from .materiais import material_do_professor
 
 rotas = APIRouter(prefix="/api", tags=["Adaptação"])
@@ -52,9 +52,8 @@ def adaptar(
     """Gera uma adaptação nova com o arquivo de regras de agora. Chamar de novo
     num material já adaptado é o reprocessamento de RF12."""
     material = material_do_professor(sessao, material_id, professor)
-    adaptacao = processamento.adaptar_material(
-        sessao, material, request.app.state.configuracao, request.app.state.cliente_llm
-    )
+    cliente = cota.cliente_do_professor(request.app.state, professor)
+    adaptacao = processamento.adaptar_material(sessao, material, request.app.state.configuracao, cliente)
     return adaptacao_detalhe(adaptacao)
 
 

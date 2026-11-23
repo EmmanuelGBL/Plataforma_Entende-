@@ -117,9 +117,44 @@ function MenuAcoes({ material, aoExcluir }) {
   );
 }
 
+/** RF25 — quanto da cota de tokens já foi usado, em texto e em barra. O 100%
+ *  só aparece com a cota esgotada, que é quando o servidor recusa. */
+function UsoDaCota({ consumidos, cota }) {
+  const esgotada = consumidos >= cota;
+  const porcentagem = esgotada ? 100 : Math.floor((consumidos / cota) * 100);
+  return (
+    <section className={'cota' + (esgotada ? ' cota--esgotada' : '')} aria-labelledby="titulo-cota">
+      <p className="cota__texto">
+        <span id="titulo-cota">Uso da sua cota de adaptação</span>
+        <strong>{porcentagem}%</strong>
+      </p>
+      <div
+        className="progresso__trilho"
+        role="meter"
+        aria-labelledby="titulo-cota"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={porcentagem}
+        aria-valuetext={`${porcentagem}% usado`}
+      >
+        <div className="progresso__barra" style={{ width: `${porcentagem}%` }} />
+      </div>
+      {esgotada && (
+        <p className="cota__aviso">
+          <CircleSlash aria-hidden="true" />
+          <span>
+            Sua cota acabou. Você ainda pode consultar, editar, aprovar, exportar e publicar o que
+            já foi adaptado. Para adaptar mais, fale com quem enviou o seu acesso.
+          </span>
+        </p>
+      )}
+    </section>
+  );
+}
+
 export function Painel() {
   usarTituloDaPagina('Meus materiais');
-  const { professor, materiais, excluir } = usarApp();
+  const { modoServidor, professor, materiais, excluir } = usarApp();
   const { anunciar, avisar } = usarAnuncios();
   const [aExcluir, setAExcluir] = useState(null);
   const [falha, setFalha] = useState(null);
@@ -187,6 +222,10 @@ export function Painel() {
             </p>
           )}
         </Aviso>
+      )}
+
+      {modoServidor && professor && (
+        <UsoDaCota consumidos={professor.tokens_consumidos} cota={professor.cota_tokens} />
       )}
 
       {materiais.length === 0 ? (

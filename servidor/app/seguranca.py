@@ -113,6 +113,7 @@ def professor_atual(
     except (jwt.PyJWTError, KeyError, ValueError):
         raise SESSAO_INVALIDA from None
     professor = sessao.get(Professor, professor_id)
-    if professor is None:
+    # RF24: desativar a conta derruba também a sessão que estava aberta.
+    if professor is None or not professor.ativo:
         raise SESSAO_INVALIDA
     return professor

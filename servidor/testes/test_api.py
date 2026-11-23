@@ -21,34 +21,14 @@ def _enviar(cliente, cabecalho, conteudo=None, nome="ciencias.pdf", tipo=PDF):
 
 # --- RF01 — conta -----------------------------------------------------------
 
-def test_cadastro_devolve_token_e_professor(cliente):
-    resposta = cliente.post(
-        "/api/autenticacao/cadastro",
-        json={"nome": "Ana", "email": "Ana@Escola.am.gov.br", "senha": "senha-forte-123"},
-    )
-    corpo = resposta.json()
-    assert resposta.status_code == 201
+def test_entrar_devolve_token_e_professor(cliente):
+    cadastrar(cliente, "Ana@Escola.am.gov.br", cota=40_000)
+    corpo = _entrar(cliente, "senha-forte-123", email="ANA@escola.am.gov.br").json()
     assert corpo["token"]
+    # Nada de hash na resposta.
+    assert set(corpo["professor"]) == {"id", "nome", "email", "cota_tokens", "tokens_consumidos"}
     assert corpo["professor"]["email"] == "ana@escola.am.gov.br"
-    assert set(corpo["professor"]) == {"id", "nome", "email"}  # nada de hash na resposta
-
-
-def test_email_repetido_e_recusado_sem_diferenca_de_caixa(cliente):
-    cadastrar(cliente, "ana@escola.am.gov.br")
-    resposta = cliente.post(
-        "/api/autenticacao/cadastro",
-        json={"nome": "Outra", "email": "ANA@escola.am.gov.br", "senha": "outra-senha-456"},
-    )
-    assert resposta.status_code == 409
-    assert resposta.json()["erro"]["titulo"] == "Já existe uma conta com este e-mail"
-
-
-def test_senha_curta_e_recusada_com_motivo_legivel(cliente):
-    resposta = cliente.post(
-        "/api/autenticacao/cadastro", json={"nome": "Ana", "email": "ana@x.com", "senha": "123"}
-    )
-    assert resposta.status_code == 422
-    assert "entre 8 e 128 caracteres" in resposta.json()["erro"]["motivo"]
+    assert (corpo["professor"]["cota_tokens"], corpo["professor"]["tokens_consumidos"]) == (40_000, 0)
 
 
 def test_entrar_com_senha_certa(cliente):
