@@ -140,11 +140,11 @@ para dizer que a mecânica melhora a aprendizagem de criança autista, e o traba
 | Interface | React 19, Vite 7, React Router 7, Lucide (ícones); CSS escrito à mão |
 | Servidor | Python 3.11, FastAPI, Uvicorn, SQLAlchemy 2, Pydantic |
 | Banco de dados | SQLite em desenvolvimento; PostgreSQL suportado |
-| Segurança | Argon2 (senha), JWT (sessão), HTTPS automático pelo Caddy |
+| Segurança | Argon2 (senha), JWT (sessão), HTTPS com certificado Let's Encrypt |
 | Leitura de arquivos | pdfplumber (PDF), python-docx (DOCX) |
 | Modelo de linguagem | GPT-6.1 Sol (OpenAI); Claude (Anthropic) como alternativa |
 | Testes | pytest, com clientes falsos do modelo, para os testes não chamarem a API paga |
-| Publicação | GitHub Actions e GitHub Pages (interface); VPS Ubuntu com Caddy e systemd (servidor) |
+| Publicação | GitHub Actions e GitHub Pages (interface); VPS Ubuntu com nginx e systemd (servidor) |
 
 ## Estrutura do projeto
 
@@ -162,7 +162,7 @@ para dizer que a mecânica melhora a aprendizagem de criança autista, e o traba
 │   ├── app/              Rotas, serviços, modelos e motor de adaptação
 │   ├── regras/tea.json   Conjunto de regras versionado
 │   └── testes/           Testes automatizados (pytest)
-├── implantar/            Instalação na VPS (Caddy, systemd, scripts)
+├── implantar/            Instalação na VPS (nginx, systemd, scripts)
 ├── docs/telas/           Capturas usadas neste README
 └── .github/workflows/    Publicação no GitHub Pages
 ```
@@ -220,7 +220,7 @@ da criança.
 - **Interface:** publicada no GitHub Pages pelo workflow
   [`.github/workflows/publicar.yml`](.github/workflows/publicar.yml) a cada envio para a `main`.
 - **Servidor:** VPS Ubuntu 22.04, instalada por [`implantar/instalar.sh`](implantar/instalar.sh).
-  O Caddy serve a API com HTTPS, renova o certificado sozinho e não grava log de acesso. O
+  O nginx serve a API com HTTPS, num site à parte e sem log, e o certbot renova o certificado. O
   servidor roda como serviço do systemd e só escuta em `127.0.0.1`. A chave da API fica no `.env`
   da VPS, que nunca entra neste repositório.
 
