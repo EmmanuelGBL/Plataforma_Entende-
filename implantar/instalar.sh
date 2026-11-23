@@ -7,7 +7,7 @@
 #   git clone https://github.com/EmmanuelGBL/Plataforma_Entende-.git /tmp/entende
 #   bash /tmp/entende/implantar/instalar.sh
 #
-# O que muda no nginx: entra um arquivo novo, "entende". Nenhum arquivo dos
+# O que muda no nginx: entra um arquivo novo, "zz-entende". Nenhum arquivo dos
 # outros sites é alterado, e o arquivo novo sai se "nginx -t" o recusar.
 #
 # Outro endereço, que já precisa apontar para o IP da VPS: DOMINIO=exemplo.com.br
@@ -37,8 +37,10 @@ grep -q 'include /etc/nginx/sites-enabled/' <<<"$config" || falha "o nginx não 
 if grep -qE '^\s*listen\s+[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:(80|443)\b' <<<"$config"; then
   falha "há site do nginx preso a um IP. Mande a saída de: nginx -T | grep -n listen"
 fi
-SITE=/etc/nginx/sites-available/entende
-LIGADO=/etc/nginx/sites-enabled/entende
+# "zz-": o nginx usa como site padrão o primeiro em ordem alfabética; este tem de
+# ser o último, para não virar o padrão no lugar de outro sistema da VPS.
+SITE=/etc/nginx/sites-available/zz-entende
+LIGADO=/etc/nginx/sites-enabled/zz-entende
 outros="$(for a in /etc/nginx/sites-enabled/* /etc/nginx/conf.d/*; do
   if [ -f "$a" ] && [ "$a" != "$LIGADO" ]; then
     grep -lE "server_name[^;]*[[:space:]]${DOMINIO//./\.}[[:space:];]" "$a" || true
