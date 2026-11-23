@@ -28,6 +28,7 @@ class Gatilho(BaseModel):
     palavras_por_frase_acima_de: int | None = Field(default=None, ge=1)
     frases_por_paragrafo_acima_de: int | None = Field(default=None, ge=1)
     palavras_sem_titulo_acima_de: int | None = Field(default=None, ge=1)
+    palavras_longas_por_paragrafo_acima_de: int | None = Field(default=None, ge=1)
     voz_passiva: bool = False
     expressoes: list[str] = []
     # Regras que entram junto quando estas já foram disparadas no bloco

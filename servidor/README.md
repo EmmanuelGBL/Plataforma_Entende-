@@ -168,7 +168,7 @@ resposta sem traduzir nada:
 ## Onde está cada coisa
 
 ```
-regras/tea.json           Conjunto de regras TEA v1.7, com gatilhos e glossário — RNF13
+regras/tea.json           Conjunto de regras TEA v1.8, com gatilhos e glossário — RNF13
 app/
   principal.py            Monta a aplicação (criar_app)
   config.py               Variáveis ENTENDE_*, OPENAI_API_KEY e ANTHROPIC_API_KEY
@@ -200,11 +200,12 @@ não o modelo.
 | TEA-02 uma ideia por bloco | modelo, se o código disparar | parágrafo com mais de 3 frases |
 | TEA-03 linguagem literal | modelo, se o código disparar | expressão da lista do arquivo; e em todo bloco que já vai ao modelo |
 | TEA-04 voz ativa | modelo, se o código disparar | forma de "ser" + particípio ("é absorvida") |
-| TEA-05 vocabulário explicado | **código** | glossário do arquivo, na primeira ocorrência |
+| TEA-05 vocabulário explicado | **código** | glossário do arquivo, em linha própria depois do parágrafo da primeira ocorrência |
 | TEA-06 conectivos explícitos | modelo | junto com TEA-01 e TEA-02 |
 | TEA-07 subtítulos | modelo, se o código disparar | mais de 120 palavras desde o último título |
 | TEA-08, TEA-10 apresentação | folha impressa | `src/estilos/impressao.css` |
 | TEA-09 antecipar a estrutura | **código** | lista dos títulos do texto adaptado |
+| TEA-11 palavras comuns | modelo, se o código disparar | parágrafo com mais de 3 palavras diferentes de 4 sílabas ou mais |
 
 1. **O código marca os blocos** (`servicos/gatilhos.py`): lê cada parágrafo e item e anota as
    regras que dispararam nele. Os limites (20 palavras, 3 frases, 120 palavras, a lista de

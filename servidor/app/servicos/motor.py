@@ -228,7 +228,7 @@ def _blocos_da_resposta(
 
 def aplicar_glossario(blocos: list[md.Bloco], regra: RegraDeclarada) -> list[md.Bloco]:
     """TEA-05: na primeira vez que um termo do glossário aparece num parágrafo
-        ou item, a explicação entra entre parênteses logo depois dele.
+        ou item, a explicação entra em bloco próprio, logo depois dele.
 
         Vale também o plural simples. Se o texto já explica o termo entre
         parênteses, nada é acrescentado. Título e tabela ficam de fora.
@@ -236,33 +236,26 @@ def aplicar_glossario(blocos: list[md.Bloco], regra: RegraDeclarada) -> list[md.
     pendentes = dict(regra.glossario or {})
     resultado = []
     for bloco in blocos:
-        if bloco.tipo not in gatilhos.TIPOS_ADAPTAVEIS or not pendentes:
-            resultado.append(bloco)
+        resultado.append(bloco)
+        if bloco.tipo not in gatilhos.TIPOS_ADAPTAVEIS:
             continue
-        # Procura no texto do bloco, e não nas explicações já acrescentadas.
-        insercoes = []
+        achados = []
         for termo, explicacao in list(pendentes.items()):
             achado = re.search(rf"(?<!\w){re.escape(termo)}(?:s|es)?(?!\w)", bloco.texto, re.IGNORECASE)
             if achado is None:
                 continue
             del pendentes[termo]
             if not re.match(r"\s*\(", bloco.texto[achado.end():]):
-                insercoes.append((achado.end(), explicacao))
-        if not insercoes:
-            resultado.append(bloco)
-            continue
-        texto = bloco.texto
-        for posicao, explicacao in sorted(insercoes, reverse=True):
-            texto = f"{texto[:posicao]} ({explicacao}){texto[posicao:]}"
-        resultado.append(
+                achados.append((achado.start(), termo, explicacao))
+        resultado += [
             md.Bloco(
                 bloco.tipo,
-                texto,
-                bloco.nivel,
-                regras=[*bloco.regras, regra.codigo],
+                f"{termo[0].upper()}{termo[1:]}: {explicacao}.",
+                regras=[regra.codigo],
                 trecho_original=bloco.trecho_original or bloco.texto,
             )
-        )
+            for _, termo, explicacao in sorted(achados)
+        ]
     return resultado
 
 

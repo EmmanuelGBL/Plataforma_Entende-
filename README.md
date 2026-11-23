@@ -95,7 +95,7 @@ O sistema nunca pede ao modelo que "adapte o texto" livremente.
 
 As regras estão no arquivo [`servidor/regras/tea.json`](servidor/regras/tea.json), que é
 versionado: toda adaptação registra a versão das regras e o modelo usados, e mudar uma regra
-exige mudar a versão. Versão atual: **TEA v1.7**, com dez regras.
+exige mudar a versão. Versão atual: **TEA v1.8**, com onze regras.
 
 | Regra | Quem aplica |
 | --- | --- |
@@ -109,6 +109,7 @@ exige mudar a versão. Versão atual: **TEA v1.7**, com dez regras.
 | TEA-08 Apresentação visual do texto | folha impressa |
 | TEA-09 Antecipação da estrutura | código, com a lista dos títulos do texto adaptado |
 | TEA-10 Remoção de ruído visual | folha impressa |
+| TEA-11 Palavras comuns | modelo, quando o parágrafo tem mais de três palavras diferentes de quatro sílabas ou mais |
 
 O modelo de linguagem é o **GPT-6.1 Sol**, pela API da OpenAI, com saída em esquema JSON fixo.
 O Claude, da Anthropic, continua disponível como alternativa configurável. Os limites e o que

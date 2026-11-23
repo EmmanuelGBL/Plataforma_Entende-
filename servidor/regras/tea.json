@@ -1,7 +1,7 @@
 {
   "identificador": "TEA",
-  "versao": "1.7",
-  "publicado_em": "2026-10-29",
+  "versao": "1.8",
+  "publicado_em": "2026-11-23",
   "descricao": "Conjunto de regras de adaptação para o perfil TEA, 5º ano do ensino fundamental. Derivado da WCAG 2.2, do documento COGA do W3C e das diretrizes do Desenho Universal para a Aprendizagem (CAST, 2024).",
   "regras": [
     {
@@ -77,9 +77,9 @@
     {
       "codigo": "TEA-05",
       "nome": "Vocabulário explicado",
-      "descricao": "Explicar entre parênteses, na primeira ocorrência, cada termo do glossário do conjunto de regras — termos do conteúdo que estão fora do vocabulário esperado para o 5º ano.",
+      "descricao": "Explicar, em linha própria logo depois do parágrafo em que aparece pela primeira vez, cada termo do glossário do conjunto de regras — termos do conteúdo que estão fora do vocabulário esperado para o 5º ano.",
       "base": "WCAG 2.2 — SC 3.1.3 Unusual Words (AAA)",
-      "justificativa": "Manter o termo técnico e explicá-lo preserva o conteúdo pedagógico (RN01) sem interromper a leitura para consultar outra fonte.",
+      "justificativa": "Manter o termo técnico e explicá-lo preserva o conteúdo pedagógico (RN01) sem interromper a leitura para consultar outra fonte. A explicação fica fora da frase para não alongá-la (TEA-01).",
       "aplicacao": "glossario",
       "glossario": {
         "clorofila": "substância verde que captura a luz do Sol",
@@ -150,6 +150,18 @@
       "base": "W3C COGA — Avoid Too Much Content; DUA 7.4 (CAST, 2024)",
       "justificativa": "Nenhuma informação é perdida: o que sai é ornamento, não conteúdo (RN01).",
       "aplicacao": "apresentacao"
+    },
+    {
+      "codigo": "TEA-11",
+      "nome": "Palavras comuns",
+      "descricao": "Trocar palavra difícil que não é conceito do conteúdo por palavra comum de mesmo sentido, nos parágrafos com mais de três palavras diferentes de quatro sílabas ou mais.",
+      "base": "W3C COGA — Use Clear Words; WCAG 2.2 — SC 3.1.5 Reading Level (AAA)",
+      "justificativa": "Palavra longa e pouco frequente toma a atenção que o leitor dedicaria ao sentido da frase. O conceito que o material ensina não é trocado: ele fica no texto (RN01).",
+      "aplicacao": "modelo",
+      "instrucao": "Troque palavra difícil, abstrata ou pouco usada por palavra comum, conhecida de uma criança de 10 a 11 anos, com o mesmo sentido; se não houver uma palavra só, use poucas palavras simples. Não troque nem retire o conceito que o material ensina, termo técnico, nome próprio, número ou palavra usada em título do material. Não invente explicação para esses termos. Se a troca mudar o sentido, deixe a palavra original.",
+      "gatilho": {
+        "palavras_longas_por_paragrafo_acima_de": 3
+      }
     }
   ]
 }

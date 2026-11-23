@@ -5,7 +5,8 @@ precisam de reescrita e por quais regras.
 - parágrafo com mais frases que o limite (TEA-02);
 - expressão da lista do arquivo (TEA-03);
 - forma de "ser" seguida de particípio, a voz passiva (TEA-04);
-- texto longo demais desde o último título (TEA-07).
+- texto longo demais desde o último título (TEA-07);
+- palavras diferentes de quatro sílabas ou mais acima do limite (TEA-11).
 
 Bloco sem marca não vai ao modelo e fica como no original. Os limites estão
 no arquivo de regras (RNF13).
@@ -13,6 +14,7 @@ no arquivo de regras (RNF13).
 
 import re
 
+from . import legibilidade
 from . import texto as md
 from .regras import ConjuntoDeclarado, RegraDeclarada
 
@@ -87,6 +89,10 @@ def _dispara(
         return True
     if gatilho.frases_por_paragrafo_acima_de and (
         bloco.tipo == "paragrafo" and len(frases(texto)) > gatilho.frases_por_paragrafo_acima_de
+    ):
+        return True
+    if gatilho.palavras_longas_por_paragrafo_acima_de and (
+        len(legibilidade.palavras_longas(texto)) > gatilho.palavras_longas_por_paragrafo_acima_de
     ):
         return True
     if gatilho.voz_passiva and tem_voz_passiva(texto):

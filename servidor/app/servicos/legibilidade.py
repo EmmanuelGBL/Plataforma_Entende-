@@ -77,6 +77,11 @@ def contar_silabas(palavra: str) -> int:
     return max(silabas, 1)
 
 
+def palavras_longas(texto: str) -> set[str]:
+    """As palavras diferentes de quatro sílabas ou mais."""
+    return {p.lower() for p in _PALAVRA.findall(texto) if contar_silabas(p) >= 4}
+
+
 def _frases_do_texto(texto: str) -> list[str]:
     # Títulos e tabelas ficam de fora: título não é frase.
     frases = []

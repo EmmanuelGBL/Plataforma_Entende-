@@ -68,7 +68,9 @@ vivem. Por isso, o frio e o calor mudam o comportamento de muitos deles.
 Alguns animais dormem durante o inverno. Outros mudam de lugar quando o clima esfria. As \
 aves que fazem isso viajam por muitos quilômetros.
 
-O solo também guarda vida. Minhocas e fungos vivem nele."""
+O solo também guarda vida. Minhocas e fungos vivem nele.
+
+A biodiversidade e a preservação ambiental dependem da colaboração da sociedade."""
 
 
 def _adaptar(material=MATERIAL, cliente=None):
@@ -106,9 +108,9 @@ def test_cada_regra_chega_aonde_deve(regra):
         assert any(regra.codigo in b.regras for b in resultado.blocos)
 
 
-def test_arquivo_do_projeto_e_valido_e_tem_as_dez_regras():
+def test_arquivo_do_projeto_e_valido_e_tem_as_onze_regras():
     assert CONJUNTO.identificador.value == "TEA"
-    assert [r.codigo for r in CONJUNTO.regras] == [f"TEA-{n:02d}" for n in range(1, 11)]
+    assert [r.codigo for r in CONJUNTO.regras] == [f"TEA-{n:02d}" for n in range(1, 12)]
 
 
 # --- Gatilhos: quando o código pede a reescrita ----------------------------------
@@ -146,6 +148,15 @@ def test_texto_longo_sem_titulo_dispara_tea07_so_depois_do_limite():
     # 27 palavras por parágrafo: passa de 120 a partir do sexto bloco (o
     # quinto parágrafo depois do título).
     assert com_tea07 == [6]
+
+
+def test_palavras_dificeis_disparam_tea11_so_acima_de_tres():
+    assert "TEA-11" in _marcas(
+        "Os espaços têm características socioespaciais diferenciadas e uma relação de complementaridade."
+    )
+    # Três palavras longas diferentes ainda não disparam, nem a mesma repetida.
+    assert _marcas("A fotossíntese acontece nas folhas. A clorofila captura a luz.") == []
+    assert _marcas("A clorofila é verde. A clorofila é útil. A clorofila capta a luz.") == []
 
 
 def test_titulo_e_tabela_nunca_sao_marcados():
@@ -193,7 +204,7 @@ def test_material_sem_nada_a_reescrever_nao_chama_o_modelo():
 def test_motor_registra_regra_por_bloco_e_o_trecho_de_origem():
     resultado, _ = _adaptar()
     dividido = [b for b in resultado.blocos if b.trecho_original == FRASE_LONGA]
-    assert dividido and all("TEA-01" in b.regras for b in dividido)
+    assert dividido and all("TEA-01" in b.regras for b in dividido if b.regras != ["TEA-05"])
     # Bloco que não foi ao modelo não recebe regra de reescrita.
     intacto = next(b for b in resultado.blocos if b.texto == "De noite não há luz. A fotossíntese para.")
     assert intacto.regras == []
@@ -264,18 +275,30 @@ def _glossario(*textos: str) -> list[md.Bloco]:
 
 def test_glossario_explica_so_a_primeira_ocorrencia():
     blocos = _glossario("A clorofila é verde.", "Sem clorofila não há fotossíntese.")
-    assert blocos[0].texto == f"A clorofila ({GLOSSARIO['clorofila']}) é verde."
-    assert blocos[0].regras == ["TEA-05"]
-    assert blocos[0].trecho_original == "A clorofila é verde."
-    assert "clorofila (" not in blocos[1].texto
-    assert f"fotossíntese ({GLOSSARIO['fotossíntese']})" in blocos[1].texto
+    assert [b.texto for b in blocos] == [
+        "A clorofila é verde.",
+        f"Clorofila: {GLOSSARIO['clorofila']}.",
+        "Sem clorofila não há fotossíntese.",
+        f"Fotossíntese: {GLOSSARIO['fotossíntese']}.",
+    ]
+    # O parágrafo fica como estava; a explicação vem em bloco próprio.
+    assert [b.regras for b in blocos] == [[], ["TEA-05"], [], ["TEA-05"]]
+    assert blocos[1].trecho_original == "A clorofila é verde."
+
+
+def test_glossario_nao_alonga_a_frase_do_termo():
+    antes = "A clorofila e os estômatos ficam na folha."
+    blocos = _glossario(antes)
+    assert blocos[0].texto == antes
+    # Na ordem em que os termos aparecem na frase.
+    assert [b.texto.split(":")[0] for b in blocos[1:]] == ["Clorofila", "Estômato"]
 
 
 def test_glossario_nao_explica_termo_que_esta_dentro_de_outra_explicacao():
     # A explicação de "fotossíntese" fala em "gás carbônico".
     blocos = _glossario("A fotossíntese acontece na folha.", "O gás carbônico vem do ar.")
-    assert blocos[0].texto.count("(") == 1
-    assert f"gás carbônico ({GLOSSARIO['gás carbônico']})" in blocos[1].texto
+    assert [b.texto.split(":")[0] for b in blocos if b.regras] == ["Fotossíntese", "Gás carbônico"]
+    assert blocos[3].texto == f"Gás carbônico: {GLOSSARIO['gás carbônico']}."
 
 
 def test_glossario_ignora_titulo_e_termo_ja_explicado():
@@ -287,7 +310,7 @@ def test_glossario_ignora_titulo_e_termo_ja_explicado():
 
 def test_glossario_acha_o_plural_e_ignora_maiusculas():
     blocos = _glossario("Decompositores vivem no solo.")
-    assert blocos[0].texto.startswith(f"Decompositores ({GLOSSARIO['decompositor']})")
+    assert blocos[1].texto == f"Decompositor: {GLOSSARIO['decompositor']}."
 
 
 # --- Arquivo de regras (RNF13, RN08) ---------------------------------------------
