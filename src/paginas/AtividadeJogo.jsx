@@ -139,41 +139,53 @@ function usarAjustesDoJogo() {
 }
 
 /* --- Som ------------------------------------------------------------------
-      Duas notas curtas geradas por oscilador (Web Audio), sem arquivo de áudio.
-      Só toca se o som estiver ligado e a partir de um clique. */
-function usarSom(ligado) {
+      Notas curtas geradas por oscilador (Web Audio), sem arquivo de áudio.
+      Só toca se o som estiver ligado e a partir de um clique. As notas ficam
+      acima de 390 Hz: o alto-falante do celular quase não reproduz as graves. */
+const NOTAS = { acerto: [523.25, 783.99], erro: [392.0] };
+
+function tocarNotas(ctx, notas) {
+  notas.forEach((frequencia, posicao) => {
+    const oscilador = ctx.createOscillator();
+    const ganho = ctx.createGain();
+    oscilador.type = 'sine';
+    oscilador.frequency.value = frequencia;
+    const inicio = ctx.currentTime + 0.02 + posicao * 0.13;
+    ganho.gain.setValueAtTime(0.0001, inicio);
+    ganho.gain.exponentialRampToValueAtTime(0.3, inicio + 0.03);
+    ganho.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.3);
+    oscilador.connect(ganho).connect(ctx.destination);
+    oscilador.start(inicio);
+    oscilador.stop(inicio + 0.32);
+  });
+}
+
+function usarSom() {
   const contexto = useRef(null);
 
-  return useCallback(
-    (tipo) => {
-      if (!ligado) return;
-      try {
-        const Fabrica = window.AudioContext ?? window.webkitAudioContext;
-        if (!Fabrica) return;
-        if (!contexto.current) contexto.current = new Fabrica();
-        const ctx = contexto.current;
-        if (ctx.state === 'suspended') ctx.resume();
-
-        const notas = tipo === 'acerto' ? [523.25, 783.99] : [196.0];
-        notas.forEach((frequencia, posicao) => {
-          const oscilador = ctx.createOscillator();
-          const ganho = ctx.createGain();
-          oscilador.type = 'sine';
-          oscilador.frequency.value = frequencia;
-          const inicio = ctx.currentTime + posicao * 0.13;
-          ganho.gain.setValueAtTime(0.0001, inicio);
-          ganho.gain.exponentialRampToValueAtTime(0.12, inicio + 0.02);
-          ganho.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.24);
-          oscilador.connect(ganho).connect(ctx.destination);
-          oscilador.start(inicio);
-          oscilador.stop(inicio + 0.26);
-        });
-      } catch {
-        /* navegador sem WebAudio ou com áudio bloqueado: o jogo segue mudo */
-      }
+  // Sair do jogo fecha o áudio: o celular limita quantos ficam abertos.
+  useEffect(
+    () => () => {
+      contexto.current?.close().catch(() => {});
+      contexto.current = null;
     },
-    [ligado],
+    [],
   );
+
+  return useCallback(async (tipo) => {
+    try {
+      const Fabrica = window.AudioContext ?? window.webkitAudioContext;
+      if (!Fabrica) return;
+      if (!contexto.current) contexto.current = new Fabrica();
+      const ctx = contexto.current;
+      // No celular o áudio nasce parado, ou para ao trocar de aplicativo: tem
+      // de ser pedido no toque, e as notas só entram depois que ele volta.
+      if (ctx.state !== 'running') await ctx.resume();
+      tocarNotas(ctx, NOTAS[tipo]);
+    } catch {
+      /* navegador sem WebAudio ou com áudio bloqueado: o jogo segue mudo */
+    }
+  }, []);
 }
 
 /** Tempo de espera antes de mostrar o resultado. Com movimento reduzido
@@ -254,7 +266,8 @@ export function AtividadeJogo() {
 
   const chaveTema = TEMAS[ajustes.tema] ? ajustes.tema : AJUSTES_PADRAO.tema;
   const tema = TEMAS[chaveTema];
-  const tocar = usarSom(ajustes.som === 'ligado');
+  const somLigado = ajustes.som === 'ligado';
+  const tocar = usarSom();
 
   usarTituloDaPagina(valida ? tema.nome : 'Atividade indisponível');
 
@@ -337,12 +350,12 @@ export function AtividadeJogo() {
 
     if (certa) {
       setAcertos((n) => n + 1);
-      tocar('acerto');
+      if (somLigado) tocar('acerto');
       anunciar(`Você acertou. ${tema.tituloAcerto}`);
       return;
     }
 
-    tocar('erro');
+    if (somLigado) tocar('erro');
     // Depois do erro a dica fica aberta: aparece no resultado e na nova tentativa (G04).
     setDicasPedidas((atuais) => ({ ...atuais, [questao.id]: true }));
     anunciar(`Não foi essa. ${tema.tituloErro}. Leia a dica e tente de novo, ou vá para a próxima.`);
@@ -536,6 +549,8 @@ export function AtividadeJogo() {
           ajustes={ajustes}
           aoDefinir={(chave, valor, rotulo) => {
             definirAjuste(chave, valor);
+            // Amostra: mostra que ligou e libera o áudio do celular neste toque.
+            if (chave === 'som' && valor === 'ligado') tocar('acerto');
             anunciar(`${OPCOES_AJUSTES[chave].nome}: ${rotulo}.`);
           }}
         />
@@ -602,6 +617,11 @@ function AjustesDoJogo({ aberto, aoAbrir, aoFechar, ajustes, aoDefinir }) {
                   </button>
                 ))}
               </div>
+              {chave === 'som' && ajustes.som === 'ligado' && (
+                <p className="campo__dica">
+                  Não ouviu? Aumente o volume. No celular, desligue o modo silencioso.
+                </p>
+              )}
             </fieldset>
           ))}
         </div>
