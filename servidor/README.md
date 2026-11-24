@@ -92,7 +92,9 @@ interface ou no servidor, com o comando `administrar.py`; o número é a cota de
 .venv\Scripts\python administrar.py remover-admin emmanuel@exemplo.com
 ```
 
-A senha é aleatória e aparece uma única vez no terminal; no banco fica só o hash. Conta desativada
+No comando, a senha é aleatória e aparece uma única vez no terminal; no banco fica só o hash. Na
+tela Contas, o administrador pode escolher a senha (8 caracteres ou mais), ao criar a conta ou em
+"Mudar senha": **provisório, para o teste de uso com professores**. Conta desativada
 não entra, a sessão aberta cai e os materiais continuam no banco. Na VPS, o comando roda com o
 usuário do serviço, para o banco não mudar de dono:
 

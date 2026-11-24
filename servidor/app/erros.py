@@ -44,6 +44,7 @@ EXPLICACAO_CAMPOS = {
     "nome": "o nome precisa ter entre 2 e 120 caracteres",
     "cota": "a cota precisa ser um número inteiro maior que zero",
     "senha": "a senha precisa ter entre 1 e 128 caracteres",
+    "nova_senha": "a senha precisa ter entre 8 e 128 caracteres",
     "arquivo": "é preciso anexar um arquivo",
 }
 

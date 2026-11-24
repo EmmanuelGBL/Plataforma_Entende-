@@ -161,7 +161,11 @@ export const servidor = {
     listar: () => pedir('/api/administracao/contas'),
     criar: (dados) => pedir('/api/administracao/contas', { metodo: 'POST', corpo: dados }),
     editar: (id, dados) => pedir(`/api/administracao/contas/${id}`, { metodo: 'PUT', corpo: dados }),
-    redefinirSenha: (id) => pedir(`/api/administracao/contas/${id}/senha`, { metodo: 'POST' }),
+    redefinirSenha: (id, senha) =>
+      pedir(`/api/administracao/contas/${id}/senha`, {
+        metodo: 'POST',
+        corpo: { nova_senha: senha || null },
+      }),
     desativar: (id) => pedir(`/api/administracao/contas/${id}/desativacao`, { metodo: 'POST' }),
     reativar: (id) => pedir(`/api/administracao/contas/${id}/reativacao`, { metodo: 'POST' }),
     excluir: (id) => pedir(`/api/administracao/contas/${id}`, { metodo: 'DELETE' }),

@@ -63,8 +63,8 @@ def _salvar(sessao: Session, email: str) -> None:
 def criar(sessao: Session, dados: NovaConta, senha: str | None = None) -> tuple[Professor, str]:
     """Devolve a conta e a senha em texto claro, que só existe neste momento.
 
-    `senha` só é informada pela conta de apresentação do banco local
-    (apresentar.py); nas demais, é aleatória.
+    `senha` vem da tela Contas ou da conta de apresentação (apresentar.py); sem
+    ela, é aleatória.
     """
     senha = senha or gerar_senha()
     professor = Professor(
@@ -90,8 +90,8 @@ def definir_cota(sessao: Session, professor: Professor, cota: int) -> None:
     sessao.commit()
 
 
-def redefinir_senha(sessao: Session, professor: Professor) -> str:
-    senha = gerar_senha()
+def redefinir_senha(sessao: Session, professor: Professor, senha: str | None = None) -> str:
+    senha = senha or gerar_senha()
     professor.senha_hash = gerar_hash(senha)
     professor.versao_sessao += 1
     sessao.commit()

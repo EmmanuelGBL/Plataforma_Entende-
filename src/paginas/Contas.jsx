@@ -76,12 +76,86 @@ function Falha({ erro, nivel }) {
   );
 }
 
+const SENHA_MINIMA = 8;
+
+function erroDaSenha(senha) {
+  const tamanho = senha.trim().length;
+  return tamanho > 0 && tamanho < SENHA_MINIMA
+    ? `A senha precisa ter pelo menos ${SENHA_MINIMA} caracteres.`
+    : undefined;
+}
+
+/** Senha escolhida pelo administrador (provisório, para o teste de uso). Fica
+ *  visível: ele precisa conferir o que vai mandar ao professor. */
+function CampoSenha({ valor, erro, aoMudar }) {
+  return (
+    <Campo
+      rotulo="Senha"
+      autoComplete="off"
+      autoCapitalize="none"
+      spellCheck={false}
+      maxLength={128}
+      value={valor}
+      erro={erro}
+      dica={`Pelo menos ${SENHA_MINIMA} caracteres. Em branco, o sistema cria uma senha aleatória.`}
+      onChange={(e) => aoMudar(e.target.value)}
+    />
+  );
+}
+
+/** Mudar a senha de uma conta que já existe. */
+function JanelaMudarSenha({ conta, aoSalvar, aoFechar }) {
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState({});
+  const [falha, setFalha] = useState(null);
+  const [salvando, setSalvando] = useState(false);
+  const formulario = useRef(null);
+
+  useEffect(() => {
+    if (erro.senha) formulario.current?.querySelector('[aria-invalid="true"]')?.focus();
+  }, [erro]);
+
+  async function enviar(evento) {
+    evento.preventDefault();
+    const problema = erroDaSenha(senha);
+    setErro({ senha: problema });
+    setFalha(null);
+    if (problema) return;
+    setSalvando(true);
+    try {
+      await aoSalvar(conta, senha.trim());
+    } catch (recusa) {
+      setFalha(recusa);
+      setSalvando(false);
+    }
+  }
+
+  return (
+    <Janela aberto titulo={`Mudar a senha de ${conta.nome}`} aoFechar={aoFechar}>
+      <Falha erro={falha} />
+      <p>A senha atual deixa de valer, e a sessão aberta é encerrada.</p>
+      <form ref={formulario} onSubmit={enviar} noValidate>
+        <CampoSenha valor={senha} erro={erro.senha} aoMudar={setSenha} />
+        <div className="linha linha-fim">
+          <Botao variante="secundario" onClick={aoFechar}>
+            Cancelar
+          </Botao>
+          <Botao type="submit" disabled={salvando}>
+            {salvando ? 'Aguarde…' : 'Mudar senha'}
+          </Botao>
+        </div>
+      </form>
+    </Janela>
+  );
+}
+
 /** Criação (sem `conta`) e edição. */
 function JanelaConta({ conta, aoSalvar, aoFechar }) {
   const [nome, setNome] = useState(conta?.nome ?? '');
   const [email, setEmail] = useState(conta?.email ?? '');
   const cotaInicial = conta ? String(conta.cota_tokens / TOKENS_POR_CREDITO) : COTA_PADRAO;
   const [cota, setCota] = useState(cotaInicial);
+  const [senha, setSenha] = useState('');
   const [erros, setErros] = useState({});
   const [falha, setFalha] = useState(null);
   const [salvando, setSalvando] = useState(false);
@@ -105,13 +179,19 @@ function JanelaConta({ conta, aoSalvar, aoFechar }) {
     if (!mantida && (!Number.isInteger(creditos) || creditos < 1 || creditos > COTA_MAXIMA)) {
       novos.cota = `Digite um número inteiro de 1 a ${numero(COTA_MAXIMA)}. Exemplo: 40`;
     }
+    if (erroDaSenha(senha)) novos.senha = erroDaSenha(senha);
     setErros(novos);
     setFalha(null);
     if (Object.keys(novos).length) return;
 
     setSalvando(true);
     try {
-      await aoSalvar({ nome: nome.trim(), email: email.trim(), cota: mantida ? conta.cota_tokens : creditos * TOKENS_POR_CREDITO });
+      const dados = {
+        nome: nome.trim(),
+        email: email.trim(),
+        cota: mantida ? conta.cota_tokens : creditos * TOKENS_POR_CREDITO,
+      };
+      await aoSalvar(conta ? dados : { ...dados, nova_senha: senha.trim() || null });
     } catch (problema) {
       setFalha(problema);
       setSalvando(false);
@@ -153,6 +233,7 @@ function JanelaConta({ conta, aoSalvar, aoFechar }) {
           dica="Uma página de texto gasta cerca de 9. O total inclui o que já foi usado."
           onChange={(e) => setCota(e.target.value)}
         />
+        {!conta && <CampoSenha valor={senha} erro={erros.senha} aoMudar={setSenha} />}
         <div className="linha linha-fim">
           <Botao variante="secundario" onClick={aoFechar}>
             Cancelar
@@ -251,7 +332,7 @@ function ItemConta({ conta, aoAgir }) {
               <li>
                 <button type="button" onClick={() => aoAgir('senha', conta)}>
                   <KeyRound aria-hidden="true" />
-                  Redefinir senha
+                  Mudar senha
                 </button>
               </li>
               <li>
@@ -283,15 +364,6 @@ function ItemConta({ conta, aoAgir }) {
 
 /** Confirmações: o que cada ação faz e o texto do diálogo. */
 const CONFIRMACOES = {
-  senha: {
-    titulo: 'Redefinir a senha?',
-    confirmar: 'Sim, gerar nova senha',
-    texto: (conta) => (
-      <p>
-        A senha atual de <strong>{conta.nome}</strong> deixa de valer, e a sessão aberta é encerrada.
-      </p>
-    ),
-  },
   desativar: {
     titulo: 'Desativar esta conta?',
     confirmar: 'Sim, desativar',
@@ -328,6 +400,7 @@ export function Contas() {
   const [contas, setContas] = useState(null);
   const [falha, setFalha] = useState(null);
   const [formulario, setFormulario] = useState(null); // null | {} (nova) | { conta }
+  const [mudando, setMudando] = useState(null); // conta que vai mudar de senha
   const [acesso, setAcesso] = useState(null);
   const [pedido, setPedido] = useState(null); // { acao, conta }
   const [ocupado, setOcupado] = useState(false);
@@ -370,8 +443,13 @@ export function Contas() {
     setAcesso({ ...criada, nova: true });
   }
 
+  async function mudarSenha(conta, senha) {
+    const novo = await administracao.redefinirSenha(conta.id, senha);
+    setMudando(null);
+    setAcesso(novo);
+  }
+
   const executar = {
-    senha: async (conta) => setAcesso(await administracao.redefinirSenha(conta.id)),
     desativar: async (conta) => {
       trocar(await administracao.desativar(conta.id));
       avisar('erro', 'Conta desativada', `${conta.nome} não entra mais.`);
@@ -402,6 +480,7 @@ export function Contas() {
 
   function aoAgir(acao, conta) {
     if (acao === 'editar') setFormulario({ conta });
+    else if (acao === 'senha') setMudando(conta);
     else if (CONFIRMACOES[acao]) setPedido({ acao, conta });
     else realizar(acao, conta);
   }
@@ -536,6 +615,9 @@ export function Contas() {
 
       {formulario && (
         <JanelaConta conta={formulario.conta} aoSalvar={salvar} aoFechar={() => setFormulario(null)} />
+      )}
+      {mudando && (
+        <JanelaMudarSenha conta={mudando} aoSalvar={mudarSenha} aoFechar={() => setMudando(null)} />
       )}
       {acesso && <JanelaSenha acesso={acesso} aoFechar={() => setAcesso(null)} />}
       <Dialogo

@@ -27,6 +27,18 @@ class NovaConta(BaseModel):
     cota: int = Field(ge=1, le=100_000_000)
 
 
+class SenhaDaConta(BaseModel):
+    """Senha escolhida pelo administrador na tela Contas. Sem ela, é aleatória."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    nova_senha: str | None = Field(default=None, min_length=8, max_length=128)
+
+
+class CriacaoDeConta(NovaConta, SenhaDaConta):
+    """Conta nova pela tela Contas."""
+
+
 class Entrada(BaseModel):
     email: EmailStr
     senha: str = Field(min_length=1, max_length=128)

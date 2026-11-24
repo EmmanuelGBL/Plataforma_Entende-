@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from ..banco import obter_sessao
 from ..erros import ErroDeNegocio
-from ..esquemas import ContaComSenha, ContaPublica, NovaConta
+from ..esquemas import ContaComSenha, ContaPublica, CriacaoDeConta, NovaConta, SenhaDaConta
 from ..modelos import Material, Professor
 from ..seguranca import administrador_atual
 from ..servicos import contas
@@ -75,12 +75,12 @@ def listar(_: Professor = Depends(administrador_atual), sessao: Session = Depend
 
 @rotas.post("", response_model=ContaComSenha, status_code=status.HTTP_201_CREATED)
 def criar(
-    dados: NovaConta,
+    dados: CriacaoDeConta,
     resposta: Response,
     administrador: Professor = Depends(administrador_atual),
     sessao: Session = Depends(obter_sessao),
 ):
-    professor, senha = contas.criar(sessao, dados)
+    professor, senha = contas.criar(sessao, dados, dados.nova_senha)
     _registrar("criação", administrador, professor.id)
     resposta.headers["Cache-Control"] = "no-store"
     return ContaComSenha(conta=_conta(sessao, professor), senha=senha)
@@ -105,11 +105,12 @@ def editar(
 def redefinir_senha(
     conta_id: uuid.UUID,
     resposta: Response,
+    dados: SenhaDaConta | None = None,
     administrador: Professor = Depends(administrador_atual),
     sessao: Session = Depends(obter_sessao),
 ):
     professor = _de_professor(sessao, conta_id)
-    senha = contas.redefinir_senha(sessao, professor)
+    senha = contas.redefinir_senha(sessao, professor, dados.nova_senha if dados else None)
     _registrar("nova senha", administrador, conta_id)
     resposta.headers["Cache-Control"] = "no-store"
     return ContaComSenha(conta=_conta(sessao, professor), senha=senha)

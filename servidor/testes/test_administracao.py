@@ -143,6 +143,44 @@ def test_redefinir_senha_derruba_a_sessao_aberta(cliente, admin):
     assert _entrar(cliente, nova.json()["senha"]).status_code == 200
 
 
+def test_administrador_escolhe_a_senha(cliente, admin, caplog):
+    caplog.set_level("DEBUG")
+    email = "bia@escola.am.gov.br"
+    criada = cliente.post(URL, headers=admin, json={**NOVA, "nova_senha": "  biologia2026 "}).json()
+    assert criada["senha"] == "biologia2026"
+    entrada = _entrar(cliente, "biologia2026", email)
+    assert entrada.status_code == 200
+
+    bia = {"Authorization": f"Bearer {entrada.json()['token']}"}
+    url = f"{URL}/{criada['conta']['id']}/senha"
+    assert cliente.post(url, headers=admin, json={"nova_senha": "historia2026"}).json()["senha"] == "historia2026"
+    assert cliente.get("/api/materiais", headers=bia).status_code == 401
+    assert _entrar(cliente, "biologia2026", email).status_code == 401
+    assert _entrar(cliente, "historia2026", email).status_code == 200
+    with cliente.app.state.fabrica_sessao() as sessao:
+        assert contas.por_email(sessao, email).senha_hash.startswith("$argon2")
+    registros = "".join(r.getMessage() for r in caplog.records if r.name == "entende")
+    assert "biologia2026" not in registros and "historia2026" not in registros
+
+
+def test_senha_escolhida_curta_e_recusada_sem_aparecer_na_resposta(cliente, admin):
+    for ruim in ("abc1234", "        ", ""):
+        resposta = cliente.post(URL, headers=admin, json={**NOVA, "nova_senha": ruim})
+        assert resposta.status_code == 422
+        assert "entre 8 e 128" in resposta.json()["erro"]["motivo"]
+        assert "abc1234" not in resposta.text
+    cadastrar(cliente)
+    url = f"{URL}/{_id(cliente)}/senha"
+    assert cliente.post(url, headers=admin, json={"nova_senha": "curta"}).status_code == 422
+    assert _entrar(cliente).status_code == 200
+
+
+def test_senha_de_administrador_nao_e_escolhida_pela_web(cliente, admin):
+    url = f"{URL}/{_id(cliente, ADMIN)}/senha"
+    assert cliente.post(url, headers=admin, json={"nova_senha": "qualquer2026"}).status_code == 409
+    assert _entrar(cliente, SENHA, ADMIN).status_code == 200
+
+
 def test_desativar_e_reativar(cliente, admin):
     ana = cadastrar(cliente)
     _enviar(cliente, ana)
