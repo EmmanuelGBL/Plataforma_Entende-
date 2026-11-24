@@ -23,7 +23,7 @@ import { PainelPreferencias } from './PainelPreferencias.jsx';
 import { JanelaEnviar } from './JanelaEnviar.jsx';
 import { ALTURA, LARGURA, MAIS, PALAVRA, SIMBOLO } from './marcaVetorial.js';
 import { usarApp } from '../contextos/Aplicacao.jsx';
-import { fraseDoSaldo, saldoDe } from '../servicos/creditos.js';
+import { saldoDe } from '../servicos/creditos.js';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
 /* Esqueleto das telas: link de salto, menu lateral com o logo (só nas telas
@@ -118,15 +118,18 @@ function LinkAjuda() {
 function SaldoDeCreditos() {
   const { modoServidor, professor } = usarApp();
   if (!modoServidor || !professor) return null;
-  const saldo = saldoDe(professor);
-  const frase = fraseDoSaldo(saldo);
+  const { esgotada, restam } = saldoDe(professor);
+  const singular = restam === '1' || restam === 'menos de 1';
+  const [verbo, unidade] = singular ? ['Resta', 'Crédito'] : ['Restam', 'Créditos'];
+  const frase = `${verbo} ${restam} ${unidade}`;
   return (
-    <p className={'barra__creditos' + (saldo.esgotada ? ' barra__creditos--esgotada' : '')} title={frase}>
+    <p className={'barra__creditos' + (esgotada ? ' barra__creditos--esgotada' : '')} title={frase}>
       <Coins aria-hidden="true" />
       <span className="apenas-leitor">{frase}</span>
       <span aria-hidden="true">
-        {saldo.restam === 'menos de 1' ? '< 1' : saldo.restam}
-        <span className="barra__rotulo"> de {saldo.total} créditos</span>
+        <span className="barra__rotulo">{verbo} </span>
+        {restam === 'menos de 1' ? '< 1' : restam}
+        <span className="barra__rotulo"> {unidade}</span>
       </span>
     </p>
   );
