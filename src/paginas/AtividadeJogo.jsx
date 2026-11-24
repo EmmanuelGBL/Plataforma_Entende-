@@ -12,6 +12,7 @@ import {
   assuntoDaAtividade,
   usarAtividadeDoCodigo,
 } from '../componentes/AtividadeAcesso.jsx';
+import { tocarSom } from '../servicos/som.js';
 import '../estilos/jogo.css';
 
 /* Atividade em forma de jogo (RF21), com as questões do material (RN04)
@@ -138,56 +139,6 @@ function usarAjustesDoJogo() {
   return [ajustes, definir];
 }
 
-/* --- Som ------------------------------------------------------------------
-      Notas curtas geradas por oscilador (Web Audio), sem arquivo de áudio.
-      Só toca se o som estiver ligado e a partir de um clique. As notas ficam
-      acima de 390 Hz: o alto-falante do celular quase não reproduz as graves. */
-const NOTAS = { acerto: [523.25, 783.99], erro: [392.0] };
-
-function tocarNotas(ctx, notas) {
-  notas.forEach((frequencia, posicao) => {
-    const oscilador = ctx.createOscillator();
-    const ganho = ctx.createGain();
-    oscilador.type = 'sine';
-    oscilador.frequency.value = frequencia;
-    const inicio = ctx.currentTime + 0.02 + posicao * 0.13;
-    ganho.gain.setValueAtTime(0.0001, inicio);
-    ganho.gain.exponentialRampToValueAtTime(0.3, inicio + 0.03);
-    ganho.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.3);
-    oscilador.connect(ganho).connect(ctx.destination);
-    oscilador.start(inicio);
-    oscilador.stop(inicio + 0.32);
-  });
-}
-
-function usarSom() {
-  const contexto = useRef(null);
-
-  // Sair do jogo fecha o áudio: o celular limita quantos ficam abertos.
-  useEffect(
-    () => () => {
-      contexto.current?.close().catch(() => {});
-      contexto.current = null;
-    },
-    [],
-  );
-
-  return useCallback(async (tipo) => {
-    try {
-      const Fabrica = window.AudioContext ?? window.webkitAudioContext;
-      if (!Fabrica) return;
-      if (!contexto.current) contexto.current = new Fabrica();
-      const ctx = contexto.current;
-      // No celular o áudio nasce parado, ou para ao trocar de aplicativo: tem
-      // de ser pedido no toque, e as notas só entram depois que ele volta.
-      if (ctx.state !== 'running') await ctx.resume();
-      tocarNotas(ctx, NOTAS[tipo]);
-    } catch {
-      /* navegador sem WebAudio ou com áudio bloqueado: o jogo segue mudo */
-    }
-  }, []);
-}
-
 /** Tempo de espera antes de mostrar o resultado. Com movimento reduzido
  *  (painel Acessibilidade ou sistema operacional), a espera é zero. */
 function esperaDoAviso(resultado) {
@@ -267,7 +218,7 @@ export function AtividadeJogo() {
   const chaveTema = TEMAS[ajustes.tema] ? ajustes.tema : AJUSTES_PADRAO.tema;
   const tema = TEMAS[chaveTema];
   const somLigado = ajustes.som === 'ligado';
-  const tocar = usarSom();
+  const [somBloqueado, setSomBloqueado] = useState(false);
 
   usarTituloDaPagina(valida ? tema.nome : 'Atividade indisponível');
 
@@ -350,12 +301,12 @@ export function AtividadeJogo() {
 
     if (certa) {
       setAcertos((n) => n + 1);
-      if (somLigado) tocar('acerto');
+      if (somLigado) tocarSom('acerto');
       anunciar(`Você acertou. ${tema.tituloAcerto}`);
       return;
     }
 
-    if (somLigado) tocar('erro');
+    if (somLigado) tocarSom('erro');
     // Depois do erro a dica fica aberta: aparece no resultado e na nova tentativa (G04).
     setDicasPedidas((atuais) => ({ ...atuais, [questao.id]: true }));
     anunciar(`Não foi essa. ${tema.tituloErro}. Leia a dica e tente de novo, ou vá para a próxima.`);
@@ -547,10 +498,13 @@ export function AtividadeJogo() {
           aoAbrir={() => setAjustesAbertos(true)}
           aoFechar={() => setAjustesAbertos(false)}
           ajustes={ajustes}
+          somBloqueado={somBloqueado}
           aoDefinir={(chave, valor, rotulo) => {
             definirAjuste(chave, valor);
-            // Amostra: mostra que ligou e libera o áudio do celular neste toque.
-            if (chave === 'som' && valor === 'ligado') tocar('acerto');
+            // Amostra: mostra que ligou.
+            if (chave === 'som' && valor === 'ligado') {
+              tocarSom('acerto').then((tocou) => setSomBloqueado(!tocou));
+            }
             anunciar(`${OPCOES_AJUSTES[chave].nome}: ${rotulo}.`);
           }}
         />
@@ -581,7 +535,7 @@ export function AtividadeJogo() {
 
 /** Ajustes do jogo num diálogo, para a cena não sair do lugar ao abrir.
  *  Cada escolha vale na hora, por isso não há botão Cancelar. */
-function AjustesDoJogo({ aberto, aoAbrir, aoFechar, ajustes, aoDefinir }) {
+function AjustesDoJogo({ aberto, aoAbrir, aoFechar, ajustes, somBloqueado, aoDefinir }) {
   return (
     <div className="jogo__ajustes">
       <button
@@ -619,7 +573,9 @@ function AjustesDoJogo({ aberto, aoAbrir, aoFechar, ajustes, aoDefinir }) {
               </div>
               {chave === 'som' && ajustes.som === 'ligado' && (
                 <p className="campo__dica">
-                  Não ouviu? Aumente o volume. No celular, desligue o modo silencioso.
+                  {somBloqueado
+                    ? 'O navegador não deixou tocar o som. Abra o jogo no Chrome.'
+                    : 'Não ouviu? Aumente o volume. No celular, desligue o modo silencioso.'}
                 </p>
               )}
             </fieldset>
