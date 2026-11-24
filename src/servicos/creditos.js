@@ -9,15 +9,13 @@ const formato = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
 export const emCreditos = (tokens) => formato.format(tokens / TOKENS_POR_CREDITO);
 
 /** Saldo de uma conta. O que resta é arredondado para baixo; abaixo de 1 vira
- *  "menos de 1", porque o servidor ainda aceita uma operação (RN13). O 100% só
- *  aparece com a cota esgotada, que é quando ele recusa. */
+ *  "menos de 1", porque o servidor ainda aceita uma operação (RN13). */
 export function saldoDe({ tokens_consumidos: consumidos, cota_tokens: cota }) {
   const restantes = Math.max(0, cota - consumidos);
   const esgotada = restantes === 0;
   const inteiros = Math.floor(restantes / TOKENS_POR_CREDITO);
   return {
     esgotada,
-    porcentagem: esgotada ? 100 : Math.floor((consumidos / cota) * 100),
     restam: !esgotada && inteiros === 0 ? 'menos de 1' : formato.format(inteiros),
     total: emCreditos(cota),
   };

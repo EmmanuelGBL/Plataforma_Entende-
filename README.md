@@ -73,7 +73,7 @@ exemplo foram escritos pela dupla.
 - Revisar as perguntas geradas a partir do material e publicar a atividade com link e código;
   revogar o link ou publicar de novo com código novo.
 - Imprimir a folha de questões, com gabarito opcional em página separada.
-- Ver no topo da tela e no painel quantos créditos de adaptação restam; sem créditos, só o que chama
+- Ver no topo da tela quantos créditos de adaptação restam; sem créditos, só o que chama
   o modelo de linguagem para de funcionar.
 
 **Para o administrador**

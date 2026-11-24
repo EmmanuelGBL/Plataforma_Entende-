@@ -19,7 +19,7 @@ import { IconeDisciplina } from '../componentes/IconeDisciplina.jsx';
 import { MenuAcoes } from '../componentes/MenuAcoes.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
-import { fraseDoSaldo, saldoDe } from '../servicos/creditos.js';
+import { saldoDe } from '../servicos/creditos.js';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
 /* Tela Meus materiais: lista os materiais do professor (RF19), com busca e
@@ -52,42 +52,16 @@ function partesDoNome(nome) {
   return { titulo: nome.slice(0, ponto), formato: nome.slice(ponto + 1).toUpperCase() };
 }
 
-/** RF25 — quanto da cota já foi usado, em texto e em barra, contado em créditos. */
-function UsoDaCota({ professor }) {
-  const saldo = saldoDe(professor);
-  const { esgotada, porcentagem } = saldo;
-  const frase = fraseDoSaldo(saldo);
+/** Só com a cota esgotada (RF25); o saldo fica na barra, ao lado do nome. */
+function CreditosEsgotados() {
   return (
-    <section className={'cota' + (esgotada ? ' cota--esgotada' : '')} aria-labelledby="titulo-cota">
-      <p className="cota__texto">
-        <strong id="titulo-cota">{frase}</strong>
-        <span>{porcentagem}% usado</span>
-      </p>
-      <div
-        className="progresso__trilho"
-        role="meter"
-        aria-label="Uso dos seus créditos"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={porcentagem}
-        aria-valuetext={`${porcentagem}% usado`}
-      >
-        <div className="progresso__barra" style={{ width: `${porcentagem}%` }} />
-      </div>
-      {esgotada ? (
-        <p className="cota__aviso">
-          <CircleSlash aria-hidden="true" />
-          <span>
-            Seus créditos acabaram. Você ainda pode consultar, editar, aprovar, exportar e publicar
-            o que já foi adaptado. Para adaptar mais, fale com quem enviou o seu acesso.
-          </span>
-        </p>
-      ) : (
-        <p className="cota__dica">
-          Adaptar e criar perguntas gastam créditos. Uma página de texto gasta cerca de 9.
-        </p>
-      )}
-    </section>
+    <p className="cota__aviso">
+      <CircleSlash aria-hidden="true" />
+      <span>
+        Seus créditos acabaram. Você ainda pode consultar, editar, aprovar, exportar e publicar o
+        que já foi adaptado. Para adaptar mais, fale com quem enviou o seu acesso.
+      </span>
+    </p>
   );
 }
 
@@ -163,9 +137,7 @@ export function Painel() {
         </Aviso>
       )}
 
-      {modoServidor && professor && (
-        <UsoDaCota professor={professor} />
-      )}
+      {modoServidor && professor && saldoDe(professor).esgotada && <CreditosEsgotados />}
 
       {materiais.length === 0 ? (
         <div className="cartao vazio">
