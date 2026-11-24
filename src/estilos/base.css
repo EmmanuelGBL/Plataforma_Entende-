@@ -214,6 +214,20 @@ kbd {
 .barra__acao[aria-expanded='true'] { border-color: var(--cor-primaria-escura); }
 :root[data-contraste='alto'] .barra__acao { border-color: #ffe600; }
 
+/* Saldo de créditos, ao lado do nome. Não é botão: sem borda de foco. */
+.barra__creditos {
+  display: inline-flex; align-items: center; gap: var(--e2);
+  max-width: none;
+  padding: var(--e1) var(--e3);
+  background: var(--cor-primaria-clara); color: var(--cor-primaria-escura);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 600; white-space: nowrap;
+}
+.barra__creditos svg { width: 1.25rem; height: 1.25rem; flex: none; }
+.barra__creditos--esgotada { background: var(--cor-atencao-fundo); color: var(--cor-atencao); }
+:root[data-contraste='alto'] .barra__creditos { border-color: currentColor; }
+
 .menu-professor { position: relative; }
 .menu-professor__avatar { width: 2rem !important; height: 2rem !important; color: var(--cor-tinta); }
 .menu-professor__seta { width: 1.1rem !important; height: 1.1rem !important; }

@@ -73,12 +73,12 @@ exemplo foram escritos pela dupla.
 - Revisar as perguntas geradas a partir do material e publicar a atividade com link e código;
   revogar o link ou publicar de novo com código novo.
 - Imprimir a folha de questões, com gabarito opcional em página separada.
-- Ver no painel quanto da cota de adaptação já foi usado; esgotada a cota, só o que chama o modelo
-  de linguagem para de funcionar.
+- Ver no topo da tela e no painel quantos créditos de adaptação restam; sem créditos, só o que chama
+  o modelo de linguagem para de funcionar.
 
 **Para o administrador**
 
-- Criar, editar, desativar e excluir contas de professor, redefinir senha e definir a cota de cada uma.
+- Criar, editar, desativar e excluir contas de professor, redefinir senha e definir os créditos de cada uma.
   Não vê o conteúdo dos materiais.
 
 **Para o estudante**

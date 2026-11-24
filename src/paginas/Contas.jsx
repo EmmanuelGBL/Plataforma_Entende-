@@ -20,26 +20,31 @@ import { MenuAcoes } from '../componentes/MenuAcoes.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
+import { emCreditos, fraseDoSaldo, saldoDe, TOKENS_POR_CREDITO } from '../servicos/creditos.js';
 
 /* Tela Contas, só para o administrador e só no modo servidor: cria, edita,
-   desativa e exclui contas de professor (RF24) e define a cota (RN13).
+   desativa e exclui contas de professor (RF24) e define a cota (RN13). A cota
+   aparece em créditos; para o servidor, vai em tokens.
 
    A senha aparece uma única vez, numa janela que só fecha pelo botão. Conta de
    administrador só muda nome e cota por aqui; o resto é no servidor. */
 
-const COTA_PADRAO = '40000';
+const COTA_PADRAO = '40';
+
+// Segura o engano de digitar a cota em tokens: 40000 créditos seriam 40 milhões.
+const COTA_MAXIMA = 1000;
 
 const SITUACOES = {
   administrador: { tom: 'info', icone: ShieldCheck, rotulo: 'Administrador' },
   desativada: { tom: 'neutra', icone: CircleSlash, rotulo: 'Desativada' },
-  esgotada: { tom: 'atencao', icone: Gauge, rotulo: 'Cota esgotada' },
+  esgotada: { tom: 'atencao', icone: Gauge, rotulo: 'Sem créditos' },
   ativa: { tom: 'boa', icone: CircleCheck, rotulo: 'Ativa' },
 };
 
 function situacaoDa(conta) {
   if (conta.administrador) return 'administrador';
   if (!conta.ativo) return 'desativada';
-  if (conta.tokens_consumidos >= conta.cota_tokens) return 'esgotada';
+  if (saldoDe(conta).esgotada) return 'esgotada';
   return 'ativa';
 }
 
@@ -75,7 +80,8 @@ function Falha({ erro, nivel }) {
 function JanelaConta({ conta, aoSalvar, aoFechar }) {
   const [nome, setNome] = useState(conta?.nome ?? '');
   const [email, setEmail] = useState(conta?.email ?? '');
-  const [cota, setCota] = useState(conta ? String(conta.cota_tokens) : COTA_PADRAO);
+  const cotaInicial = conta ? String(conta.cota_tokens / TOKENS_POR_CREDITO) : COTA_PADRAO;
+  const [cota, setCota] = useState(cotaInicial);
   const [erros, setErros] = useState({});
   const [falha, setFalha] = useState(null);
   const [salvando, setSalvando] = useState(false);
@@ -88,14 +94,16 @@ function JanelaConta({ conta, aoSalvar, aoFechar }) {
 
   async function enviar(evento) {
     evento.preventDefault();
-    const tokens = Number(cota);
+    const creditos = Number(cota);
+    // Cota definida no servidor pode não ser redonda: sem mexer no campo, ela fica.
+    const mantida = conta?.cota_tokens > 0 && cota === cotaInicial;
     const novos = {};
     if (nome.trim().length < 2) novos.nome = 'Digite o nome, com pelo menos 2 letras.';
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
       novos.email = 'Digite um e-mail completo. Exemplo: nome@escola.br';
     }
-    if (!Number.isInteger(tokens) || tokens < 1) {
-      novos.cota = 'Digite um número inteiro maior que zero. Exemplo: 40000';
+    if (!mantida && (!Number.isInteger(creditos) || creditos < 1 || creditos > COTA_MAXIMA)) {
+      novos.cota = `Digite um número inteiro de 1 a ${numero(COTA_MAXIMA)}. Exemplo: 40`;
     }
     setErros(novos);
     setFalha(null);
@@ -103,7 +111,7 @@ function JanelaConta({ conta, aoSalvar, aoFechar }) {
 
     setSalvando(true);
     try {
-      await aoSalvar({ nome: nome.trim(), email: email.trim(), cota: tokens });
+      await aoSalvar({ nome: nome.trim(), email: email.trim(), cota: mantida ? conta.cota_tokens : creditos * TOKENS_POR_CREDITO });
     } catch (problema) {
       setFalha(problema);
       setSalvando(false);
@@ -134,14 +142,15 @@ function JanelaConta({ conta, aoSalvar, aoFechar }) {
           onChange={(e) => setEmail(e.target.value)}
         />
         <Campo
-          rotulo="Cota de tokens"
+          rotulo="Créditos"
           tipo="number"
           obrigatorio
           min="1"
+          max={COTA_MAXIMA}
           step="1"
           value={cota}
           erro={erros.cota}
-          dica="40 mil dão para cerca de seis adaptações de texto curto."
+          dica="Uma página de texto gasta cerca de 9. O total inclui o que já foi usado."
           onChange={(e) => setCota(e.target.value)}
         />
         <div className="linha linha-fim">
@@ -218,9 +227,7 @@ function ItemConta({ conta, aoAgir }) {
           <p className="item-material__meta item-conta__meta">
             {conta.email}
             <span aria-hidden="true"> · </span>
-            <span>
-              {numero(conta.tokens_consumidos)} de {numero(conta.cota_tokens)} tokens
-            </span>
+            <span>{fraseDoSaldo(saldoDe(conta))}</span>
             <span aria-hidden="true"> · </span>
             <span>{materiais(conta.quantidade_materiais)}</span>
           </p>
@@ -351,7 +358,7 @@ export function Contas() {
       trocar(conta);
       setFormulario(null);
       avisar('boa', 'Conta salva', conta.nome);
-      // Quem edita a própria conta vê o nome e a cota novos.
+      // Quem edita a própria conta vê o nome e os créditos novos.
       atualizarProfessor();
       return;
     }
@@ -430,7 +437,7 @@ export function Contas() {
       <div className="cabecalho-pagina cabecalho-acoes">
         <div>
           <h1>Contas</h1>
-          <p>Crie o acesso dos professores e acompanhe o uso da cota de cada um.</p>
+          <p>Crie o acesso dos professores e acompanhe os créditos de cada um.</p>
         </div>
         <Botao onClick={() => setFormulario({})} disabled={!contas}>
           <UserPlus aria-hidden="true" />
@@ -459,12 +466,12 @@ export function Contas() {
               <dd>{numero(contas.length)}</dd>
             </div>
             <div className="bloco">
-              <dt>Tokens distribuídos</dt>
-              <dd>{numero(totais.cota)}</dd>
+              <dt>Créditos distribuídos</dt>
+              <dd>{emCreditos(totais.cota)}</dd>
             </div>
             <div className="bloco">
-              <dt>Tokens consumidos</dt>
-              <dd>{numero(totais.consumo)}</dd>
+              <dt>Créditos usados</dt>
+              <dd>{emCreditos(totais.consumo)}</dd>
             </div>
           </dl>
 

@@ -52,7 +52,7 @@ def cliente_do_professor(estado, professor: Professor) -> ClienteLLM:
     """`estado` é o app.state: o cliente do servidor e a fábrica de sessões."""
     if professor.tokens_consumidos >= professor.cota_tokens:
         raise ErroDeNegocio(
-            "Sua cota de adaptação acabou",
+            "Seus créditos de adaptação acabaram",
             "Cada conta tem um limite de uso do modelo de linguagem, e o da sua já foi atingido. "
             "O pedido não foi executado.",
             "Você ainda pode consultar, editar, aprovar, exportar e publicar o que já foi "

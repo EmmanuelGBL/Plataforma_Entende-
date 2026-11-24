@@ -113,6 +113,9 @@ do reprocessamento e da geração de questões; esgotada, o pedido é recusado (
 modelo, e o resto do sistema continua funcionando. Como a conferência é no começo, a última
 operação, ou duas pedidas ao mesmo tempo, podem ultrapassar a cota.
 
+O servidor, a API e o `administrar.py` usam tokens. A interface mostra a mesma cota em **créditos**
+(1 crédito = 1.000 tokens, em `src/servicos/creditos.js`).
+
 ### Banco
 
 Sem `ENTENDE_BANCO_URL`, o banco é um SQLite em `entende.db`, nesta pasta. Para PostgreSQL, basta

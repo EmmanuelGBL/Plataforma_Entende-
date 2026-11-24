@@ -19,6 +19,7 @@ import { IconeDisciplina } from '../componentes/IconeDisciplina.jsx';
 import { MenuAcoes } from '../componentes/MenuAcoes.jsx';
 import { usarTituloDaPagina } from '../componentes/Layout.jsx';
 import { usarApp } from '../contextos/Aplicacao.jsx';
+import { fraseDoSaldo, saldoDe } from '../servicos/creditos.js';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
 /* Tela Meus materiais: lista os materiais do professor (RF19), com busca e
@@ -51,21 +52,21 @@ function partesDoNome(nome) {
   return { titulo: nome.slice(0, ponto), formato: nome.slice(ponto + 1).toUpperCase() };
 }
 
-/** RF25 — quanto da cota de tokens já foi usado, em texto e em barra. O 100%
- *  só aparece com a cota esgotada, que é quando o servidor recusa. */
-function UsoDaCota({ consumidos, cota }) {
-  const esgotada = consumidos >= cota;
-  const porcentagem = esgotada ? 100 : Math.floor((consumidos / cota) * 100);
+/** RF25 — quanto da cota já foi usado, em texto e em barra, contado em créditos. */
+function UsoDaCota({ professor }) {
+  const saldo = saldoDe(professor);
+  const { esgotada, porcentagem } = saldo;
+  const frase = fraseDoSaldo(saldo);
   return (
     <section className={'cota' + (esgotada ? ' cota--esgotada' : '')} aria-labelledby="titulo-cota">
       <p className="cota__texto">
-        <span id="titulo-cota">Uso da sua cota de adaptação</span>
-        <strong>{porcentagem}%</strong>
+        <strong id="titulo-cota">{frase}</strong>
+        <span>{porcentagem}% usado</span>
       </p>
       <div
         className="progresso__trilho"
         role="meter"
-        aria-labelledby="titulo-cota"
+        aria-label="Uso dos seus créditos"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={porcentagem}
@@ -73,13 +74,17 @@ function UsoDaCota({ consumidos, cota }) {
       >
         <div className="progresso__barra" style={{ width: `${porcentagem}%` }} />
       </div>
-      {esgotada && (
+      {esgotada ? (
         <p className="cota__aviso">
           <CircleSlash aria-hidden="true" />
           <span>
-            Sua cota acabou. Você ainda pode consultar, editar, aprovar, exportar e publicar o que
-            já foi adaptado. Para adaptar mais, fale com quem enviou o seu acesso.
+            Seus créditos acabaram. Você ainda pode consultar, editar, aprovar, exportar e publicar
+            o que já foi adaptado. Para adaptar mais, fale com quem enviou o seu acesso.
           </span>
+        </p>
+      ) : (
+        <p className="cota__dica">
+          Adaptar e criar perguntas gastam créditos. Uma página de texto gasta cerca de 9.
         </p>
       )}
     </section>
@@ -159,7 +164,7 @@ export function Painel() {
       )}
 
       {modoServidor && professor && (
-        <UsoDaCota consumidos={professor.tokens_consumidos} cota={professor.cota_tokens} />
+        <UsoDaCota professor={professor} />
       )}
 
       {materiais.length === 0 ? (

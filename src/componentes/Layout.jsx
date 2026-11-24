@@ -11,6 +11,7 @@ import {
   ChevronDown,
   CircleHelp,
   CircleUserRound,
+  Coins,
   FolderOpen,
   Gamepad2,
   ListChecks,
@@ -22,6 +23,7 @@ import { PainelPreferencias } from './PainelPreferencias.jsx';
 import { JanelaEnviar } from './JanelaEnviar.jsx';
 import { ALTURA, LARGURA, MAIS, PALAVRA, SIMBOLO } from './marcaVetorial.js';
 import { usarApp } from '../contextos/Aplicacao.jsx';
+import { fraseDoSaldo, saldoDe } from '../servicos/creditos.js';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
 /* Esqueleto das telas: link de salto, menu lateral com o logo (só nas telas
@@ -108,6 +110,25 @@ function LinkAjuda() {
       <CircleHelp aria-hidden="true" />
       <span className="barra__rotulo">Ajuda</span>
     </Link>
+  );
+}
+
+/** Saldo de créditos, ao lado do nome. Só no modo servidor: a demonstração não
+ *  tem cota. Em tela estreita fica só o número. */
+function SaldoDeCreditos() {
+  const { modoServidor, professor } = usarApp();
+  if (!modoServidor || !professor) return null;
+  const saldo = saldoDe(professor);
+  const frase = fraseDoSaldo(saldo);
+  return (
+    <p className={'barra__creditos' + (saldo.esgotada ? ' barra__creditos--esgotada' : '')} title={frase}>
+      <Coins aria-hidden="true" />
+      <span className="apenas-leitor">{frase}</span>
+      <span aria-hidden="true">
+        {saldo.restam === 'menos de 1' ? '< 1' : saldo.restam}
+        <span className="barra__rotulo"> de {saldo.total} créditos</span>
+      </span>
+    </p>
   );
 }
 
@@ -347,6 +368,7 @@ export function Layout() {
             {/* Com sessão, a Ajuda está no menu lateral. */}
             {!professor && <LinkAjuda />}
             <PainelPreferencias />
+            <SaldoDeCreditos />
             <MenuProfessor />
           </div>
         </div>

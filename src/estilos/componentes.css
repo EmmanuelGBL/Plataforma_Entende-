@@ -250,6 +250,7 @@ legend { font-weight: 600; padding-inline: var(--e2); }
 /* --- Uso da cota, no painel (RF25) ----------------------------------------- */
 .cota { max-width: 34rem; margin-bottom: var(--e5); }
 .cota__texto { display: flex; justify-content: space-between; gap: var(--e3); max-width: none; margin-bottom: var(--e2); }
+.cota__dica { max-width: none; margin-top: var(--e2); font-size: 0.9375rem; color: var(--cor-texto-apoio); }
 .cota__aviso { display: flex; gap: var(--e2); max-width: none; margin-top: var(--e2); color: var(--cor-atencao); }
 .cota__aviso svg { flex: none; width: 1.25rem; height: 1.25rem; margin-top: 0.15em; }
 .cota--esgotada .progresso__barra { background: var(--cor-atencao); }

@@ -187,8 +187,7 @@ export function Entrar() {
             <p className="entrada-cartao__nota">
               <Info aria-hidden="true" />
               A conta é criada pela equipe do Entende+. Guardamos seu nome, seu e-mail, a senha
-              cifrada, os materiais que você enviar e quanto da sua cota foi usado. Só você vê seus
-              materiais.
+              cifrada, os materiais que você enviar e quantos créditos você usou. Só você vê seus materiais.
             </p>
           )}
         </section>
