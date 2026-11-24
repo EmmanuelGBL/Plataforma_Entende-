@@ -9,5 +9,5 @@ Montados com gravações do Freesound em domínio público (CC0 1.0), cortadas, 
 | "Oh" da torcida (`fora.mp3`) | [crowd oh - disappointed](https://freesound.org/s/619007/) | mrrap4food |
 
 O chute sai no toque. No erro, a torcida entra 0,7 s depois, que é o tempo de voo da bola em
-`jogo.css`; no acerto, 1,1 s depois, com entrada lenta, volume baixo e sem os agudos (sensibilidade
+`jogo.css`; no acerto, 1,1 s depois, com entrada lenta e menos agudos; as duas torcidas têm a mesma sonoridade (sensibilidade
 sensorial, G08).
