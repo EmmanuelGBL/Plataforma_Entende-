@@ -16,14 +16,17 @@ import {
   Gamepad2,
   ListChecks,
   LogOut,
+  Menu,
   PanelLeftClose,
   UsersRound,
+  X,
 } from 'lucide-react';
 import { PainelPreferencias } from './PainelPreferencias.jsx';
 import { JanelaEnviar } from './JanelaEnviar.jsx';
 import { ALTURA, LARGURA, MAIS, PALAVRA, SIMBOLO } from './marcaVetorial.js';
 import { usarApp } from '../contextos/Aplicacao.jsx';
 import { saldoDe } from '../servicos/creditos.js';
+import { usarMidia } from './usarMidia.js';
 import { usarAnuncios } from '../contextos/Anuncios.jsx';
 
 /* Esqueleto das telas: link de salto, menu lateral com o logo (só nas telas
@@ -217,9 +220,11 @@ const ITEM_CONTAS = ['/contas', UsersRound, 'Contas'];
  *
  *  Fechado, o topo mostra só o símbolo do livro, que é também o botão de
  *  abrir; em tela larga os itens ficam só com o ícone (o nome aparece ao
- *  passar o mouse e continua para o leitor de tela), e em tela estreita
- *  somem. */
-function MenuLateral({ fechado, aoAlternar }) {
+ *  passar o mouse e continua para o leitor de tela).
+ *
+ *  Em tela estreita o menu é uma lista que desce da barra e se fecha ao
+ *  escolher um item, com Esc ou tocando fora. */
+function MenuLateral({ fechado, aoAlternar, estreita }) {
   const { administrador } = usarApp();
   const itens = administrador ? [...ITENS_MENU, ITEM_CONTAS] : ITENS_MENU;
   // O botão de abrir e o de recolher são elementos diferentes: depois de
@@ -236,10 +241,51 @@ function MenuLateral({ fechado, aoAlternar }) {
     aoAlternar();
   }
 
+  // Tela estreita: Esc e toque fora fecham a lista.
+  const navegacao = useRef(null);
+  const fecharEstreita = useRef(aoAlternar);
+  fecharEstreita.current = aoAlternar;
+  const listaAberta = estreita && !fechado;
+  useEffect(() => {
+    if (!listaAberta) return undefined;
+    function aoClicarFora(evento) {
+      if (!navegacao.current?.contains(evento.target)) fecharEstreita.current();
+    }
+    function aoTeclar(evento) {
+      if (evento.key !== 'Escape') return;
+      fecharEstreita.current();
+      navegacao.current?.querySelector('button')?.focus();
+    }
+    document.addEventListener('mousedown', aoClicarFora);
+    document.addEventListener('keydown', aoTeclar);
+    return () => {
+      document.removeEventListener('mousedown', aoClicarFora);
+      document.removeEventListener('keydown', aoTeclar);
+    };
+  }, [listaAberta]);
+
   return (
-    <nav className="menu-lateral" id="menu" aria-label="Navegação principal" accessKey="2">
+    <nav className="menu-lateral" ref={navegacao} id="menu" aria-label="Navegação principal" accessKey="2">
       <div className="menu-lateral__topo">
-        {fechado ? (
+        {estreita ? (
+          <>
+            <button
+              type="button"
+              className="menu-lateral__alternar"
+              aria-expanded={!fechado}
+              aria-controls="menu-itens"
+              onClick={aoAlternar}
+            >
+              {fechado ? <Menu aria-hidden="true" /> : <X aria-hidden="true" />}
+              <span className="apenas-leitor">Menu</span>
+            </button>
+            <Link to="/painel" className="marca">
+              <LogoEntende className="marca__logo" />
+              <LogoEntende simbolo className="menu-lateral__simbolo" />
+              <span className="apenas-leitor">Entende+ — início</span>
+            </Link>
+          </>
+        ) : fechado ? (
           <button
             type="button"
             ref={botao}
@@ -275,7 +321,7 @@ function MenuLateral({ fechado, aoAlternar }) {
         <ul>
           {itens.map(([caminho, Icone, rotulo]) => (
             <li key={caminho}>
-              <NavLink to={caminho} title={fechado ? rotulo : undefined}>
+              <NavLink to={caminho} title={fechado ? rotulo : undefined} onClick={listaAberta ? aoAlternar : undefined}>
                 <Icone aria-hidden="true" />
                 <span className="menu-lateral__rotulo">{rotulo}</span>
               </NavLink>
@@ -350,7 +396,12 @@ export function Layout() {
   const { professor } = usarApp();
   const principal = useRef(null);
   const envio = usarJanelaEnvio();
-  const [menuFechado, alternarMenu] = usarMenuFechado();
+  const [menuLargoFechado, alternarMenuLargo] = usarMenuFechado();
+  // Em tela estreita o menu sempre começa fechado, para não empurrar a página.
+  const estreita = usarMidia('(max-width: 62rem)');
+  const [listaAberta, setListaAberta] = useState(false);
+  const menuFechado = estreita ? !listaAberta : menuLargoFechado;
+  const alternarMenu = estreita ? () => setListaAberta((v) => !v) : alternarMenuLargo;
   usarFocoNaTroca(principal, false);
 
   const classeApp = professor
@@ -361,7 +412,7 @@ export function Layout() {
     <div className={classeApp}>
       <LinksDeSalto />
 
-      {professor && <MenuLateral fechado={menuFechado} aoAlternar={alternarMenu} />}
+      {professor && <MenuLateral fechado={menuFechado} aoAlternar={alternarMenu} estreita={estreita} />}
 
       <header className="barra">
         <div className="barra-interna">

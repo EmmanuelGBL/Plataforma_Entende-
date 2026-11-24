@@ -129,3 +129,8 @@
   --sombra: none;
   --sombra-alta: none;
 }
+
+/* Pouca altura (celular deitado): barra baixa, para sobrar tela. */
+@media (orientation: landscape) and (max-height: 32rem) {
+  :root { --altura-barra: 3rem; }
+}

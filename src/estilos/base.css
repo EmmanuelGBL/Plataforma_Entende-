@@ -197,6 +197,11 @@ kbd {
 
 .barra__acoes { margin-left: auto; display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap; }
 
+@media (orientation: landscape) and (max-height: 32rem) {
+  .barra-interna { padding-block: 0; }
+  .marca__logo { height: 2rem; }
+}
+
 /* Botão e link da barra (Ajuda, Acessibilidade, menu do professor): mesma
    aparência para os três, com ícone à esquerda. */
 .barra__acao {
@@ -320,21 +325,42 @@ kbd {
   overflow: hidden; clip-path: inset(50%); white-space: nowrap;
 }
 
-/* Tela estreita: o menu vira uma faixa acima da barra, com o logo e, aberto,
-   os itens lado a lado; fechado, fica só o símbolo. */
+/* Tela estreita: menu e barra numa linha só, e os itens descem por cima da
+   página. */
 @media (max-width: 62rem) {
-  .app--com-menu { display: flex; flex-direction: column; }
-  .menu-lateral {
-    position: static; height: auto; width: auto;
-    padding: 0 var(--respiro-lateral) var(--e2);
-    border-right: none; border-bottom: 1px solid var(--cor-borda);
+  .app--com-menu { position: relative; grid-template-rows: auto auto 1fr; grid-template-columns: auto minmax(0, 1fr); }
+  .app--com-menu > .corpo { grid-column: 1 / -1; grid-row: 2 / -1; }
+  .app--com-menu > .barra { grid-row: 1; }
+  .menu-lateral, .app--menu-fechado .menu-lateral {
+    grid-column: 1; grid-row: 1;
+    position: static; height: auto; width: auto; overflow: visible;
+    padding: 0;
+    border-right: 0;
+    box-shadow: 0 1px 3px rgba(15, 31, 61, 0.06);
   }
-  .menu-lateral__topo { margin: 0 calc(-1 * var(--respiro-lateral)) var(--e2); padding-inline: var(--respiro-lateral) var(--e2); }
-  .menu-lateral__itens ul { display: flex; flex-wrap: wrap; }
-  .app--menu-fechado .menu-lateral { width: auto; padding-bottom: 0; }
-  .app--menu-fechado .menu-lateral__topo { margin-bottom: 0; border-bottom: 0; justify-content: flex-start; padding-inline: var(--respiro-lateral); }
-  .app--menu-fechado .menu-lateral__alternar--simbolo { margin-inline: 0; }
+  .menu-lateral__topo, .app--menu-fechado .menu-lateral__topo {
+    margin: 0; padding-inline: var(--e2) 0; justify-content: flex-start; gap: var(--e1);
+    background: var(--cor-barra-fundo);
+  }
+  .menu-lateral__itens {
+    position: absolute; z-index: 35;
+    top: calc(var(--altura-barra) + 1px); left: 0; right: 0;
+    max-height: calc(100dvh - var(--altura-barra)); overflow-y: auto;
+    padding: var(--e2) var(--e3) var(--e3);
+    background: var(--cor-superficie);
+    border-bottom: 1px solid var(--cor-borda-forte);
+    box-shadow: var(--sombra-alta);
+  }
   .app--menu-fechado .menu-lateral__itens { display: none; }
+  .menu-lateral__topo .menu-lateral__simbolo { display: none; }
+  .app--com-menu .barra-interna { flex-wrap: nowrap; padding-inline: var(--e2) var(--e3); }
+  :root[data-contraste='alto'] .menu-lateral__topo { border-bottom: 2px solid #ffe600; }
+}
+
+/* Celular: no topo do menu fica só o livro, para caber a conta e os créditos. */
+@media (max-width: 30rem) {
+  .menu-lateral__topo .marca__logo { display: none; }
+  .menu-lateral__topo .menu-lateral__simbolo { display: block; width: 2.25rem; height: 2.25rem; }
 }
 
 /* --- Utilitários de layout ----------------------------------------------- */

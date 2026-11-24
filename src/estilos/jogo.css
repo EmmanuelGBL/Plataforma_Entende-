@@ -58,7 +58,8 @@
   font-weight: 600;
 }
 .jogo__ajustes-gatilho:hover { background: var(--cor-superficie-alt); }
-.jogo__ajustes-gatilho svg { width: 1.25rem; height: 1.25rem; }
+.jogo__ajustes { flex: none; }
+.jogo__ajustes-gatilho svg { flex: none; width: 1.25rem; height: 1.25rem; }
 
 /* Os grupos ficam dentro do diálogo e usam a moldura dele. */
 .jogo__ajustes-grupos { margin-top: var(--e4); }
@@ -69,13 +70,23 @@
       A cena é a peça principal: ocupa a largura e cabe na altura da tela.
       Proporção fixa, para não mudar de tamanho entre as fases (G01). */
 .jogo__arena {
-  width: min(100%, max(36rem, calc((100dvh - 14rem) * 16 / 9)));
+  --proporcao: 16 / 9;
+  width: min(100%, max(36rem, calc((100dvh - 14rem) * var(--proporcao))));
   margin: 0 auto var(--e3);
+}
+/* Em pé (celular e tablet): cena mais alta que larga. Ver MOLDES em CenaJogo.jsx. */
+@media (orientation: portrait) and (max-width: 62rem) {
+  .jogo__arena {
+    --proporcao: 240 / 290;
+    width: min(100%, max(15rem, calc((100dvh - 14rem) * var(--proporcao))));
+  }
+  .conteudo:has(> .jogo) { padding-block: var(--e4); }
+  .jogo .atividade__troca { margin: 0; }
 }
 
 .jogo__cena {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--proporcao);
   width: 100%;
   border: 2px solid var(--cor-borda);
   border-radius: var(--raio-g);
@@ -278,11 +289,53 @@
     from { transform: translateY(2rem); opacity: 0; }
     to { transform: none; opacity: 1; }
   }
+  .jogo__ajustes-gatilho { width: var(--alvo-minimo); justify-content: center; padding: 0; }
   .jogo__ajustes-rotulo {
     position: absolute; width: 1px; height: 1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap;
   }
   .jogo__convite { top: 2%; padding: 0.2em 0.75em; }
+}
+
+/* Celular deitado (ou zoom alto em tela larga): pouca altura. Pontos, progresso
+   e ajustes vão para uma coluna ao lado da cena, e a janela da pergunta usa a
+   tela inteira, para nada ficar cortado. */
+@media (orientation: landscape) and (max-height: 32rem) {
+  .conteudo:has(> .jogo) { padding: var(--e2) var(--e3) 0; }
+  .atividade.jogo {
+    max-width: none;
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    column-gap: var(--e3);
+    align-items: start;
+  }
+  .jogo .jogo__topo { grid-column: 1; grid-row: 1; flex-direction: column; align-items: stretch; gap: var(--e2); margin: 0; }
+  .jogo .jogo__topo .pontos { justify-content: center; padding-block: 0; }
+  .jogo .jogo__topo .progresso-perguntas {
+    flex: none; flex-direction: column; align-items: stretch; gap: var(--e2);
+    padding: var(--e2) var(--e3); border-radius: var(--raio-g); text-align: center;
+  }
+  .jogo .jogo__topo .progresso-perguntas__segmentos { flex: none; }
+  .jogo .jogo__topo .progresso-perguntas__texto { white-space: normal; font-size: 0.9375rem; }
+  .jogo__ajustes-gatilho { width: 100%; justify-content: center; font-size: 0.9375rem; line-height: 1.2; text-align: left; }
+  .jogo__arena {
+    grid-column: 2; grid-row: 1 / -1;
+    width: min(100%, calc((100dvh - var(--altura-barra) - 1.25rem) * 16 / 9));
+    margin: 0 auto;
+  }
+  .jogo .atividade__troca { grid-column: 1; grid-row: 2; margin: var(--e2) 0 0; font-size: 0.875rem; }
+
+  .jogo__janela-fundo { position: fixed; z-index: 55; padding: var(--e2); }
+  /* Resultado embaixo, para o gol ou o planeta continuar à vista. */
+  .jogo__janela-fundo--resultado { align-items: end; }
+  .jogo__janela { width: min(100%, 46rem); padding: var(--e2) var(--e4); border-width: 3px; border-radius: var(--raio-g); }
+  .jogo__janela .atividade__pergunta { margin: var(--e1) 0 var(--e2); font-size: 1.125rem; }
+  .jogo__janela .atividade__opcoes--grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e2); }
+  .jogo__janela .atividade__opcoes--grade .atividade__opcao { min-height: 2.75rem; padding-block: var(--e1); font-size: 1rem; }
+  .jogo__pedir-dica { margin-bottom: var(--e2); }
+  .jogo__dica { margin-bottom: var(--e2); padding: var(--e2) var(--e3); }
+  .jogo__resultado + .jogo__dica { margin-top: var(--e2); }
 }
 
 /* --- Cenário: futebol ------------------------------------------------------ */

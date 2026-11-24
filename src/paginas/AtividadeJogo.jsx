@@ -12,7 +12,7 @@ import {
   assuntoDaAtividade,
   usarAtividadeDoCodigo,
 } from '../componentes/AtividadeAcesso.jsx';
-import { tocarSom } from '../servicos/som.js';
+import { pararSom, tocarSom } from '../servicos/som.js';
 import '../estilos/jogo.css';
 
 /* Atividade em forma de jogo (RF21), com as questões do material (RN04)
@@ -219,6 +219,8 @@ export function AtividadeJogo() {
   const tema = TEMAS[chaveTema];
   const somLigado = ajustes.som === 'ligado';
   const [somBloqueado, setSomBloqueado] = useState(false);
+  // Sair do jogo cala a torcida.
+  useEffect(() => pararSom, []);
 
   usarTituloDaPagina(valida ? tema.nome : 'Atividade indisponível');
 
@@ -301,12 +303,12 @@ export function AtividadeJogo() {
 
     if (certa) {
       setAcertos((n) => n + 1);
-      if (somLigado) tocarSom('acerto');
+      if (somLigado) tocarSom(chaveTema, 'acerto');
       anunciar(`Você acertou. ${tema.tituloAcerto}`);
       return;
     }
 
-    if (somLigado) tocarSom('erro');
+    if (somLigado) tocarSom(chaveTema, 'erro');
     // Depois do erro a dica fica aberta: aparece no resultado e na nova tentativa (G04).
     setDicasPedidas((atuais) => ({ ...atuais, [questao.id]: true }));
     anunciar(`Não foi essa. ${tema.tituloErro}. Leia a dica e tente de novo, ou vá para a próxima.`);
@@ -315,12 +317,14 @@ export function AtividadeJogo() {
   /** Nova tentativa na mesma rodada: volta para a pergunta com a mesma mira
    *  e com todas as alternativas, na mesma ordem. */
   function tentarDeNovo() {
+    pararSom();
     setResultado(null);
     setFase('responder');
     anunciar('Tente de novo. A pergunta e as alternativas são as mesmas.');
   }
 
   function avancar({ semAcerto } = {}) {
+    pararSom();
     if (semAcerto) setFaltaram((atuais) => [...atuais, indiceDaQuestao]);
 
     if (ultima) {
@@ -502,8 +506,9 @@ export function AtividadeJogo() {
           aoDefinir={(chave, valor, rotulo) => {
             definirAjuste(chave, valor);
             // Amostra: mostra que ligou.
+            if (chave === 'som' && valor === 'desligado') pararSom();
             if (chave === 'som' && valor === 'ligado') {
-              tocarSom('acerto').then((tocou) => setSomBloqueado(!tocou));
+              tocarSom(chaveTema, 'acerto').then((tocou) => setSomBloqueado(!tocou));
             }
             anunciar(`${OPCOES_AJUSTES[chave].nome}: ${rotulo}.`);
           }}

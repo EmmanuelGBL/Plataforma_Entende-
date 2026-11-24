@@ -1,4 +1,5 @@
 import { MousePointerClick } from 'lucide-react';
+import { usarMidia } from './usarMidia.js';
 
 /* Cena do jogo: desenho em SVG (aria-hidden) com as áreas de mira por cima,
    que são botões de verdade. Tudo o que acontece na cena também está escrito
@@ -21,29 +22,74 @@ import { MousePointerClick } from 'lucide-react';
    Tudo é transition/animation, e o base.css zera os dois quando o movimento
    reduzido está ligado (G09). */
 
-/** As cinco áreas, em unidades do viewBox (320 × 180): o centro (onde o
- *  objeto chega) e o retângulo clicável. A do meio ocupa a coluna inteira. */
-export const ZONAS = [
-  { x: 95, y: 68, area: [62, 52, 66, 35] },
-  { x: 95, y: 105, area: [62, 87, 66, 35] },
-  { x: 160, y: 70, area: [128, 52, 64, 70] },
-  { x: 225, y: 68, area: [192, 52, 66, 35] },
-  { x: 225, y: 105, area: [192, 87, 66, 35] },
-];
+/* Dois moldes da mesma cena: deitada e, em celular e tablet em pé, mais alta
+   que larga, para as áreas de toque ficarem grandes. Medidas em unidades do
+   viewBox. Cada zona tem o centro (onde o objeto chega) e o retângulo
+   clicável; a do meio ocupa a coluna inteira. */
+const MOLDES = {
+  deitado: {
+    largura: 320,
+    altura: 180,
+    zonas: [
+      { x: 95, y: 68, area: [62, 52, 66, 35] },
+      { x: 95, y: 105, area: [62, 87, 66, 35] },
+      { x: 160, y: 70, area: [128, 52, 64, 70] },
+      { x: 225, y: 68, area: [192, 52, 66, 35] },
+      { x: 225, y: 105, area: [192, 87, 66, 35] },
+    ],
+    /* Diâmetro do círculo de mira, igual nas cinco áreas. No espaço ele
+       envolve o planeta, com folga. */
+    mira: { futebol: 30, espaco: 36 },
+    /* Ponto de partida: a marca do pênalti, ou a base de lançamento. */
+    repouso: { futebol: { x: 160, y: 156 }, espaco: { x: 160, y: 164 } },
+    /* Altura onde o objeto passa no erro: acima da trave, ou dos planetas. */
+    porCima: { futebol: 16, espaco: 36 },
+    planeta: 13,
+    objeto: 1,
+    /* Linha do gol: é onde o goleiro tem os pés. */
+    linhaDoGol: 128,
+    goleiro: { escala: 0.82, salto: 65 },
+    trave: { esquerda: 46, direita: 274, topo: 42 },
+    rede: { esquerda: 62, direita: 258, topo: 52, base: 122 },
+    gramado: 118,
+    pequenaArea: 'M 24 174 L 56 140 H 264 L 296 174',
+    marcaPenalti: 162,
+    estrelas: [
+      [24, 22], [58, 140], [118, 26], [204, 30], [292, 24], [300, 118], [20, 96], [270, 150],
+      [140, 118], [184, 132],
+    ],
+  },
+  emPe: {
+    largura: 240,
+    altura: 290,
+    zonas: [
+      { x: 60, y: 99, area: [30, 72, 60, 54] },
+      { x: 60, y: 153, area: [30, 126, 60, 54] },
+      { x: 120, y: 102, area: [90, 72, 60, 108] },
+      { x: 180, y: 99, area: [150, 72, 60, 54] },
+      { x: 180, y: 153, area: [150, 126, 60, 54] },
+    ],
+    mira: { futebol: 42, espaco: 50 },
+    repouso: { futebol: { x: 120, y: 250 }, espaco: { x: 120, y: 262 } },
+    porCima: { futebol: 38, espaco: 70 },
+    planeta: 18,
+    objeto: 1.35,
+    linhaDoGol: 186,
+    goleiro: { escala: 1.12, salto: 46 },
+    trave: { esquerda: 16, direita: 224, topo: 62 },
+    rede: { esquerda: 30, direita: 210, topo: 72, base: 180 },
+    gramado: 176,
+    pequenaArea: 'M 6 280 L 32 202 H 208 L 234 280',
+    marcaPenalti: 259,
+    estrelas: [
+      [22, 40], [84, 52], [154, 30], [218, 48], [18, 214], [72, 236], [212, 206], [186, 252],
+      [40, 274], [120, 190],
+    ],
+  },
+};
 
-const LARGURA = 320;
-const ALTURA = 180;
-/* Diâmetro do círculo de mira, igual nas cinco áreas (unidades da cena). No
-   espaço ele envolve o planeta (raio 13), com folga. */
-const DIAMETRO_MIRA = { futebol: 30, espaco: 36 };
-/* Ponto de partida: a marca do pênalti, ou a base de lançamento. */
-const REPOUSO = { futebol: { x: 160, y: 156 }, espaco: { x: 160, y: 164 } };
-/* Altura onde o objeto passa no erro: acima da trave, ou acima dos planetas. */
-const ALTURA_POR_CIMA = { futebol: 16, espaco: 36 };
-const RAIO_PLANETA = 13;
-
-/** Linha do gol: é onde o goleiro tem os pés. */
-const LINHA_DO_GOL = 128;
+/** Telas em pé até a largura de um tablet. */
+const TELA_EM_PE = '(orientation: portrait) and (max-width: 62rem)';
 
 const porcento = (valor, total) => `${((valor / total) * 100).toFixed(3)}%`;
 
@@ -58,6 +104,9 @@ export function CenaJogo({
   aoMirar,
   sobreposicao,
 }) {
+  const emPe = usarMidia(TELA_EM_PE);
+  const molde = emPe ? MOLDES.emPe : MOLDES.deitado;
+  const { largura: LARGURA, altura: ALTURA, zonas: ZONAS } = molde;
   const espaco = tema !== 'futebol';
   const mirou = canto !== null && canto !== undefined;
   const mostrandoResultado = fase === 'resultado' && mirou;
@@ -66,19 +115,20 @@ export function CenaJogo({
 
   /* Onde o objeto para: no alvo, no acerto; acima dele, no erro. O foguete
      pousa em cima do planeta. */
-  let objeto = espaco ? REPOUSO.espaco : REPOUSO.futebol;
+  let objeto = espaco ? molde.repouso.espaco : molde.repouso.futebol;
   if (mostrandoResultado) {
-    if (!acertou) objeto = { x: zona.x, y: espaco ? ALTURA_POR_CIMA.espaco : ALTURA_POR_CIMA.futebol };
-    else objeto = espaco ? { x: zona.x, y: zona.y - RAIO_PLANETA + 1 } : zona;
+    if (!acertou) objeto = { x: zona.x, y: espaco ? molde.porCima.espaco : molde.porCima.futebol };
+    else objeto = espaco ? { x: zona.x, y: zona.y - molde.planeta + 1 } : zona;
   }
   /* O objeto encolhe ao chegar, para dar a ideia de distância. */
-  const escala = acertou ? (espaco ? 0.7 : 0.78) : 1;
+  const escala = molde.objeto * (acertou ? (espaco ? 0.7 : 0.78) : 1);
 
   // Goleiro: sempre o lado oposto ao escolhido (regra 2).
-  const ladoEscolhido = mirou ? Math.sign(zona.x - 160) || -1 : 0;
+  const meio = LARGURA / 2;
+  const ladoEscolhido = mirou ? Math.sign(zona.x - meio) || -1 : 0;
   const guardiao = {
-    x: mostrandoResultado ? 160 - ladoEscolhido * 65 : 160,
-    y: mostrandoResultado ? LINHA_DO_GOL - 12 : LINHA_DO_GOL,
+    x: mostrandoResultado ? meio - ladoEscolhido * molde.goleiro.salto : meio,
+    y: mostrandoResultado ? molde.linhaDoGol - 12 : molde.linhaDoGol,
     giro: mostrandoResultado ? -ladoEscolhido * 24 : 0,
   };
 
@@ -86,11 +136,12 @@ export function CenaJogo({
     <div
       className="jogo__cena"
       data-tema={espaco ? 'espaco' : 'futebol'}
+      data-molde={emPe ? 'em-pe' : 'deitado'}
       data-fase={fase}
       data-resultado={mostrandoResultado ? resultado : undefined}
     >
       <svg viewBox={`0 0 ${LARGURA} ${ALTURA}`} aria-hidden="true" focusable="false">
-        {espaco ? <Espaco destacado={mirou ? canto : null} /> : <Campo />}
+        {espaco ? <Espaco molde={molde} destacado={mirou ? canto : null} /> : <Campo molde={molde} />}
 
         {!espaco && (
           <g
@@ -100,7 +151,7 @@ export function CenaJogo({
             }}
           >
             <g className="jogo__guardiao-espera">
-              <Guardiao />
+              <Guardiao escala={molde.goleiro.escala} />
             </g>
           </g>
         )}
@@ -108,15 +159,15 @@ export function CenaJogo({
         {/* Efeito visual do acerto (G08): a rede balança ou o planeta brilha. */}
         {acertou && comemorar && (
           <g className="jogo__balanco" transform={`translate(${zona.x} ${zona.y})`}>
-            <circle r="14" />
-            <circle r="22" />
+            <circle r={14 * molde.objeto} />
+            <circle r={22 * molde.objeto} />
           </g>
         )}
 
         {/* Marca da área escolhida, visível até o fim da rodada. */}
         {mirou && (
           <g className="jogo__mira" transform={`translate(${zona.x} ${zona.y})`}>
-            <circle r={espaco ? 18 : 16} />
+            <circle r={espaco ? molde.mira.espaco / 2 : molde.mira.futebol / 2 + 1} />
             {/* No espaço a cruz taparia o planeta: fica só o anel. */}
             {!espaco && <path d="M -7 0 H 7 M 0 -7 V 7" />}
           </g>
@@ -132,7 +183,10 @@ export function CenaJogo({
 
         {/* Bandeirinha no planeta onde o foguete pousou. */}
         {acertou && espaco && (
-          <g className="jogo__bandeira" transform={`translate(${zona.x + 9} ${zona.y - 8})`}>
+          <g
+            className="jogo__bandeira"
+            transform={`translate(${zona.x + 0.7 * molde.planeta} ${zona.y - 0.6 * molde.planeta}) scale(${molde.objeto})`}
+          >
             <path d="M 0 0 V -12" />
             <path d="M 0 -12 L 8 -9 L 0 -6 Z" />
           </g>
@@ -161,7 +215,7 @@ export function CenaJogo({
                     height: porcento(altura, ALTURA),
                     // O círculo fica no ponto-alvo da zona (onde a bola chega e
                     // onde o planeta é desenhado), em % da área de clique.
-                    '--diametro': porcento(DIAMETRO_MIRA[espaco ? 'espaco' : 'futebol'], altura),
+                    '--diametro': porcento(molde.mira[espaco ? 'espaco' : 'futebol'], altura),
                     '--centro-x': porcento(alvoX - x, largura),
                     '--centro-y': porcento(alvoY - y, altura),
                   }}
@@ -183,9 +237,9 @@ export function CenaJogo({
 /* --- Goleiro --------------------------------------------------------------
       Desenhado com a origem nos pés e reduzido por `scale` para ocupar cerca
       de três quartos da altura do gol. */
-function Guardiao() {
+function Guardiao({ escala }) {
   return (
-    <g transform="scale(0.82)">
+    <g transform={`scale(${escala})`}>
       {/* sombra na linha do gol */}
       <ellipse className="jogo-g__sombra" cx="0" cy="0" rx="21" ry="3.5" />
 
@@ -321,34 +375,52 @@ function Foguete() {
 /* --- Tema futebol --------------------------------------------------------
       Campo, pequena área, gol com rede e marca do pênalti. Fundo liso, sem
       torcida nem placar (G10). */
-function Campo() {
+function Campo({ molde }) {
+  const { largura, altura, trave, rede, linhaDoGol, gramado } = molde;
+  const passos = (inicio, fim, passo) =>
+    Array.from({ length: Math.ceil((fim - inicio) / passo) - 1 }, (_, i) => inicio + (i + 1) * passo);
   return (
     <g className="jogo__palco">
-      <rect className="jogo__ceu" x="0" y="0" width="320" height="124" />
-      <rect className="jogo__gramado" x="0" y="118" width="320" height="62" />
+      <rect className="jogo__ceu" x="0" y="0" width={largura} height={gramado + 6} />
+      <rect className="jogo__gramado" x="0" y={gramado} width={largura} height={altura - gramado} />
 
       {/* rede: fundo mais escuro que o céu, para a malha branca aparecer */}
-      <path className="jogo__rede-fundo" d="M 62 52 H 258 V 122 H 62 Z" />
-      <path className="jogo__rede-lateral" d="M 46 42 L 62 52 V 122 L 46 128 Z" />
-      <path className="jogo__rede-lateral" d="M 274 42 L 258 52 V 122 L 274 128 Z" />
-      <path className="jogo__rede-topo" d="M 46 42 L 62 52 H 258 L 274 42 Z" />
+      <path
+        className="jogo__rede-fundo"
+        d={`M ${rede.esquerda} ${rede.topo} H ${rede.direita} V ${rede.base} H ${rede.esquerda} Z`}
+      />
+      <path
+        className="jogo__rede-lateral"
+        d={`M ${trave.esquerda} ${trave.topo} L ${rede.esquerda} ${rede.topo} V ${rede.base} L ${trave.esquerda} ${linhaDoGol} Z`}
+      />
+      <path
+        className="jogo__rede-lateral"
+        d={`M ${trave.direita} ${trave.topo} L ${rede.direita} ${rede.topo} V ${rede.base} L ${trave.direita} ${linhaDoGol} Z`}
+      />
+      <path
+        className="jogo__rede-topo"
+        d={`M ${trave.esquerda} ${trave.topo} L ${rede.esquerda} ${rede.topo} H ${rede.direita} L ${trave.direita} ${trave.topo} Z`}
+      />
 
       <g className="jogo__malha">
-        {[74, 86, 98, 110, 122, 134, 146, 158, 170, 182, 194, 206, 218, 230, 242].map((x) => (
-          <line key={`v${x}`} x1={x} y1="52" x2={x} y2="122" />
+        {passos(rede.esquerda, rede.direita, 12).map((x) => (
+          <line key={`v${x}`} x1={x} y1={rede.topo} x2={x} y2={rede.base} />
         ))}
-        {[64, 76, 88, 100, 112].map((y) => (
-          <line key={`h${y}`} x1="62" y1={y} x2="258" y2={y} />
+        {passos(rede.topo, rede.base, 12).map((y) => (
+          <line key={`h${y}`} x1={rede.esquerda} y1={y} x2={rede.direita} y2={y} />
         ))}
       </g>
 
-      {/* A pequena área fica abaixo da linha do gol (y=128). */}
-      <path className="jogo__linha-campo" d="M 24 174 L 56 140 H 264 L 296 174" />
+      {/* A pequena área fica abaixo da linha do gol. */}
+      <path className="jogo__linha-campo" d={molde.pequenaArea} />
 
       {/* trave desenhada por último, por cima da rede */}
-      <path className="jogo__trave" d="M 46 128 V 42 H 274 V 128" />
+      <path
+        className="jogo__trave"
+        d={`M ${trave.esquerda} ${linhaDoGol} V ${trave.topo} H ${trave.direita} V ${linhaDoGol}`}
+      />
 
-      <ellipse className="jogo__marca-penalti" cx="160" cy="162" rx="7" ry="2.4" />
+      <ellipse className="jogo__marca-penalti" cx={largura / 2} cy={molde.marcaPenalti} rx="7" ry="2.4" />
     </g>
   );
 }
@@ -358,30 +430,28 @@ function Campo() {
       planetas no lugar das cinco áreas e a base de lançamento embaixo. Sem
       adversário: ninguém defende, o foguete só precisa da resposta certa. */
 const PLANETAS = ['a', 'b', 'c', 'd', 'e'];
-const ESTRELAS = [
-  [24, 22], [58, 140], [118, 26], [204, 30], [292, 24], [300, 118], [20, 96], [270, 150],
-  [140, 118], [184, 132],
-];
 
-function Espaco({ destacado }) {
+function Espaco({ molde, destacado }) {
+  const { largura, altura, zonas, planeta, repouso } = molde;
+  const base = repouso.espaco;
   return (
     <g className="jogo__palco">
-      <rect className="jogo__ceu" x="0" y="0" width="320" height="180" />
+      <rect className="jogo__ceu" x="0" y="0" width={largura} height={altura} />
 
       <g className="jogo__estrelas">
-        {ESTRELAS.map(([x, y]) => (
+        {molde.estrelas.map(([x, y]) => (
           <path key={`${x}-${y}`} d={`M ${x} ${y - 3} L ${x + 1} ${y - 1} L ${x + 3} ${y} L ${x + 1} ${y + 1} L ${x} ${y + 3} L ${x - 1} ${y + 1} L ${x - 3} ${y} L ${x - 1} ${y - 1} Z`} />
         ))}
       </g>
 
-      {ZONAS.map(({ x, y }, posicao) => (
+      {zonas.map(({ x, y }, posicao) => (
         <g
           key={PLANETAS[posicao]}
           className={`jogo__planeta jogo__planeta--${PLANETAS[posicao]}`}
           data-destacado={destacado === posicao ? 'sim' : undefined}
-          transform={`translate(${x} ${y})`}
+          transform={`translate(${x} ${y}) scale(${planeta / 13})`}
         >
-          <circle r={RAIO_PLANETA} />
+          <circle r="13" />
           {/* Detalhe plano de cada planeta: faixa, cratera ou anel. */}
           {posicao === 0 && <path className="jogo__planeta-detalhe" d="M -12 -4 Q 0 -1 12 -4 V 0 Q 0 3 -12 0 Z" />}
           {posicao === 1 && <circle className="jogo__planeta-detalhe" cx="-4" cy="3" r="3" />}
@@ -392,7 +462,11 @@ function Espaco({ destacado }) {
       ))}
 
       {/* base de lançamento */}
-      <path className="jogo__base" d="M 140 164 H 180 L 174 170 H 146 Z" />
+      <path
+        className="jogo__base"
+        transform={`translate(${base.x} ${base.y}) scale(${molde.objeto})`}
+        d="M -20 0 H 20 L 14 6 H -14 Z"
+      />
     </g>
   );
 }

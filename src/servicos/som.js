@@ -1,5 +1,8 @@
-/* Sons do jogo. As notas são calculadas aqui e viram um WAV tocado por <audio>,
-   sem arquivo baixado. Não usa Web Audio: num teste em Android os tons curtos
+import fora from '../sons/fora.mp3?inline';
+import gol from '../sons/gol.mp3?inline';
+
+/* Sons do jogo. No futebol, gravações de chute e torcida (src/sons/LEIA-ME.md).
+   No espaço, notas calculadas aqui, que viram um WAV tocado por <audio>. Não usa Web Audio: num teste em Android os tons curtos
    gerados na hora não saíram. O silêncio do começo dá tempo de o
    alto-falante ligar; as notas ficam acima de 390 Hz, porque o do celular quase
    não reproduz as graves. */
@@ -11,6 +14,7 @@ const DURACAO = 0.45;
 const VOLUME = 0.5;
 
 const NOTAS = { acerto: [523.25, 783.99], erro: [392.0] };
+const GRAVACOES = { futebol: { acerto: gol, erro: fora } };
 
 /** WAV mono de 16 bits, com entrada e saída suaves em cada nota. */
 function montarWav(notas) {
@@ -48,16 +52,33 @@ function montarWav(notas) {
 }
 
 const prontos = {};
+let tocando = null;
 
-/** Toca o som; `false` se o navegador não deixou. Chamar dentro do toque. */
-export async function tocarSom(tipo) {
+function preparar(tema, resultado) {
+  const chave = `${tema}-${resultado}`;
+  if (!prontos[chave]) {
+    const gravacao = GRAVACOES[tema]?.[resultado];
+    prontos[chave] = new Audio(gravacao ?? URL.createObjectURL(montarWav(NOTAS[resultado])));
+  }
+  return prontos[chave];
+}
+
+export function pararSom() {
+  tocando?.pause();
+  tocando = null;
+}
+
+/** Toca o som do resultado ('acerto' ou 'erro') no tema; `false` se o navegador
+ *  não deixou. Chamar dentro do toque. */
+export async function tocarSom(tema, resultado) {
   try {
-    if (!prontos[tipo]) prontos[tipo] = new Audio(URL.createObjectURL(montarWav(NOTAS[tipo])));
-    const audio = prontos[tipo];
-    audio.currentTime = 0;
-    await audio.play();
+    pararSom();
+    tocando = preparar(tema, resultado);
+    tocando.currentTime = 0;
+    await tocando.play();
     return true;
-  } catch {
-    return false;
+  } catch (erro) {
+    // Interrompido por pararSom() não é bloqueio.
+    return erro?.name === 'AbortError';
   }
 }

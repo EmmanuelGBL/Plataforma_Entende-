@@ -1243,7 +1243,7 @@ table.dados--estreita { max-width: 46rem; }
    a cena (16:9), os pontos e o "Prefere sem jogo?" caberem juntos. 15rem é o
    que fica fora da cena: barra, folgas, pontos e o link. Em janela muito baixa
    a cena para em 30rem de largura e a página volta a rolar. */
-@media (min-width: 40.0625rem) {
+@media (min-width: 40.0625rem) and (orientation: landscape) and (min-height: 32.0625rem) {
   .atividade.jogo { max-width: min(80rem, max(30rem, calc((100dvh - 15rem) * 16 / 9))); }
   .conteudo:has(> .jogo) { padding-block: var(--e4); }
   .jogo .atividade__troca { margin: var(--e3) 0 0; }
@@ -1266,6 +1266,101 @@ table.dados--estreita { max-width: 46rem; }
 
 .enviar-secao fieldset { border: none; padding: 0; margin: 0 0 var(--e3); }
 
+/* Escolha do tema: três opções lado a lado a partir do tablet e no celular
+   deitado; no celular em pé, uma embaixo da outra, com a figura ao lado do
+   texto, para as três caberem na tela. */
+@media (min-width: 44rem), (orientation: landscape) and (max-height: 32rem) {
+  .escolha { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 62rem) {
+  .escolha { gap: var(--e4); }
+  .escolha__figura { height: 9rem; }
+}
+@media (max-width: 40rem) and (orientation: portrait) {
+  .escolha-tela { padding-block: 0; }
+  .escolha-tela__cabecalho { margin-bottom: var(--e4); }
+  .escolha-tela__cabecalho h1 { font-size: 1.5rem; }
+  .escolha-tela__cabecalho p { font-size: 1rem; line-height: 1.35; margin-top: var(--e1); }
+  .escolha { gap: var(--e3); }
+  .escolha__opcao {
+    display: grid; grid-template-columns: 4rem minmax(0, 1fr); gap: var(--e2) var(--e3);
+    padding: var(--e2) var(--e3); text-align: left;
+  }
+  .escolha__figura { grid-row: 1; width: 4rem; height: 4rem; align-self: center; }
+  .escolha__figura svg { width: 2.5rem; height: 2.5rem; }
+  .escolha__botao { grid-column: 1 / -1; }
+  .escolha__texto { justify-items: start; }
+  .escolha__titulo { font-size: 1.25rem; }
+  .escolha__texto > span { font-size: 1rem; line-height: 1.35; }
+  .escolha__botao { min-height: var(--alvo-minimo); font-size: 1rem; }
+
+  .conclusao { padding-block: 0; }
+  .conclusao__palco { width: 6rem; height: 5rem; }
+  .conclusao__trofeu-botao { width: 5rem; height: 5rem; }
+  .conclusao__trofeu { width: 4.25rem; height: 4.25rem; }
+  .conclusao__titulo { font-size: 2rem; }
+  .conclusao__subtitulo { font-size: 1.125rem; margin-bottom: var(--e3); }
+  .conclusao__cartao { padding: var(--e3); }
+  .conclusao__numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: var(--e3); }
+  .conclusao__numeros > div { flex-direction: column-reverse; justify-content: flex-end; align-items: flex-start; gap: var(--e1); padding: var(--e3); }
+  .conclusao__numeros dd { font-size: 2rem; }
+  .conclusao__numeros dt svg { width: 1.5rem; height: 1.5rem; }
+  .conclusao__mensagem { padding: var(--e3); gap: var(--e3); }
+  .conclusao__mensagem svg { width: 2rem; height: 2rem; }
+  .conclusao__acoes { margin-top: var(--e4); gap: var(--e2); }
+  .conclusao__acoes .botao { width: 100%; min-height: 3rem; font-size: 1.0625rem; }
+  .conclusao__privacidade { margin-top: var(--e3); }
+
+  .atividade__cartao { padding: var(--e4); }
+  .atividade__cartao .atividade__pergunta { font-size: 1.25rem; }
+  .atividade__cartao .atividade__opcoes--grade { gap: var(--e3); }
+  .atividade__cartao .atividade__opcoes--grade .atividade__opcao { min-height: 3.75rem; font-size: 1.0625rem; }
+}
+/* Celular deitado: tudo mais baixo, para rolar menos. */
+@media (orientation: landscape) and (max-height: 32rem) {
+  .conteudo:has(> .escolha-tela), .conteudo:has(> .atividade), .conteudo:has(> .conclusao) { padding-block: var(--e3); }
+  .escolha-tela { padding-block: 0; }
+  .escolha-tela__cabecalho { margin-bottom: var(--e3); }
+  .escolha-tela__cabecalho h1 { font-size: 1.375rem; }
+  .escolha-tela__cabecalho p { font-size: 1rem; margin-top: 0; }
+  .escolha-tela__cabecalho .escolha-tela__assunto { display: none; }
+  .escolha__opcao { gap: var(--e2); padding: var(--e2); border-radius: var(--raio-g); }
+  .escolha__figura { height: 3.75rem; }
+  .escolha__figura svg { width: 2.5rem; height: 2.5rem; }
+  .escolha__titulo { font-size: 1.125rem; }
+  .escolha__texto > span { font-size: 0.9375rem; line-height: 1.3; }
+  .escolha__botao { min-height: var(--alvo-minimo); font-size: 1rem; }
+
+  .conclusao { padding-block: 0; }
+  .conclusao__palco { width: 5rem; height: 4rem; margin-bottom: 0; }
+  .conclusao__trofeu-botao { width: 4rem; height: 4rem; }
+  .conclusao__trofeu { width: 3.5rem; height: 3.5rem; }
+  .conclusao__titulo { font-size: 1.75rem; }
+  .conclusao__subtitulo { font-size: 1.125rem; margin: 0 auto var(--e2); }
+  .conclusao__cartao { padding: var(--e3); }
+  .conclusao__numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: var(--e2); }
+  .conclusao__numeros > div, .conclusao__mensagem { padding: var(--e2) var(--e3); }
+  .conclusao__numeros dd { font-size: 1.75rem; }
+  .conclusao__mensagem svg { width: 2rem; height: 2rem; }
+  .conclusao__acoes { margin-top: var(--e3); }
+
+  .atividade__cartao { padding: var(--e3) var(--e4); }
+  .atividade__cartao .atividade__pergunta { font-size: 1.25rem; }
+  .atividade__cartao .atividade__opcoes--grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e2); }
+  .atividade__cartao .atividade__opcoes--grade .atividade__opcao { min-height: 3rem; font-size: 1.0625rem; }
+  .atividade:not(.jogo) .jogo__topo { margin-bottom: var(--e2); }
+  .atividade:not(.jogo) .pontos { padding-block: 0; }
+}
+
+/* Celular: busca na primeira linha e os dois filtros na segunda; texto
+   original sem justificar, que em coluna estreita abre buracos. */
+@media (max-width: 40rem) {
+  .filtros__campo { flex: 1 1 8rem; min-width: 0; }
+  .filtros__campo--busca { flex: 1 1 100%; }
+  .filtros__campo select { min-width: 0; width: 100%; }
+  .texto-original p { text-align: left; }
+}
+
 /* Celular: pontos e progresso numa linha só. */
 @media (max-width: 40rem) {
   .jogo__topo { flex-wrap: nowrap; gap: var(--e2); }
@@ -1274,6 +1369,12 @@ table.dados--estreita { max-width: 46rem; }
   .pontos__texto strong { font-size: 1.25rem; }
   .progresso-perguntas { flex: 1 1 0; min-width: 0; padding: var(--e2) var(--e3); gap: var(--e2); }
   .progresso-perguntas__texto { font-size: 0.9375rem; }
+}
+/* Celular estreito: os segmentos em cima do texto, para não sumirem (G14). */
+@media (max-width: 26rem) {
+  .progresso-perguntas { flex-direction: column; align-items: stretch; gap: var(--e1); text-align: center; border-radius: var(--raio-g); }
+  .progresso-perguntas__segmentos { flex: none; }
+  .progresso-perguntas__segmentos li { height: 0.625rem; }
 }
 
 /* --- Avisos flutuantes (toast) -------------------------------------------
