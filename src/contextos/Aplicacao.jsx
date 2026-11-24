@@ -36,7 +36,13 @@ const PROFESSORA_DEMO = {
   email: 'professor@escola.manaus.br',
   escola: 'Escola Municipal (rede Semed)',
   turma: '5º ano B',
+  cota_tokens: 40000,
+  tokens_consumidos: 0,
 };
+
+/* Saldo de exemplo: a demonstração não chama o modelo, mas desconta o que o
+   texto de exemplo gastou na medição de 29/10/2026. */
+const GASTO_DEMO = 5665;
 
 const CATALOGO_DEMO = { conjunto: CONJUNTO_REGRAS, regras: REGRAS };
 
@@ -191,11 +197,20 @@ export function ProvedorAplicacao({ children }) {
     }));
   }, []);
 
+  /** Só no modo demonstração: nunca chega a esgotar, porque nela nada é recusado. */
+  const gastarNaDemo = useCallback(() => {
+    setProfessor((atual) => {
+      const consumidos = (atual?.tokens_consumidos ?? 0) + GASTO_DEMO;
+      return atual && consumidos < atual.cota_tokens ? { ...atual, tokens_consumidos: consumidos } : atual;
+    });
+  }, []);
+
   /** Só no modo demonstração: o material nasce pronto, no fim do fluxo. */
   const acrescentarMaterial = useCallback((novo) => {
     setMateriais((atuais) => [novo, ...atuais]);
     setAdaptacoes((atuais) => ({ ...atuais, [novo.id]: { blocos: TEXTO_ADAPTADO, questoes: QUESTOES } }));
-  }, []);
+    gastarNaDemo();
+  }, [gastarNaDemo]);
 
   /** Só no modo servidor: envia o arquivo e extrai o texto (RF02, RF03). */
   const enviarArquivo = useCallback(
@@ -216,6 +231,7 @@ export function ProvedorAplicacao({ children }) {
           versaoRegras: `${CONJUNTO_REGRAS.identificador} v${CONJUNTO_REGRAS.versao}`,
           estado: 'adaptado',
         });
+        gastarNaDemo();
         return;
       }
       try {
@@ -227,7 +243,7 @@ export function ProvedorAplicacao({ children }) {
         await atualizarProfessor();
       }
     },
-    [atualizarMaterial, guardarAdaptacao, carregarMateriais, atualizarProfessor],
+    [atualizarMaterial, gastarNaDemo, guardarAdaptacao, carregarMateriais, atualizarProfessor],
   );
 
   /** RF09. No modo servidor o texto vai em Markdown; na demonstração, em blocos. */

@@ -113,11 +113,11 @@ function LinkAjuda() {
   );
 }
 
-/** Saldo de créditos, ao lado do nome. Só no modo servidor: a demonstração não
- *  tem cota. Em tela estreita fica só o número. */
+/** Saldo de créditos, ao lado do nome (na demonstração, um saldo de exemplo).
+ *  Em tela estreita fica só o número. */
 function SaldoDeCreditos() {
-  const { modoServidor, professor } = usarApp();
-  if (!modoServidor || !professor) return null;
+  const { professor } = usarApp();
+  if (!professor) return null;
   const { esgotada, restam } = saldoDe(professor);
   const singular = restam === '1' || restam === 'menos de 1';
   const [verbo, unidade] = singular ? ['Resta', 'Crédito'] : ['Restam', 'Créditos'];
