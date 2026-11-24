@@ -30,11 +30,16 @@ export const URL_API = URL_DO_BUILD || (servidorLocalPedido() ? URL_LOCAL : '');
 /* Com servidor, a tela de entrada deixa escolher entre ele ("ao vivo") e a
    demonstração com os dados prontos — na apresentação, mostra-se o
    protótipo e depois a API funcionando. A escolha é só preferência deste
-   navegador. */
+   navegador.
+
+   Aberto com ?demonstracao=1, o site mostra a demonstração só nesta visita, sem
+   guardar a escolha: é o endereço para mostrar a atividade a quem não tem conta. */
 export const servidorDisponivel = Boolean(URL_API);
 const CHAVE_MODO = 'entende.modo';
+const PARAMETRO_DEMO = 'demonstracao';
 
 function lerModo() {
+  if (new URLSearchParams(window.location.search).get(PARAMETRO_DEMO) === '1') return 'demonstracao';
   try {
     return window.localStorage.getItem(CHAVE_MODO);
   } catch {
@@ -51,7 +56,13 @@ export function escolherModo(aoVivo) {
   } catch {
     return; // sem armazenamento não há como lembrar a escolha
   }
-  window.location.reload();
+  const endereco = new URL(window.location.href);
+  if (!endereco.searchParams.has(PARAMETRO_DEMO)) {
+    window.location.reload();
+    return;
+  }
+  endereco.searchParams.delete(PARAMETRO_DEMO);
+  window.location.replace(endereco);
 }
 
 const CHAVE_TOKEN = 'entende.token';
